@@ -120,11 +120,11 @@ export const sessionApi = {
   close: (sessionId: string) => api.post(`/api/sessions/${sessionId}/close`),
   addCourt: (sessionId: string) => api.post(`/api/sessions/${sessionId}/courts`),
   endCourt: (sessionId: string, courtId: string) =>
-    api.post(`/api/sessions/${sessionId}/courts/${courtId}/end`),
+    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/end`),
   kick: (sessionId: string, courtId: string, playerId: string) =>
-    api.post(`/api/sessions/${sessionId}/courts/${courtId}/kick`, { player_id: playerId }),
+    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/kick`, { player_id: playerId }),
   addPlaying: (sessionId: string, courtId: string, playerId: string) =>
-    api.post(`/api/sessions/${sessionId}/courts/${courtId}/add-playing`, { player_id: playerId }),
+    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/add-playing`, { player_id: playerId }),
 }
 
 export const adminApi = {
