@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { CourtView, PlayerSlot } from '../api/client'
 import { tierOf } from '../lib/levels'
 
@@ -22,6 +23,8 @@ interface Props {
   court: CourtView
   onEnd: () => void
   onKick: (playerId: string) => void
+  onRename: (name: string) => void
+  onRemove: () => void
 }
 
 function Chip({ slot, onKick }: { slot: PlayerSlot; onKick: () => void }) {
@@ -38,11 +41,45 @@ function Chip({ slot, onKick }: { slot: PlayerSlot; onKick: () => void }) {
   )
 }
 
-export function ManageCourtCard({ court, onEnd, onKick }: Props) {
+export function ManageCourtCard({ court, onEnd, onKick, onRename, onRemove }: Props) {
+  const [editing, setEditing] = useState(false)
+  const [nameInput, setNameInput] = useState(court.name ?? '')
+  const title = court.name?.trim() ? court.name : `場地 ${court.court_num}`
+
+  function saveName() {
+    onRename(nameInput.trim())
+    setEditing(false)
+  }
+  function confirmRemove() {
+    const msg = court.playing.length > 0
+      ? '刪除這個場地?場上的人會被計入統計(視同結束),排隊的人會被取消排隊。'
+      : '刪除這個場地?'
+    if (confirm(msg)) onRemove()
+  }
+
   return (
     <div className="card space-y-3">
-      <div className="flex items-center justify-between">
-        <span className="font-extrabold text-gray-700">場地 {court.court_num}</span>
+      <div className="flex items-center justify-between gap-2">
+        {editing ? (
+          <div className="flex items-center gap-1 flex-1">
+            <input
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              placeholder={`場地 ${court.court_num}`}
+              autoFocus
+              className="flex-1 border-2 border-gray-200 rounded-xl px-2 py-1 text-sm
+                focus:outline-none focus:border-brand-pink"
+            />
+            <button onClick={saveName} className="text-xs font-bold text-brand-pink px-1">存</button>
+          </div>
+        ) : (
+          <button
+            onClick={() => { setNameInput(court.name ?? ''); setEditing(true) }}
+            className="font-extrabold text-gray-700 flex items-center gap-1"
+          >
+            {title} <span className="text-gray-300 text-xs">✎</span>
+          </button>
+        )}
         {court.playing.length === 0 ? (
           <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">空場</span>
         ) : court.playing.length === 4 ? (
@@ -83,7 +120,11 @@ export function ManageCourtCard({ court, onEnd, onKick }: Props) {
         disabled={court.playing.length === 0 && court.queue.length === 0}
         className="btn-primary w-full text-sm disabled:opacity-40"
       >
-        {court.status === 'playing' ? '結束這場 → 換下一組' : '開始(排隊者上場)'}
+        {court.playing.length === 4 ? '結束這場 → 換下一組' : '開始(排隊者上場)'}
+      </button>
+
+      <button onClick={confirmRemove} className="w-full text-xs text-red-300 hover:text-red-400">
+        刪除這個場地
       </button>
     </div>
   )

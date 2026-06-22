@@ -48,6 +48,7 @@ export interface PlayerSlot {
 export interface CourtView {
   court_id: string
   court_num: number
+  name?: string
   status: 'empty' | 'playing'
   playing: PlayerSlot[]
   queue: PlayerSlot[]
@@ -137,6 +138,10 @@ export const sessionApi = {
     ),
   close: (sessionId: string) => api.post(`/api/sessions/${sessionId}/close`),
   addCourt: (sessionId: string) => api.post(`/api/sessions/${sessionId}/courts`),
+  renameCourt: (sessionId: string, courtId: string, name: string) =>
+    api.put(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/name`, { name }),
+  removeCourt: (sessionId: string, courtId: string) =>
+    api.delete(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}`),
   endCourt: (sessionId: string, courtId: string) =>
     api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/end`),
   kick: (sessionId: string, courtId: string, playerId: string) =>

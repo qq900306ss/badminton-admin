@@ -17,7 +17,7 @@ export function SessionManagePage() {
   const { data: session, isLoading } = useSessionView(sid)
   const { data: players } = useSessionPlayers(sid)
   const { data: roster } = useMembers()
-  const { endCourt, kick, addPlaying, addCourt, addPlayer, setLevel } = useManageActions(sid)
+  const { endCourt, kick, addPlaying, addCourt, addPlayer, setLevel, renameCourt, removeCourt } = useManageActions(sid)
 
   const [showQR, setShowQR] = useState(true)
   const [addTarget, setAddTarget] = useState<string | null>(null) // court_id to add a player to
@@ -231,6 +231,8 @@ export function SessionManagePage() {
                 court={court}
                 onEnd={() => endCourt.mutate(court.court_id)}
                 onKick={(playerId) => kick.mutate({ courtId: court.court_id, playerId })}
+                onRename={(name) => renameCourt.mutate({ courtId: court.court_id, name })}
+                onRemove={() => removeCourt.mutate(court.court_id)}
               />
               {court.playing.length < 4 && (
                 <button
