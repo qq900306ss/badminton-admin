@@ -124,6 +124,8 @@ export function SessionManagePage() {
             {(players ?? [])
               .filter((p) => p.display_name.includes(memberFilter.trim()))
               .filter((p) => (onlyUnclaimed ? !p.claimed : true))
+              .slice()
+              .sort((a, b) => Number(b.claimed) - Number(a.claimed)) // 未到的排最後
               .map((p) => {
               const tier = tierOf(p.level)
               return (
