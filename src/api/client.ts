@@ -87,6 +87,10 @@ export const sessionApi = {
     api.get<{ data: SessionView }>(`/api/sessions/${sessionId}`),
   getPlayers: (sessionId: string) =>
     api.get<{ data: SessionPlayer[] }>(`/api/sessions/${sessionId}/players`),
+  addPlayer: (sessionId: string, displayName: string) =>
+    api.post<{ data: SessionPlayer }>(`/api/sessions/${sessionId}/players`, {
+      display_name: displayName,
+    }),
   close: (sessionId: string) => api.post(`/api/sessions/${sessionId}/close`),
   addCourt: (sessionId: string) => api.post(`/api/sessions/${sessionId}/courts`),
   endCourt: (sessionId: string, courtId: string) =>

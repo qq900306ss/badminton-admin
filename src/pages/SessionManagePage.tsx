@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { sessionApi } from '../api/client'
-import { useSessionView, useSessionPlayers, useManageActions } from '../hooks/useApi'
+import { useSessionView, useSessionPlayers, useManageActions, useMembers } from '../hooks/useApi'
 import { ManageCourtCard } from '../components/ManageCourtCard'
 
 const BOOKING_URL = import.meta.env.VITE_BOOKING_URL || 'http://localhost:5174'
@@ -14,10 +14,16 @@ export function SessionManagePage() {
 
   const { data: session, isLoading } = useSessionView(sid)
   const { data: players } = useSessionPlayers(sid)
-  const { endCourt, kick, addPlaying, addCourt } = useManageActions(sid)
+  const { data: roster } = useMembers()
+  const { endCourt, kick, addPlaying, addCourt, addPlayer } = useManageActions(sid)
 
   const [showQR, setShowQR] = useState(true)
   const [addTarget, setAddTarget] = useState<string | null>(null) // court_id to add a player to
+  const [newName, setNewName] = useState('')
+
+  // roster members not yet in this session (available to quick-add)
+  const inSession = new Set((players ?? []).map((p) => p.display_name))
+  const rosterAvailable = (roster ?? []).filter((m) => !inSession.has(m.display_name))
 
   const joinUrl = `${BOOKING_URL}/?s=${sid}`
 
@@ -73,6 +79,72 @@ export function SessionManagePage() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* people in this session */}
+        <div className="card space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-gray-700">本場人員 ({players?.length ?? 0})</span>
+          </div>
+
+          {/* current people */}
+          <div className="flex flex-wrap gap-2">
+            {(players ?? []).map((p) => (
+              <span key={p.player_id} className="px-3 py-1.5 rounded-full text-sm font-semibold bg-brand-mint text-emerald-700">
+                {p.display_name}
+              </span>
+            ))}
+            {(players ?? []).length === 0 && (
+              <span className="text-sm text-gray-300">還沒有人,從下面加入</span>
+            )}
+          </div>
+
+          {/* quick-add from roster */}
+          {rosterAvailable.length > 0 && (
+            <div className="border-t pt-3 space-y-2">
+              <p className="text-xs text-gray-400">從常駐名單加入(點一下)</p>
+              <div className="flex flex-wrap gap-2">
+                {rosterAvailable.map((m) => (
+                  <button
+                    key={m.member_id}
+                    onClick={() => addPlayer.mutate(m.display_name)}
+                    className="px-3 py-1.5 rounded-full text-sm font-semibold bg-gray-100 text-gray-600
+                      hover:bg-brand-pink hover:text-white transition-colors"
+                  >
+                    ＋ {m.display_name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* add a brand-new name */}
+          <div className="border-t pt-3 flex gap-2">
+            <input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && newName.trim()) {
+                  addPlayer.mutate(newName.trim())
+                  setNewName('')
+                }
+              }}
+              placeholder="臨時加一個新名字"
+              className="flex-1 border-2 border-gray-200 rounded-2xl px-3 py-2 text-sm
+                focus:outline-none focus:border-brand-pink"
+            />
+            <button
+              onClick={() => {
+                if (newName.trim()) {
+                  addPlayer.mutate(newName.trim())
+                  setNewName('')
+                }
+              }}
+              className="btn-primary px-4 py-2 text-sm"
+            >
+              加入
+            </button>
+          </div>
         </div>
 
         {/* add court */}

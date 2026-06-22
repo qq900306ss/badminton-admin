@@ -43,6 +43,13 @@ export function useSessionPlayers(sessionId: string) {
 export function useManageActions(sessionId: string) {
   const qc = useQueryClient()
   const invalidate = () => qc.invalidateQueries({ queryKey: ['session', sessionId] })
+  const invalidatePlayers = () =>
+    qc.invalidateQueries({ queryKey: ['session-players', sessionId] })
+
+  const addPlayer = useMutation({
+    mutationFn: (name: string) => sessionApi.addPlayer(sessionId, name),
+    onSuccess: invalidatePlayers,
+  })
 
   const endCourt = useMutation({
     mutationFn: (courtId: string) => sessionApi.endCourt(sessionId, courtId),
@@ -62,5 +69,5 @@ export function useManageActions(sessionId: string) {
     mutationFn: () => sessionApi.addCourt(sessionId),
     onSuccess: invalidate,
   })
-  return { endCourt, kick, addPlaying, addCourt }
+  return { endCourt, kick, addPlaying, addCourt, addPlayer }
 }

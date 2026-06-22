@@ -87,7 +87,7 @@ export function DashboardPage() {
           <label className="block">
             <span className="text-sm font-bold text-gray-600">球場數量</span>
             <div className="flex gap-2 mt-1">
-              {[2, 3, 4, 5, 6].map((n) => (
+              {[1, 2, 3, 4, 5, 6].map((n) => (
                 <button
                   key={n}
                   onClick={() => setNumCourts(n)}
@@ -98,6 +98,35 @@ export function DashboardPage() {
                   {n}
                 </button>
               ))}
+            </div>
+            {/* custom count for big halls (7+) */}
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-xs text-gray-400">或自訂</span>
+              <button
+                onClick={() => setNumCourts(Math.max(1, numCourts - 1))}
+                className="w-9 h-9 rounded-full bg-gray-100 text-gray-500 font-bold active:scale-90"
+              >
+                −
+              </button>
+              <input
+                type="number"
+                min={1}
+                max={30}
+                value={numCourts}
+                onChange={(e) => {
+                  const v = parseInt(e.target.value, 10)
+                  if (!isNaN(v)) setNumCourts(Math.min(30, Math.max(1, v)))
+                }}
+                className="w-16 text-center border-2 border-gray-200 rounded-2xl py-1.5 font-bold
+                  focus:outline-none focus:border-brand-pink"
+              />
+              <button
+                onClick={() => setNumCourts(Math.min(30, numCourts + 1))}
+                className="w-9 h-9 rounded-full bg-gray-100 text-gray-500 font-bold active:scale-90"
+              >
+                ＋
+              </button>
+              <span className="text-xs text-gray-400">場(最多 30)</span>
             </div>
           </label>
         </div>
