@@ -1,7 +1,29 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { sessionApi, type Org } from '../api/client'
 import { useMembers, useMemberActions } from '../hooks/useApi'
+
+// local YYYY-MM-DD (en-CA formats as ISO date in local timezone)
+const todayStr = () => new Date().toLocaleDateString('en-CA')
+
+// combine a date + HH:mm into a full ISO timestamp (UTC), or undefined
+function toISO(date: string, time: string): string | undefined {
+  if (!date || !time) return undefined
+  const d = new Date(`${date}T${time}`)
+  return isNaN(d.getTime()) ? undefined : d.toISOString()
+}
+
+// "6/22 18:00–21:00" from ISO timestamps
+function fmtRange(s: { start_at?: string; end_at?: string }): string {
+  if (!s.start_at) return ''
+  const start = new Date(s.start_at)
+  const hm = (d: Date) =>
+    d.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false })
+  const day = `${start.getMonth() + 1}/${start.getDate()}`
+  const tail = s.end_at ? `–${hm(new Date(s.end_at))}` : ''
+  return `${day} ${hm(start)}${tail}`
+}
 
 export function DashboardPage() {
   const nav = useNavigate()
@@ -9,8 +31,22 @@ export function DashboardPage() {
   const { data: members } = useMembers()
   const { add, remove } = useMemberActions()
 
+  const { data: mySessions } = useQuery({
+    queryKey: ['my-sessions'],
+    queryFn: () => sessionApi.mySessions().then((r) => r.data.data),
+  })
+  const openSessions = (mySessions ?? []).filter((s) => s.status === 'open')
+  const pastSessions = (mySessions ?? [])
+    .filter((s) => s.status !== 'open')
+    .sort((a, b) => (b.opened_at || '').localeCompare(a.opened_at || ''))
+
+  const [title, setTitle] = useState('')
   const [password, setPassword] = useState('')
   const [numCourts, setNumCourts] = useState(4)
+  const [date, setDate] = useState(todayStr())
+  const [startTime, setStartTime] = useState('18:00')
+  const [endTime, setEndTime] = useState('21:00')
+  const [queueTime, setQueueTime] = useState('18:00')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [newMember, setNewMember] = useState('')
   const [tempNames, setTempNames] = useState<string[]>([])
@@ -33,7 +69,15 @@ export function DashboardPage() {
     setError('')
     const playerNames = [...selected, ...tempNames]
     try {
-      const res = await sessionApi.create(password, numCourts, playerNames)
+      const res = await sessionApi.create({
+        title: title.trim() || org?.org_name || '羽球團',
+        password,
+        num_courts: numCourts,
+        player_names: playerNames,
+        start_at: toISO(date, startTime),
+        end_at: toISO(date, endTime),
+        queue_open_at: toISO(date, queueTime),
+      })
       nav(`/session/${res.data.data.session_id}`)
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error
@@ -70,10 +114,65 @@ export function DashboardPage() {
       </header>
 
       <div className="max-w-md mx-auto p-4 space-y-4">
+        {/* my ongoing sessions */}
+        {openSessions.length > 0 && (
+          <div className="card space-y-2">
+            <span className="font-bold text-gray-700">進行中的開團 🏸</span>
+            {openSessions.map((s) => (
+              <button
+                key={s.session_id}
+                onClick={() => nav(`/session/${s.session_id}`)}
+                className="w-full text-left px-4 py-3 rounded-2xl bg-brand-mint/40
+                  hover:bg-brand-mint transition-colors flex items-center justify-between"
+              >
+                <div>
+                  <p className="font-bold text-gray-700">{s.title || '未命名'}</p>
+                  <p className="text-xs text-gray-500">
+                    {fmtRange(s)} · {s.num_courts} 場
+                  </p>
+                </div>
+                <span className="text-brand-pink font-semibold text-sm">管理 →</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* past sessions history */}
+        {pastSessions.length > 0 && (
+          <details className="card">
+            <summary className="cursor-pointer font-bold text-gray-700">
+              歷史開團 ({pastSessions.length})
+            </summary>
+            <div className="mt-3 space-y-1">
+              {pastSessions.map((s) => (
+                <button
+                  key={s.session_id}
+                  onClick={() => nav(`/session/${s.session_id}`)}
+                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-gray-50
+                    flex items-center justify-between"
+                >
+                  <span className="text-gray-600">{s.title || '未命名'}</span>
+                  <span className="text-xs text-gray-400">{fmtRange(s)}</span>
+                </button>
+              ))}
+            </div>
+          </details>
+        )}
+
         <h2 className="text-xl font-extrabold text-gray-800">開新的一團 🎉</h2>
 
         {/* settings */}
         <div className="card space-y-4">
+          <label className="block">
+            <span className="text-sm font-bold text-gray-600">這場的名稱</span>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="例如 週六晚雙打團"
+              className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-4 py-2.5
+                focus:outline-none focus:border-brand-pink"
+            />
+          </label>
           <label className="block">
             <span className="text-sm font-bold text-gray-600">場地密碼(臨打人進場用)</span>
             <input
@@ -83,6 +182,51 @@ export function DashboardPage() {
               className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-4 py-2.5
                 focus:outline-none focus:border-brand-pink"
             />
+          </label>
+
+          {/* schedule */}
+          <label className="block">
+            <span className="text-sm font-bold text-gray-600">日期</span>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-4 py-2.5
+                focus:outline-none focus:border-brand-pink"
+            />
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block">
+              <span className="text-sm font-bold text-gray-600">開打</span>
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-3 py-2.5
+                  focus:outline-none focus:border-brand-pink"
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm font-bold text-gray-600">結束</span>
+              <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-3 py-2.5
+                  focus:outline-none focus:border-brand-pink"
+              />
+            </label>
+          </div>
+          <label className="block">
+            <span className="text-sm font-bold text-gray-600">排隊開放時間</span>
+            <input
+              type="time"
+              value={queueTime}
+              onChange={(e) => setQueueTime(e.target.value)}
+              className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-4 py-2.5
+                focus:outline-none focus:border-brand-pink"
+            />
+            <span className="text-xs text-gray-400">這時間之前,臨打人能進場看,但還不能自己排上場</span>
           </label>
           <label className="block">
             <span className="text-sm font-bold text-gray-600">球場數量</span>

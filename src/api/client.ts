@@ -63,6 +63,27 @@ export interface SessionPlayer {
   is_temp: boolean
 }
 
+export interface SessionSummary {
+  session_id: string
+  title: string
+  num_courts: number
+  status: string
+  start_at?: string
+  end_at?: string
+  queue_open_at?: string
+  opened_at: string
+}
+
+export interface CreateSessionInput {
+  title: string
+  password: string
+  num_courts: number
+  player_names: string[]
+  start_at?: string
+  end_at?: string
+  queue_open_at?: string
+}
+
 export const authApi = {
   google: (code: string) =>
     api.post<{ data: { token: string; org: Org } }>('/api/auth/google', { code }),
@@ -77,12 +98,9 @@ export const orgApi = {
 }
 
 export const sessionApi = {
-  create: (password: string, numCourts: number, playerNames: string[]) =>
-    api.post<{ data: { session_id: string } }>('/api/sessions', {
-      password,
-      num_courts: numCourts,
-      player_names: playerNames,
-    }),
+  create: (input: CreateSessionInput) =>
+    api.post<{ data: { session_id: string } }>('/api/sessions', input),
+  mySessions: () => api.get<{ data: SessionSummary[] }>('/api/my/sessions'),
   getView: (sessionId: string) =>
     api.get<{ data: SessionView }>(`/api/sessions/${sessionId}`),
   getPlayers: (sessionId: string) =>
