@@ -122,7 +122,7 @@ export function ManageCourtCard({ court, onEnd, onKick, onRename, onRemove }: Pr
         disabled={filled === 0 && court.queue.length === 0}
         className="btn-primary w-full text-sm disabled:opacity-40"
       >
-        {filled === 4 ? '結束這場 → 換下一組' : '開始(排隊者上場)'}
+        {filled === 4 ? '結束這場 → 換下一組' : '結束這場'}
       </button>
 
       <button onClick={confirmRemove} className="w-full text-xs text-red-300 hover:text-red-400">

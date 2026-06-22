@@ -148,6 +148,8 @@ export const sessionApi = {
     api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/kick`, { player_id: playerId }),
   addPlaying: (sessionId: string, courtId: string, playerId: string) =>
     api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/add-playing`, { player_id: playerId }),
+  addQueue: (sessionId: string, courtId: string, playerId: string) =>
+    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/add-queue`, { player_id: playerId }),
 }
 
 export const adminApi = {

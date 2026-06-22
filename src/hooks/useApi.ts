@@ -86,5 +86,10 @@ export function useManageActions(sessionId: string) {
     mutationFn: (courtId: string) => sessionApi.removeCourt(sessionId, courtId),
     onSuccess: invalidate,
   })
-  return { endCourt, kick, addPlaying, addCourt, addPlayer, setLevel, renameCourt, removeCourt }
+  const addQueue = useMutation({
+    mutationFn: (v: { courtId: string; playerId: string }) =>
+      sessionApi.addQueue(sessionId, v.courtId, v.playerId),
+    onSuccess: invalidate,
+  })
+  return { endCourt, kick, addPlaying, addCourt, addPlayer, setLevel, renameCourt, removeCourt, addQueue }
 }

@@ -17,7 +17,7 @@ export function SessionManagePage() {
   const { data: session, isLoading } = useSessionView(sid)
   const { data: players } = useSessionPlayers(sid)
   const { data: roster } = useMembers()
-  const { endCourt, kick, addPlaying, addCourt, addPlayer, setLevel, renameCourt, removeCourt } = useManageActions(sid)
+  const { endCourt, kick, addPlaying, addCourt, addPlayer, setLevel, renameCourt, removeCourt, addQueue } = useManageActions(sid)
 
   const [showQR, setShowQR] = useState(true)
   const [addTarget, setAddTarget] = useState<string | null>(null) // court_id to add a player to
@@ -234,29 +234,39 @@ export function SessionManagePage() {
                 onRename={(name) => renameCourt.mutate({ courtId: court.court_id, name })}
                 onRemove={() => removeCourt.mutate(court.court_id)}
               />
-              {court.playing.filter((p) => p.player_id).length < 4 && (
-                <button
-                  onClick={() => setAddTarget(addTarget === court.court_id ? null : court.court_id)}
-                  className="w-full text-xs text-brand-pink font-semibold py-1"
-                >
-                  {addTarget === court.court_id ? '收起' : '＋ 手動把人加到場上'}
-                </button>
-              )}
+              <button
+                onClick={() => setAddTarget(addTarget === court.court_id ? null : court.court_id)}
+                className="w-full text-xs text-brand-pink font-semibold py-1"
+              >
+                {addTarget === court.court_id ? '收起' : '＋ 手動加人(上場 / 排隊)'}
+              </button>
               {addTarget === court.court_id && (
-                <div className="card flex flex-wrap gap-2">
-                  {(players ?? []).map((p) => (
-                    <button
-                      key={p.player_id}
-                      onClick={() => {
-                        addPlaying.mutate({ courtId: court.court_id, playerId: p.player_id })
-                        setAddTarget(null)
-                      }}
-                      className="px-3 py-1.5 rounded-full text-sm font-semibold bg-gray-100 text-gray-600
-                        hover:bg-brand-pink hover:text-white transition-colors"
-                    >
-                      {p.display_name}
-                    </button>
-                  ))}
+                <div className="card space-y-1.5">
+                  {(players ?? []).map((p) => {
+                    const playingFull = court.playing.filter((x) => x.player_id).length >= 4
+                    const queueFull = court.queue.length >= 4
+                    return (
+                      <div key={p.player_id} className="flex items-center justify-between gap-2">
+                        <span className="text-sm font-semibold text-gray-600 truncate">{p.display_name}</span>
+                        <div className="flex gap-1 shrink-0">
+                          <button
+                            disabled={playingFull}
+                            onClick={() => { addPlaying.mutate({ courtId: court.court_id, playerId: p.player_id }); setAddTarget(null) }}
+                            className="px-2.5 py-1 rounded-full text-xs font-bold bg-brand-mint text-emerald-700 disabled:opacity-30"
+                          >
+                            上場
+                          </button>
+                          <button
+                            disabled={queueFull}
+                            onClick={() => { addQueue.mutate({ courtId: court.court_id, playerId: p.player_id }); setAddTarget(null) }}
+                            className="px-2.5 py-1 rounded-full text-xs font-bold bg-brand-yellow text-amber-700 disabled:opacity-30"
+                          >
+                            排隊
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
                   {(players ?? []).length === 0 && (
                     <span className="text-sm text-gray-300">還沒有人進場</span>
                   )}
