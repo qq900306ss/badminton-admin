@@ -24,6 +24,7 @@ export function SessionManagePage() {
   const [newName, setNewName] = useState('')
   const [levelTarget, setLevelTarget] = useState<string | null>(null) // player_id being re-leveled
   const [memberFilter, setMemberFilter] = useState('')
+  const [onlyUnclaimed, setOnlyUnclaimed] = useState(false)
   const [addFilter, setAddFilter] = useState('')
 
   // roster members not yet in this session (available to quick-add)
@@ -97,21 +98,32 @@ export function SessionManagePage() {
             </span>
           </div>
 
-          {/* filter */}
-          {(players ?? []).length > 6 && (
-            <input
-              value={memberFilter}
-              onChange={(e) => setMemberFilter(e.target.value)}
-              placeholder="🔍 搜尋名字"
-              className="w-full border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm
-                focus:outline-none focus:border-brand-pink"
-            />
+          {/* filter: search + 未到 toggle */}
+          {(players ?? []).length > 0 && (
+            <div className="flex gap-2">
+              <input
+                value={memberFilter}
+                onChange={(e) => setMemberFilter(e.target.value)}
+                placeholder="🔍 搜尋名字"
+                className="flex-1 border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm
+                  focus:outline-none focus:border-brand-pink"
+              />
+              <button
+                onClick={() => setOnlyUnclaimed(!onlyUnclaimed)}
+                className={`px-3 rounded-2xl text-sm font-bold shrink-0 ${
+                  onlyUnclaimed ? 'bg-brand-pink text-white' : 'bg-gray-100 text-gray-500'
+                }`}
+              >
+                只看未到
+              </button>
+            </div>
           )}
 
           {/* current people — tap to set level; ● = 已到, 未到 = 還沒掃碼認領 */}
           <div className="flex flex-wrap gap-2">
             {(players ?? [])
               .filter((p) => p.display_name.includes(memberFilter.trim()))
+              .filter((p) => (onlyUnclaimed ? !p.claimed : true))
               .map((p) => {
               const tier = tierOf(p.level)
               return (
@@ -244,11 +256,14 @@ export function SessionManagePage() {
               {addTarget === court.court_id && (() => {
                 const playingFull = court.playing.filter((x) => x.player_id).length >= 4
                 const queueFull = court.queue.length >= 4
-                const onCourt = new Set(
-                  [...court.playing.map((x) => x.player_id), ...court.queue.map((x) => x.player_id)].filter(Boolean)
+                // exclude anyone already on ANY court (playing or queue) — one court per person
+                const busy = new Set(
+                  (session?.courts ?? [])
+                    .flatMap((ct) => [...ct.playing.map((x) => x.player_id), ...ct.queue.map((x) => x.player_id)])
+                    .filter(Boolean)
                 )
                 const candidates = (players ?? [])
-                  .filter((p) => !onCourt.has(p.player_id))
+                  .filter((p) => !busy.has(p.player_id))
                   .filter((p) => p.display_name.includes(addFilter.trim()))
                 return (
                   <div className="card space-y-2">
