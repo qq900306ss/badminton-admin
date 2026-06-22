@@ -1,7 +1,17 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { adminApi } from '../api/client'
+import { adminApi, type SessionSummary } from '../api/client'
+
+function fmtRange(s: SessionSummary): string {
+  if (!s.start_at) return ''
+  const start = new Date(s.start_at)
+  const hm = (d: Date) =>
+    d.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false })
+  const day = `${start.getMonth() + 1}/${start.getDate()}`
+  const tail = s.end_at ? `–${hm(new Date(s.end_at))}` : ''
+  return `${day} ${hm(start)}${tail}`
+}
 
 export function AdminPage() {
   const nav = useNavigate()
@@ -10,6 +20,19 @@ export function AdminPage() {
     queryKey: ['orgs'],
     queryFn: () => adminApi.listOrgs().then((r) => r.data.data),
   })
+  const { data: allSessions } = useQuery({
+    queryKey: ['admin-sessions'],
+    queryFn: () => adminApi.listSessions().then((r) => r.data.data),
+    refetchInterval: 5000,
+  })
+
+  const orgNameOf = (id: string) =>
+    (orgs ?? []).find((o) => o.org_id === id)?.org_name ?? '未知'
+  const leaderCount = (orgs ?? []).filter((o) => o.role === 'leader').length
+  const sessions = (allSessions ?? []).slice().sort((a, b) =>
+    (b.opened_at || '').localeCompare(a.opened_at || '')
+  )
+  const openCount = sessions.filter((s) => s.status === 'open').length
 
   const [email, setEmail] = useState('')
   const [orgName, setOrgName] = useState('')
@@ -43,6 +66,21 @@ export function AdminPage() {
       </header>
 
       <div className="max-w-md mx-auto p-4 space-y-4">
+        {/* stats */}
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: '團主', value: leaderCount, emoji: '🧑‍🏫' },
+            { label: '進行中', value: openCount, emoji: '🏸' },
+            { label: '總場次', value: sessions.length, emoji: '📋' },
+          ].map((stat) => (
+            <div key={stat.label} className="card text-center py-3">
+              <div className="text-2xl">{stat.emoji}</div>
+              <div className="text-2xl font-extrabold text-gray-800">{stat.value}</div>
+              <div className="text-xs text-gray-400">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+
         <h2 className="text-xl font-extrabold text-gray-800">團主管理 👑</h2>
 
         <div className="card space-y-3">
@@ -92,6 +130,39 @@ export function AdminPage() {
                 </button>
               )}
             </div>
+          ))}
+        </div>
+
+        {/* all sessions across orgs */}
+        <div className="card space-y-2">
+          <span className="font-bold text-gray-700">所有開團</span>
+          {sessions.length === 0 && <p className="text-sm text-gray-300">還沒有任何開團</p>}
+          {sessions.map((s) => (
+            <button
+              key={s.session_id}
+              onClick={() => nav(`/session/${s.session_id}`)}
+              className="w-full text-left py-2 border-b last:border-0 flex items-center justify-between"
+            >
+              <div>
+                <p className="font-semibold text-gray-700">
+                  {s.title || '未命名'}
+                  <span
+                    className={`ml-2 text-xs px-2 py-0.5 rounded-full ${
+                      s.status === 'open'
+                        ? 'bg-brand-mint text-emerald-700'
+                        : 'bg-gray-100 text-gray-400'
+                    }`}
+                  >
+                    {s.status === 'open' ? '進行中' : '已結束'}
+                  </span>
+                </p>
+                <p className="text-xs text-gray-400">
+                  {orgNameOf(s.org_id)}
+                  {fmtRange(s) && <span> · {fmtRange(s)}</span>} · {s.num_courts} 場
+                </p>
+              </div>
+              <span className="text-brand-pink text-sm font-semibold">查看 →</span>
+            </button>
           ))}
         </div>
       </div>

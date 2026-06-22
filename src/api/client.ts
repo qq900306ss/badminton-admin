@@ -65,6 +65,7 @@ export interface SessionPlayer {
 
 export interface SessionSummary {
   session_id: string
+  org_id: string
   title: string
   num_courts: number
   status: string
@@ -124,4 +125,5 @@ export const adminApi = {
   createOrg: (email: string, orgName: string) =>
     api.post<{ data: Org }>('/api/admin/orgs', { email, org_name: orgName }),
   deleteOrg: (orgId: string) => api.delete(`/api/admin/orgs/${orgId}`),
+  listSessions: () => api.get<{ data: SessionSummary[] }>('/api/admin/sessions'),
 }
