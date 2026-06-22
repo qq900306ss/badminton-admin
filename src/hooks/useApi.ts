@@ -1,0 +1,66 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { orgApi, sessionApi } from '../api/client'
+
+export function useMembers() {
+  return useQuery({
+    queryKey: ['members'],
+    queryFn: () => orgApi.getMembers().then((r) => r.data.data),
+  })
+}
+
+export function useMemberActions() {
+  const qc = useQueryClient()
+  const invalidate = () => qc.invalidateQueries({ queryKey: ['members'] })
+  const add = useMutation({
+    mutationFn: (name: string) => orgApi.addMember(name),
+    onSuccess: invalidate,
+  })
+  const remove = useMutation({
+    mutationFn: (id: string) => orgApi.deleteMember(id),
+    onSuccess: invalidate,
+  })
+  return { add, remove }
+}
+
+export function useSessionView(sessionId: string) {
+  return useQuery({
+    queryKey: ['session', sessionId],
+    queryFn: () => sessionApi.getView(sessionId).then((r) => r.data.data),
+    refetchInterval: 3000,
+    enabled: !!sessionId,
+  })
+}
+
+export function useSessionPlayers(sessionId: string) {
+  return useQuery({
+    queryKey: ['session-players', sessionId],
+    queryFn: () => sessionApi.getPlayers(sessionId).then((r) => r.data.data),
+    refetchInterval: 3000,
+    enabled: !!sessionId,
+  })
+}
+
+export function useManageActions(sessionId: string) {
+  const qc = useQueryClient()
+  const invalidate = () => qc.invalidateQueries({ queryKey: ['session', sessionId] })
+
+  const endCourt = useMutation({
+    mutationFn: (courtId: string) => sessionApi.endCourt(sessionId, courtId),
+    onSuccess: invalidate,
+  })
+  const kick = useMutation({
+    mutationFn: (v: { courtId: string; playerId: string }) =>
+      sessionApi.kick(sessionId, v.courtId, v.playerId),
+    onSuccess: invalidate,
+  })
+  const addPlaying = useMutation({
+    mutationFn: (v: { courtId: string; playerId: string }) =>
+      sessionApi.addPlaying(sessionId, v.courtId, v.playerId),
+    onSuccess: invalidate,
+  })
+  const addCourt = useMutation({
+    mutationFn: () => sessionApi.addCourt(sessionId),
+    onSuccess: invalidate,
+  })
+  return { endCourt, kick, addPlaying, addCourt }
+}
