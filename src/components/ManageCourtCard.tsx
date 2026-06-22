@@ -45,6 +45,8 @@ export function ManageCourtCard({ court, onEnd, onKick, onRename, onRemove }: Pr
   const [editing, setEditing] = useState(false)
   const [nameInput, setNameInput] = useState(court.name ?? '')
   const title = court.name?.trim() ? court.name : `場地 ${court.court_num}`
+  const playing = court.playing.filter((p) => p.player_id) // 去掉空位
+  const filled = playing.length
 
   function saveName() {
     onRename(nameInput.trim())
@@ -80,25 +82,25 @@ export function ManageCourtCard({ court, onEnd, onKick, onRename, onRemove }: Pr
             {title} <span className="text-gray-300 text-xs">✎</span>
           </button>
         )}
-        {court.playing.length === 0 ? (
+        {filled === 0 ? (
           <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">空場</span>
-        ) : court.playing.length === 4 ? (
+        ) : filled === 4 ? (
           <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-mint text-emerald-700">
             進行中{elapsedMins(court.started_at) !== null ? ` · 已 ${elapsedMins(court.started_at)} 分` : ''}
           </span>
         ) : (
           <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-yellow text-amber-700">
-            湊人中 {court.playing.length}/4
+            湊人中 {filled}/4
           </span>
         )}
       </div>
 
       {/* playing */}
       <div>
-        <p className="text-xs text-gray-400 font-semibold mb-1">場上 ({court.playing.length}/4)</p>
+        <p className="text-xs text-gray-400 font-semibold mb-1">場上 ({filled}/4)</p>
         <div className="flex flex-wrap gap-2 min-h-[2rem]">
-          {court.playing.length === 0 && <span className="text-sm text-gray-300">無</span>}
-          {court.playing.map((p) => (
+          {filled === 0 && <span className="text-sm text-gray-300">無</span>}
+          {playing.map((p) => (
             <Chip key={p.player_id} slot={p} onKick={() => onKick(p.player_id)} />
           ))}
         </div>
@@ -117,10 +119,10 @@ export function ManageCourtCard({ court, onEnd, onKick, onRename, onRemove }: Pr
 
       <button
         onClick={onEnd}
-        disabled={court.playing.length === 0 && court.queue.length === 0}
+        disabled={filled === 0 && court.queue.length === 0}
         className="btn-primary w-full text-sm disabled:opacity-40"
       >
-        {court.playing.length === 4 ? '結束這場 → 換下一組' : '開始(排隊者上場)'}
+        {filled === 4 ? '結束這場 → 換下一組' : '開始(排隊者上場)'}
       </button>
 
       <button onClick={confirmRemove} className="w-full text-xs text-red-300 hover:text-red-400">

@@ -234,7 +234,7 @@ export function SessionManagePage() {
                 onRename={(name) => renameCourt.mutate({ courtId: court.court_id, name })}
                 onRemove={() => removeCourt.mutate(court.court_id)}
               />
-              {court.playing.length < 4 && (
+              {court.playing.filter((p) => p.player_id).length < 4 && (
                 <button
                   onClick={() => setAddTarget(addTarget === court.court_id ? null : court.court_id)}
                   className="w-full text-xs text-brand-pink font-semibold py-1"
