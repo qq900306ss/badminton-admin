@@ -24,6 +24,7 @@ export function SessionManagePage() {
   const [newName, setNewName] = useState('')
   const [levelTarget, setLevelTarget] = useState<string | null>(null) // player_id being re-leveled
   const [memberFilter, setMemberFilter] = useState('')
+  const [addFilter, setAddFilter] = useState('')
 
   // roster members not yet in this session (available to quick-add)
   const inSession = new Set((players ?? []).map((p) => p.display_name))
@@ -240,38 +241,53 @@ export function SessionManagePage() {
               >
                 {addTarget === court.court_id ? '收起' : '＋ 手動加人(上場 / 排隊)'}
               </button>
-              {addTarget === court.court_id && (
-                <div className="card space-y-1.5">
-                  {(players ?? []).map((p) => {
-                    const playingFull = court.playing.filter((x) => x.player_id).length >= 4
-                    const queueFull = court.queue.length >= 4
-                    return (
-                      <div key={p.player_id} className="flex items-center justify-between gap-2">
-                        <span className="text-sm font-semibold text-gray-600 truncate">{p.display_name}</span>
-                        <div className="flex gap-1 shrink-0">
-                          <button
-                            disabled={playingFull}
-                            onClick={() => { addPlaying.mutate({ courtId: court.court_id, playerId: p.player_id }); setAddTarget(null) }}
-                            className="px-2.5 py-1 rounded-full text-xs font-bold bg-brand-mint text-emerald-700 disabled:opacity-30"
-                          >
-                            上場
-                          </button>
-                          <button
-                            disabled={queueFull}
-                            onClick={() => { addQueue.mutate({ courtId: court.court_id, playerId: p.player_id }); setAddTarget(null) }}
-                            className="px-2.5 py-1 rounded-full text-xs font-bold bg-brand-yellow text-amber-700 disabled:opacity-30"
-                          >
-                            排隊
-                          </button>
+              {addTarget === court.court_id && (() => {
+                const playingFull = court.playing.filter((x) => x.player_id).length >= 4
+                const queueFull = court.queue.length >= 4
+                const onCourt = new Set(
+                  [...court.playing.map((x) => x.player_id), ...court.queue.map((x) => x.player_id)].filter(Boolean)
+                )
+                const candidates = (players ?? [])
+                  .filter((p) => !onCourt.has(p.player_id))
+                  .filter((p) => p.display_name.includes(addFilter.trim()))
+                return (
+                  <div className="card space-y-2">
+                    <input
+                      value={addFilter}
+                      onChange={(e) => setAddFilter(e.target.value)}
+                      placeholder="🔍 搜尋名字"
+                      className="w-full border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm
+                        focus:outline-none focus:border-brand-pink"
+                    />
+                    <div className="max-h-60 overflow-y-auto space-y-1.5">
+                      {candidates.map((p) => (
+                        <div key={p.player_id} className="flex items-center justify-between gap-2">
+                          <span className="text-sm font-semibold text-gray-600 truncate">{p.display_name}</span>
+                          <div className="flex gap-1 shrink-0">
+                            <button
+                              disabled={playingFull}
+                              onClick={() => { addPlaying.mutate({ courtId: court.court_id, playerId: p.player_id }); setAddTarget(null); setAddFilter('') }}
+                              className="px-2.5 py-1 rounded-full text-xs font-bold bg-brand-mint text-emerald-700 disabled:opacity-30"
+                            >
+                              上場
+                            </button>
+                            <button
+                              disabled={queueFull}
+                              onClick={() => { addQueue.mutate({ courtId: court.court_id, playerId: p.player_id }); setAddTarget(null); setAddFilter('') }}
+                              className="px-2.5 py-1 rounded-full text-xs font-bold bg-brand-yellow text-amber-700 disabled:opacity-30"
+                            >
+                              排隊
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    )
-                  })}
-                  {(players ?? []).length === 0 && (
-                    <span className="text-sm text-gray-300">還沒有人進場</span>
-                  )}
-                </div>
-              )}
+                      ))}
+                      {candidates.length === 0 && (
+                        <span className="text-sm text-gray-300">沒有可加入的人</span>
+                      )}
+                    </div>
+                  </div>
+                )
+              })()}
             </div>
           ))}
         </div>
