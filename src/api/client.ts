@@ -28,6 +28,7 @@ export interface Org {
   google_email: string
   org_name: string
   role: 'superadmin' | 'leader'
+  disabled?: boolean
 }
 
 export interface OrgMember {
@@ -149,5 +150,9 @@ export const adminApi = {
   createOrg: (email: string, orgName: string) =>
     api.post<{ data: Org }>('/api/admin/orgs', { email, org_name: orgName }),
   deleteOrg: (orgId: string) => api.delete(`/api/admin/orgs/${orgId}`),
+  setDisabled: (orgId: string, disabled: boolean) =>
+    api.post<{ data: Org }>(`/api/admin/orgs/${orgId}/disabled`, { disabled }),
+  impersonate: (orgId: string) =>
+    api.post<{ data: { token: string; org: Org } }>(`/api/admin/impersonate/${orgId}`),
   listSessions: () => api.get<{ data: SessionSummary[] }>('/api/admin/sessions'),
 }

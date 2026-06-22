@@ -56,6 +56,21 @@ export function AdminPage() {
     mutationFn: (orgId: string) => adminApi.deleteOrg(orgId),
     onSuccess: invalidate,
   })
+  const toggleDisabled = useMutation({
+    mutationFn: (v: { orgId: string; disabled: boolean }) =>
+      adminApi.setDisabled(v.orgId, v.disabled),
+    onSuccess: invalidate,
+  })
+
+  async function impersonate(orgId: string) {
+    const res = await adminApi.impersonate(orgId)
+    // stash the admin session so we can switch back
+    localStorage.setItem('admin_token', localStorage.getItem('token') || '')
+    localStorage.setItem('admin_org', localStorage.getItem('org') || '')
+    localStorage.setItem('token', res.data.data.token)
+    localStorage.setItem('org', JSON.stringify(res.data.data.org))
+    nav('/')
+  }
 
   return (
     <div className="min-h-screen bg-brand-bg pb-10">
@@ -112,22 +127,41 @@ export function AdminPage() {
         <div className="card space-y-2">
           <span className="font-bold text-gray-700">所有團主</span>
           {(orgs ?? []).map((o) => (
-            <div key={o.org_id} className="flex items-center justify-between py-2 border-b last:border-0">
-              <div>
-                <p className="font-semibold text-gray-700">
+            <div key={o.org_id} className="flex items-center justify-between py-2 border-b last:border-0 gap-2">
+              <div className="min-w-0">
+                <p className="font-semibold text-gray-700 truncate">
                   {o.org_name}
                   {o.role === 'superadmin' && (
                     <span className="ml-2 text-xs bg-brand-yellow text-amber-700 px-2 py-0.5 rounded-full">
                       管理員
                     </span>
                   )}
+                  {o.disabled && (
+                    <span className="ml-2 text-xs bg-red-100 text-red-500 px-2 py-0.5 rounded-full">
+                      已停用
+                    </span>
+                  )}
                 </p>
-                <p className="text-xs text-gray-400">{o.google_email}</p>
+                <p className="text-xs text-gray-400 truncate">{o.google_email}</p>
               </div>
               {o.role !== 'superadmin' && (
-                <button onClick={() => remove.mutate(o.org_id)} className="text-red-300 text-xs">
-                  刪除
-                </button>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => impersonate(o.org_id)}
+                    className="text-xs font-semibold text-brand-pink"
+                  >
+                    以此身份
+                  </button>
+                  <button
+                    onClick={() => toggleDisabled.mutate({ orgId: o.org_id, disabled: !o.disabled })}
+                    className={`text-xs font-semibold ${o.disabled ? 'text-emerald-500' : 'text-amber-500'}`}
+                  >
+                    {o.disabled ? '啟用' : '停用'}
+                  </button>
+                  <button onClick={() => remove.mutate(o.org_id)} className="text-red-300 text-xs">
+                    刪除
+                  </button>
+                </div>
               )}
             </div>
           ))}

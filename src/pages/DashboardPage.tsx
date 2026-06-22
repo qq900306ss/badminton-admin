@@ -87,8 +87,24 @@ export function DashboardPage() {
     }
   }
 
+  const impersonating = !!localStorage.getItem('admin_token')
+  function stopImpersonating() {
+    localStorage.setItem('token', localStorage.getItem('admin_token') || '')
+    localStorage.setItem('org', localStorage.getItem('admin_org') || '')
+    localStorage.removeItem('admin_token')
+    localStorage.removeItem('admin_org')
+    nav('/admin')
+    location.reload()
+  }
+
   return (
     <div className="min-h-screen bg-brand-bg pb-10">
+      {impersonating && (
+        <div className="bg-amber-100 text-amber-800 text-sm font-semibold px-4 py-2 flex items-center justify-between">
+          <span>👁️ 正在以「{org?.org_name}」身份操作</span>
+          <button onClick={stopImpersonating} className="underline font-bold">返回管理員</button>
+        </div>
+      )}
       <header className="bg-white shadow-sm px-4 py-3 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-2">
           <span className="text-2xl">🏸</span>

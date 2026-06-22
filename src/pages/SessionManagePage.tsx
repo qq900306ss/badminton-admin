@@ -23,6 +23,7 @@ export function SessionManagePage() {
   const [addTarget, setAddTarget] = useState<string | null>(null) // court_id to add a player to
   const [newName, setNewName] = useState('')
   const [levelTarget, setLevelTarget] = useState<string | null>(null) // player_id being re-leveled
+  const [memberFilter, setMemberFilter] = useState('')
 
   // roster members not yet in this session (available to quick-add)
   const inSession = new Set((players ?? []).map((p) => p.display_name))
@@ -95,9 +96,22 @@ export function SessionManagePage() {
             </span>
           </div>
 
+          {/* filter */}
+          {(players ?? []).length > 6 && (
+            <input
+              value={memberFilter}
+              onChange={(e) => setMemberFilter(e.target.value)}
+              placeholder="🔍 搜尋名字"
+              className="w-full border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm
+                focus:outline-none focus:border-brand-pink"
+            />
+          )}
+
           {/* current people — tap to set level; ● = 已到, 未到 = 還沒掃碼認領 */}
           <div className="flex flex-wrap gap-2">
-            {(players ?? []).map((p) => {
+            {(players ?? [])
+              .filter((p) => p.display_name.includes(memberFilter.trim()))
+              .map((p) => {
               const tier = tierOf(p.level)
               return (
                 <button
