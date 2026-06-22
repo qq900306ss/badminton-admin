@@ -242,7 +242,7 @@ export function SessionManagePage() {
           ))}
         </div>
 
-        <p className="text-center text-xs text-gray-300">每 3 秒自動更新 · 共 {players?.length ?? 0} 人在場</p>
+        <p className="text-center text-xs text-gray-300">每 3 秒自動更新 · 已報到 {players?.length ?? 0} 人</p>
       </div>
     </div>
   )
