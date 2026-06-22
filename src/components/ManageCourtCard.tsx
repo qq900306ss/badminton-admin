@@ -43,13 +43,17 @@ export function ManageCourtCard({ court, onEnd, onKick }: Props) {
     <div className="card space-y-3">
       <div className="flex items-center justify-between">
         <span className="font-extrabold text-gray-700">場地 {court.court_num}</span>
-        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-          court.status === 'playing' ? 'bg-brand-mint text-emerald-700' : 'bg-gray-100 text-gray-400'
-        }`}>
-          {court.status === 'playing'
-            ? `進行中${elapsedMins(court.started_at) !== null ? ` · 已 ${elapsedMins(court.started_at)} 分` : ''}`
-            : '空場'}
-        </span>
+        {court.playing.length === 0 ? (
+          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">空場</span>
+        ) : court.playing.length === 4 ? (
+          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-mint text-emerald-700">
+            進行中{elapsedMins(court.started_at) !== null ? ` · 已 ${elapsedMins(court.started_at)} 分` : ''}
+          </span>
+        ) : (
+          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-yellow text-amber-700">
+            湊人中 {court.playing.length}/4
+          </span>
+        )}
       </div>
 
       {/* playing */}
