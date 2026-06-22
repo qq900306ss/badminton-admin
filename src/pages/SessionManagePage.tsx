@@ -4,6 +4,7 @@ import { QRCodeSVG } from 'qrcode.react'
 import { sessionApi } from '../api/client'
 import { useSessionView, useSessionPlayers, useManageActions, useMembers } from '../hooks/useApi'
 import { ManageCourtCard } from '../components/ManageCourtCard'
+import { StatsPanel } from '../components/StatsPanel'
 import { TIERS, tierOf } from '../lib/levels'
 
 const BOOKING_URL = import.meta.env.VITE_BOOKING_URL || 'http://localhost:5174'
@@ -86,10 +87,15 @@ export function SessionManagePage() {
         {/* people in this session */}
         <div className="card space-y-3">
           <div className="flex items-center justify-between">
-            <span className="font-bold text-gray-700">本場人員 ({players?.length ?? 0})</span>
+            <span className="font-bold text-gray-700">本場人員</span>
+            <span className="text-xs text-gray-400">
+              已到 <span className="font-bold text-emerald-600">
+                {(players ?? []).filter((p) => p.claimed).length}
+              </span> / 共 {players?.length ?? 0} 人
+            </span>
           </div>
 
-          {/* current people — tap to set level */}
+          {/* current people — tap to set level; ● = 已到, 未到 = 還沒掃碼認領 */}
           <div className="flex flex-wrap gap-2">
             {(players ?? []).map((p) => {
               const tier = tierOf(p.level)
@@ -98,12 +104,14 @@ export function SessionManagePage() {
                   key={p.player_id}
                   onClick={() => setLevelTarget(levelTarget === p.player_id ? null : p.player_id)}
                   className={`px-3 py-1.5 rounded-full text-sm font-semibold flex items-center gap-1.5
-                    ${tier ? tier.chip : 'bg-gray-100 text-gray-500'}`}
+                    ${tier ? tier.chip : 'bg-gray-100 text-gray-500'} ${p.claimed ? '' : 'opacity-50'}`}
                 >
+                  <span className={p.claimed ? 'text-emerald-600' : 'text-gray-300'}>●</span>
                   {p.display_name}
                   <span className="bg-white/70 text-gray-700 rounded-full px-1.5 text-xs">
                     {p.level > 0 ? `Lv${p.level}` : '?'}
                   </span>
+                  {!p.claimed && <span className="text-[10px] text-gray-400">未到</span>}
                 </button>
               )
             })}
@@ -241,6 +249,9 @@ export function SessionManagePage() {
             </div>
           ))}
         </div>
+
+        {/* stats dashboard */}
+        <StatsPanel sessionId={sid} players={players ?? []} />
 
         <p className="text-center text-xs text-gray-300">每 3 秒自動更新 · 已報到 {players?.length ?? 0} 人</p>
       </div>

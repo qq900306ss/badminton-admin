@@ -12,6 +12,12 @@ function fallbackColor(id: string) {
   return PALETTE[h % PALETTE.length]
 }
 
+function elapsedMins(startedAt?: string): number | null {
+  if (!startedAt) return null
+  const ms = Date.now() - new Date(startedAt).getTime()
+  return ms < 0 ? null : Math.floor(ms / 60000)
+}
+
 interface Props {
   court: CourtView
   onEnd: () => void
@@ -40,7 +46,9 @@ export function ManageCourtCard({ court, onEnd, onKick }: Props) {
         <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
           court.status === 'playing' ? 'bg-brand-mint text-emerald-700' : 'bg-gray-100 text-gray-400'
         }`}>
-          {court.status === 'playing' ? '進行中' : '空場'}
+          {court.status === 'playing'
+            ? `進行中${elapsedMins(court.started_at) !== null ? ` · 已 ${elapsedMins(court.started_at)} 分` : ''}`
+            : '空場'}
         </span>
       </div>
 

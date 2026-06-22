@@ -41,6 +41,7 @@ export interface PlayerSlot {
   player_id: string
   display_name: string
   level: number
+  games: number
 }
 
 export interface CourtView {
@@ -49,6 +50,17 @@ export interface CourtView {
   status: 'empty' | 'playing'
   playing: PlayerSlot[]
   queue: PlayerSlot[]
+  started_at?: string
+}
+
+export interface GameLog {
+  session_id: string
+  ended_at_id: string
+  court_num: number
+  player_names: string[]
+  started_at: string
+  ended_at: string
+  minutes: number
 }
 
 export interface SessionView {
@@ -62,6 +74,9 @@ export interface SessionPlayer {
   player_id: string
   display_name: string
   level: number
+  claimed: boolean
+  games: number
+  total_minutes: number
   is_temp: boolean
 }
 
@@ -104,6 +119,8 @@ export const sessionApi = {
   create: (input: CreateSessionInput) =>
     api.post<{ data: { session_id: string } }>('/api/sessions', input),
   mySessions: () => api.get<{ data: SessionSummary[] }>('/api/my/sessions'),
+  games: (sessionId: string) =>
+    api.get<{ data: GameLog[] }>(`/api/sessions/${sessionId}/games`),
   getView: (sessionId: string) =>
     api.get<{ data: SessionView }>(`/api/sessions/${sessionId}`),
   getPlayers: (sessionId: string) =>
