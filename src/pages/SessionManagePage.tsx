@@ -4,6 +4,7 @@ import { QRCodeSVG } from 'qrcode.react'
 import { sessionApi } from '../api/client'
 import { useSessionView, useSessionPlayers, useManageActions, useMembers } from '../hooks/useApi'
 import { ManageCourtCard } from '../components/ManageCourtCard'
+import { TIERS, tierOf } from '../lib/levels'
 
 const BOOKING_URL = import.meta.env.VITE_BOOKING_URL || 'http://localhost:5174'
 
@@ -15,11 +16,12 @@ export function SessionManagePage() {
   const { data: session, isLoading } = useSessionView(sid)
   const { data: players } = useSessionPlayers(sid)
   const { data: roster } = useMembers()
-  const { endCourt, kick, addPlaying, addCourt, addPlayer } = useManageActions(sid)
+  const { endCourt, kick, addPlaying, addCourt, addPlayer, setLevel } = useManageActions(sid)
 
   const [showQR, setShowQR] = useState(true)
   const [addTarget, setAddTarget] = useState<string | null>(null) // court_id to add a player to
   const [newName, setNewName] = useState('')
+  const [levelTarget, setLevelTarget] = useState<string | null>(null) // player_id being re-leveled
 
   // roster members not yet in this session (available to quick-add)
   const inSession = new Set((players ?? []).map((p) => p.display_name))
@@ -87,17 +89,62 @@ export function SessionManagePage() {
             <span className="font-bold text-gray-700">本場人員 ({players?.length ?? 0})</span>
           </div>
 
-          {/* current people */}
+          {/* current people — tap to set level */}
           <div className="flex flex-wrap gap-2">
-            {(players ?? []).map((p) => (
-              <span key={p.player_id} className="px-3 py-1.5 rounded-full text-sm font-semibold bg-brand-mint text-emerald-700">
-                {p.display_name}
-              </span>
-            ))}
+            {(players ?? []).map((p) => {
+              const tier = tierOf(p.level)
+              return (
+                <button
+                  key={p.player_id}
+                  onClick={() => setLevelTarget(levelTarget === p.player_id ? null : p.player_id)}
+                  className={`px-3 py-1.5 rounded-full text-sm font-semibold flex items-center gap-1.5
+                    ${tier ? tier.chip : 'bg-gray-100 text-gray-500'}`}
+                >
+                  {p.display_name}
+                  <span className="bg-white/70 text-gray-700 rounded-full px-1.5 text-xs">
+                    {p.level > 0 ? `Lv${p.level}` : '?'}
+                  </span>
+                </button>
+              )
+            })}
             {(players ?? []).length === 0 && (
               <span className="text-sm text-gray-300">還沒有人,從下面加入</span>
             )}
           </div>
+
+          {/* level editor for the tapped player */}
+          {levelTarget && (
+            <div className="border-t pt-3 space-y-2">
+              <p className="text-xs text-gray-500 font-semibold">
+                設定「{(players ?? []).find((p) => p.player_id === levelTarget)?.display_name}」的程度
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {TIERS.flatMap((t) =>
+                  Array.from({ length: t.max - t.min + 1 }, (_, i) => t.min + i).map((lv) => (
+                    <button
+                      key={lv}
+                      onClick={() => {
+                        setLevel.mutate({ playerId: levelTarget, level: lv })
+                        setLevelTarget(null)
+                      }}
+                      className={`w-8 h-8 rounded-lg text-sm font-bold ${t.chip}`}
+                    >
+                      {lv}
+                    </button>
+                  ))
+                )}
+                <button
+                  onClick={() => {
+                    setLevel.mutate({ playerId: levelTarget, level: 0 })
+                    setLevelTarget(null)
+                  }}
+                  className="px-3 h-8 rounded-lg text-xs font-bold bg-gray-100 text-gray-500"
+                >
+                  清除
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* quick-add from roster */}
           {rosterAvailable.length > 0 && (

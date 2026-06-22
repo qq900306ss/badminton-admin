@@ -50,6 +50,14 @@ export function useManageActions(sessionId: string) {
     mutationFn: (name: string) => sessionApi.addPlayer(sessionId, name),
     onSuccess: invalidatePlayers,
   })
+  const setLevel = useMutation({
+    mutationFn: (v: { playerId: string; level: number }) =>
+      sessionApi.setLevel(sessionId, v.playerId, v.level),
+    onSuccess: () => {
+      invalidatePlayers()
+      invalidate()
+    },
+  })
 
   const endCourt = useMutation({
     mutationFn: (courtId: string) => sessionApi.endCourt(sessionId, courtId),
@@ -69,5 +77,5 @@ export function useManageActions(sessionId: string) {
     mutationFn: () => sessionApi.addCourt(sessionId),
     onSuccess: invalidate,
   })
-  return { endCourt, kick, addPlaying, addCourt, addPlayer }
+  return { endCourt, kick, addPlaying, addCourt, addPlayer, setLevel }
 }

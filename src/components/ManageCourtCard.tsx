@@ -1,11 +1,12 @@
 import type { CourtView, PlayerSlot } from '../api/client'
+import { tierOf } from '../lib/levels'
 
 const PALETTE = [
   'bg-brand-pink', 'bg-brand-mint', 'bg-brand-yellow',
   'bg-brand-peach', 'bg-brand-lavender',
   'bg-purple-200', 'bg-blue-200', 'bg-teal-200',
 ]
-function avatarColor(id: string) {
+function fallbackColor(id: string) {
   let h = 0
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0
   return PALETTE[h % PALETTE.length]
@@ -18,10 +19,12 @@ interface Props {
 }
 
 function Chip({ slot, onKick }: { slot: PlayerSlot; onKick: () => void }) {
+  const tier = tierOf(slot.level)
+  const bg = tier ? tier.avatarBg : fallbackColor(slot.player_id)
   return (
-    <span className={`inline-flex items-center gap-1 pl-1 pr-2 py-1 rounded-full text-sm font-semibold text-white ${avatarColor(slot.player_id)}`}>
+    <span className={`inline-flex items-center gap-1 pl-1 pr-2 py-1 rounded-full text-sm font-semibold text-white ${bg}`}>
       <span className="w-5 h-5 rounded-full bg-white/30 flex items-center justify-center text-xs">
-        {slot.display_name?.[0]?.toUpperCase()}
+        {slot.level > 0 ? slot.level : slot.display_name?.[0]?.toUpperCase()}
       </span>
       {slot.display_name}
       <button onClick={onKick} className="ml-0.5 text-white/80 hover:text-white font-bold">×</button>

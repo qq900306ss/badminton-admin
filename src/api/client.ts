@@ -40,6 +40,7 @@ export interface OrgMember {
 export interface PlayerSlot {
   player_id: string
   display_name: string
+  level: number
 }
 
 export interface CourtView {
@@ -60,6 +61,7 @@ export interface SessionView {
 export interface SessionPlayer {
   player_id: string
   display_name: string
+  level: number
   is_temp: boolean
 }
 
@@ -110,6 +112,11 @@ export const sessionApi = {
     api.post<{ data: SessionPlayer }>(`/api/sessions/${sessionId}/players`, {
       display_name: displayName,
     }),
+  setLevel: (sessionId: string, playerId: string, level: number) =>
+    api.post<{ data: SessionPlayer }>(
+      `/api/sessions/${sessionId}/players/${playerId}/level`,
+      { level }
+    ),
   close: (sessionId: string) => api.post(`/api/sessions/${sessionId}/close`),
   addCourt: (sessionId: string) => api.post(`/api/sessions/${sessionId}/courts`),
   endCourt: (sessionId: string, courtId: string) =>
