@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { sessionApi, type Org } from '../api/client'
 import { useMembers, useMemberActions } from '../hooks/useApi'
 import { InstallButton } from '../components/InstallButton'
+import { TimeSelect } from '../components/TimeSelect'
 
 // local YYYY-MM-DD (en-CA formats as ISO date in local timezone)
 const todayStr = () => new Date().toLocaleDateString('en-CA')
@@ -212,39 +213,19 @@ export function DashboardPage() {
                 focus:outline-none focus:border-brand-pink"
             />
           </label>
-          <div className="grid grid-cols-2 gap-3">
-            <label className="block">
-              <span className="text-sm font-bold text-gray-600">開打</span>
-              <input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-3 py-2.5
-                  focus:outline-none focus:border-brand-pink"
-              />
-            </label>
-            <label className="block">
-              <span className="text-sm font-bold text-gray-600">結束</span>
-              <input
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-3 py-2.5
-                  focus:outline-none focus:border-brand-pink"
-              />
-            </label>
+          <div>
+            <span className="text-sm font-bold text-gray-600">開打時間</span>
+            <TimeSelect value={startTime} onChange={setStartTime} />
           </div>
-          <label className="block">
+          <div>
+            <span className="text-sm font-bold text-gray-600">結束時間</span>
+            <TimeSelect value={endTime} onChange={setEndTime} />
+          </div>
+          <div>
             <span className="text-sm font-bold text-gray-600">排隊開放時間</span>
-            <input
-              type="time"
-              value={queueTime}
-              onChange={(e) => setQueueTime(e.target.value)}
-              className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-4 py-2.5
-                focus:outline-none focus:border-brand-pink"
-            />
+            <TimeSelect value={queueTime} onChange={setQueueTime} />
             <span className="text-xs text-gray-400">這時間之前,臨打人能進場看,但還不能自己排上場</span>
-          </label>
+          </div>
           <label className="block">
             <span className="text-sm font-bold text-gray-600">球場數量</span>
             <div className="flex gap-2 mt-1">
