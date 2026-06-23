@@ -6,6 +6,8 @@ import { useSessionView, useSessionPlayers, useManageActions, useMembers } from 
 import { ManageCourtCard } from '../components/ManageCourtCard'
 import { StatsPanel } from '../components/StatsPanel'
 import { SessionSummary } from '../components/SessionSummary'
+import { useConfirm } from '../components/Confirm'
+import { CourtSkeleton } from '../components/Skeleton'
 import { TIERS, tierOf } from '../lib/levels'
 
 const BOOKING_URL = import.meta.env.VITE_BOOKING_URL || 'http://localhost:5174'
@@ -19,6 +21,7 @@ export function SessionManagePage() {
   const { data: players } = useSessionPlayers(sid)
   const { data: roster } = useMembers()
   const { endCourt, kick, addPlaying, addCourt, addPlayer, setLevel, renameCourt, removeCourt, addQueue } = useManageActions(sid)
+  const confirm = useConfirm()
 
   const [showQR, setShowQR] = useState(true)
   const [poster, setPoster] = useState(false)
@@ -37,15 +40,15 @@ export function SessionManagePage() {
   const joinUrl = `${BOOKING_URL}/?s=${sid}`
 
   async function closeSession() {
-    if (!confirm('確定要結束這次開團嗎?')) return
+    if (!(await confirm({ message: '確定要結束這次開團嗎?', confirmText: '結束開團', danger: true }))) return
     await sessionApi.close(sid)
     setSummary(true) // 結束後直接看散場總結
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-brand-bg flex items-center justify-center">
-        <div className="text-4xl animate-bounce">🏸</div>
+      <div className="min-h-screen bg-brand-bg p-4">
+        <CourtSkeleton />
       </div>
     )
   }
@@ -286,7 +289,15 @@ export function SessionManagePage() {
                 onEnd={() => endCourt.mutate(court.court_id)}
                 onKick={(playerId) => kick.mutate({ courtId: court.court_id, playerId })}
                 onRename={(name) => renameCourt.mutate({ courtId: court.court_id, name })}
-                onRemove={() => removeCourt.mutate(court.court_id)}
+                onRemove={async () => {
+                  const hasPlaying = court.playing.some((p) => p.player_id)
+                  const msg = hasPlaying
+                    ? '刪除這個場地?場上的人會計入統計(視同結束),排隊的人會被取消排隊。'
+                    : '刪除這個場地?'
+                  if (await confirm({ message: msg, confirmText: '刪除', danger: true })) {
+                    removeCourt.mutate(court.court_id)
+                  }
+                }}
               />
               <button
                 onClick={() => setAddTarget(addTarget === court.court_id ? null : court.court_id)}

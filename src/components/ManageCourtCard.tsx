@@ -52,13 +52,6 @@ export function ManageCourtCard({ court, onEnd, onKick, onRename, onRemove }: Pr
     onRename(nameInput.trim())
     setEditing(false)
   }
-  function confirmRemove() {
-    const msg = court.playing.length > 0
-      ? '刪除這個場地?場上的人會被計入統計(視同結束),排隊的人會被取消排隊。'
-      : '刪除這個場地?'
-    if (confirm(msg)) onRemove()
-  }
-
   return (
     <div className="card space-y-3">
       <div className="flex items-center justify-between gap-2">
@@ -125,7 +118,7 @@ export function ManageCourtCard({ court, onEnd, onKick, onRename, onRemove }: Pr
         {filled === 4 ? '結束這場 → 換下一組' : '結束這場'}
       </button>
 
-      <button onClick={confirmRemove} className="w-full text-xs text-red-300 hover:text-red-400">
+      <button onClick={onRemove} className="w-full text-xs text-red-300 hover:text-red-400">
         刪除這個場地
       </button>
     </div>

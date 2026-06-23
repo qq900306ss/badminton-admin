@@ -5,6 +5,9 @@ import { AuthCallback } from './pages/AuthCallback'
 import { DashboardPage } from './pages/DashboardPage'
 import { SessionManagePage } from './pages/SessionManagePage'
 import { AdminPage } from './pages/AdminPage'
+import { ErrorBoundary } from './components/ErrorBoundary'
+import { ConnectionBanner } from './components/ConnectionBanner'
+import { ConfirmProvider } from './components/Confirm'
 
 const qc = new QueryClient()
 
@@ -17,6 +20,9 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <QueryClientProvider client={qc}>
+      <ErrorBoundary>
+      <ConfirmProvider>
+      <ConnectionBanner />
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -27,6 +33,8 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
+      </ConfirmProvider>
+      </ErrorBoundary>
     </QueryClientProvider>
   )
 }

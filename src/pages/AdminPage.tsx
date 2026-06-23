@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { adminApi, type SessionSummary } from '../api/client'
+import { useConfirm } from '../components/Confirm'
 
 function fmtRange(s: SessionSummary): string {
   if (!s.start_at) return ''
@@ -16,6 +17,7 @@ function fmtRange(s: SessionSummary): string {
 export function AdminPage() {
   const nav = useNavigate()
   const qc = useQueryClient()
+  const confirm = useConfirm()
   const { data: orgs } = useQuery({
     queryKey: ['orgs'],
     queryFn: () => adminApi.listOrgs().then((r) => r.data.data),
@@ -158,7 +160,14 @@ export function AdminPage() {
                   >
                     {o.disabled ? '啟用' : '停用'}
                   </button>
-                  <button onClick={() => remove.mutate(o.org_id)} className="text-red-300 text-xs">
+                  <button
+                    onClick={async () => {
+                      if (await confirm({ message: `刪除團主「${o.org_name}」?`, confirmText: '刪除', danger: true })) {
+                        remove.mutate(o.org_id)
+                      }
+                    }}
+                    className="text-red-300 text-xs"
+                  >
                     刪除
                   </button>
                 </div>
