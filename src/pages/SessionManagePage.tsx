@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { sessionApi } from '../api/client'
+import type { SessionPlayer } from '../api/client'
 import { useSessionView, useSessionPlayers, useManageActions, useMembers } from '../hooks/useApi'
 import { ManageCourtCard } from '../components/ManageCourtCard'
 import { StatsPanel } from '../components/StatsPanel'
@@ -326,9 +327,24 @@ export function SessionManagePage() {
                     .flatMap((ct) => [...ct.playing.map((x) => x.player_id), ...ct.queue.map((x) => x.player_id)])
                     .filter(Boolean)
                 )
+                // fair rotation: surface whoever has played least so the leader
+                // can seat the fairest next. 未到 (not here yet) sink to the bottom
+                // and never get the 建議 badge — they're not physically on court.
                 const candidates = (players ?? [])
                   .filter((p) => !busy.has(p.player_id))
                   .filter((p) => p.display_name.includes(addFilter.trim()))
+                  .slice()
+                  .sort((a, b) => {
+                    if (a.claimed !== b.claimed) return Number(b.claimed) - Number(a.claimed)
+                    if (a.games !== b.games) return a.games - b.games
+                    if (a.total_minutes !== b.total_minutes) return a.total_minutes - b.total_minutes
+                    return a.display_name.localeCompare(b.display_name)
+                  })
+                const present = candidates.filter((p) => p.claimed)
+                const minGames = present.length ? Math.min(...present.map((p) => p.games)) : 0
+                const maxGames = present.length ? Math.max(...present.map((p) => p.games)) : 0
+                // only suggest once a real fairness gap exists (skip the all-0 start)
+                const suggest = (p: SessionPlayer) => maxGames > minGames && p.claimed && p.games === minGames
                 return (
                   <div className="card space-y-2">
                     <input
@@ -338,11 +354,28 @@ export function SessionManagePage() {
                       className="w-full border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm
                         focus:outline-none focus:border-brand-pink"
                     />
+                    <p className="text-[11px] text-gray-400">⚖️ 依公平排序:打最少場的排在最前面</p>
                     <div className="max-h-60 overflow-y-auto space-y-1.5">
-                      {candidates.map((p) => (
-                        <div key={p.player_id} className="flex items-center justify-between gap-2">
-                          <span className="text-sm font-semibold text-gray-600 truncate">{p.display_name}</span>
-                          <div className="flex gap-1 shrink-0">
+                      {candidates.map((p) => {
+                        const sug = suggest(p)
+                        return (
+                        <div
+                          key={p.player_id}
+                          className={`flex items-center justify-between gap-2 rounded-xl px-1.5 py-0.5
+                            ${sug ? 'bg-brand-mint/40' : ''}`}
+                        >
+                          <div className="min-w-0 flex items-center gap-1.5">
+                            <span className="text-sm font-semibold text-gray-600 truncate">{p.display_name}</span>
+                            {sug && (
+                              <span className="shrink-0 text-[10px] font-bold text-emerald-700
+                                bg-white rounded-full px-1.5 py-0.5">⭐ 建議</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-[11px] text-gray-400 tabular-nums">
+                              {p.claimed ? `${p.games} 場` : '未到'}
+                            </span>
+                            <div className="flex gap-1">
                             <button
                               disabled={playingFull}
                               onClick={() => { addPlaying.mutate({ courtId: court.court_id, playerId: p.player_id }); setAddTarget(null); setAddFilter('') }}
@@ -357,9 +390,11 @@ export function SessionManagePage() {
                             >
                               排隊
                             </button>
+                            </div>
                           </div>
                         </div>
-                      ))}
+                        )
+                      })}
                       {candidates.length === 0 && (
                         <span className="text-sm text-gray-300">沒有可加入的人</span>
                       )}
