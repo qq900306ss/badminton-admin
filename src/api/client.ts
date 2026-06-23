@@ -67,8 +67,12 @@ export interface GameLog {
 
 export interface SessionView {
   session_id: string
+  title?: string
   num_courts: number
   status: string
+  start_at?: string
+  end_at?: string
+  queue_open_at?: string
   courts: CourtView[]
 }
 

@@ -5,6 +5,7 @@ import { sessionApi } from '../api/client'
 import { useSessionView, useSessionPlayers, useManageActions, useMembers } from '../hooks/useApi'
 import { ManageCourtCard } from '../components/ManageCourtCard'
 import { StatsPanel } from '../components/StatsPanel'
+import { SessionSummary } from '../components/SessionSummary'
 import { TIERS, tierOf } from '../lib/levels'
 
 const BOOKING_URL = import.meta.env.VITE_BOOKING_URL || 'http://localhost:5174'
@@ -20,6 +21,8 @@ export function SessionManagePage() {
   const { endCourt, kick, addPlaying, addCourt, addPlayer, setLevel, renameCourt, removeCourt, addQueue } = useManageActions(sid)
 
   const [showQR, setShowQR] = useState(true)
+  const [poster, setPoster] = useState(false)
+  const [summary, setSummary] = useState(false)
   const [addTarget, setAddTarget] = useState<string | null>(null) // court_id to add a player to
   const [newName, setNewName] = useState('')
   const [levelTarget, setLevelTarget] = useState<string | null>(null) // player_id being re-leveled
@@ -36,7 +39,7 @@ export function SessionManagePage() {
   async function closeSession() {
     if (!confirm('確定要結束這次開團嗎?')) return
     await sessionApi.close(sid)
-    nav('/')
+    setSummary(true) // 結束後直接看散場總結
   }
 
   if (isLoading) {
@@ -52,8 +55,23 @@ export function SessionManagePage() {
       <header className="bg-white shadow-sm px-4 py-3 flex items-center justify-between sticky top-0 z-10">
         <button onClick={() => nav('/')} className="text-sm text-gray-400">← 返回</button>
         <span className="font-extrabold text-gray-800">場中管理</span>
-        <button onClick={closeSession} className="text-sm font-semibold text-red-400">結束開團</button>
+        <div className="flex items-center gap-3">
+          <button onClick={() => setSummary(true)} className="text-sm font-semibold text-brand-pink">總結</button>
+          <button onClick={closeSession} className="text-sm font-semibold text-red-400">結束開團</button>
+        </div>
       </header>
+
+      {summary && (
+        <SessionSummary
+          sessionId={sid}
+          title={session?.title ?? ''}
+          players={players ?? []}
+          onClose={() => {
+            setSummary(false)
+            if (session?.status === 'closed') nav('/')
+          }}
+        />
+      )}
 
       <div className="max-w-2xl mx-auto p-4 space-y-4">
         {/* QR code share */}
@@ -83,9 +101,30 @@ export function SessionManagePage() {
                   複製
                 </button>
               </div>
+              <button onClick={() => setPoster(true)} className="btn-primary w-full text-sm">
+                🖥 海報模式(全螢幕大 QR)
+              </button>
             </div>
           )}
         </div>
+
+        {/* full-screen QR poster — stand the phone/laptop at the door */}
+        {poster && (
+          <div
+            className="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center p-6 text-center"
+            onClick={() => setPoster(false)}
+          >
+            <div className="text-5xl mb-4">🏸</div>
+            <p className="text-2xl font-extrabold text-gray-800">
+              {session?.title?.trim() ? session.title : '羽球揪團'}
+            </p>
+            <p className="text-gray-400 mb-6">掃我加入,選位置上場</p>
+            <div className="bg-white p-4 rounded-3xl shadow-xl border">
+              <QRCodeSVG value={joinUrl} size={Math.min(360, window.innerWidth - 80)} />
+            </div>
+            <p className="text-gray-300 text-sm mt-8">點任一處關閉</p>
+          </div>
+        )}
 
         {/* people in this session */}
         <div className="card space-y-3">
