@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { sessionApi, type Org } from '../api/client'
 import { useMembers, useMemberActions } from '../hooks/useApi'
+import { InstallButton } from '../components/InstallButton'
 
 // local YYYY-MM-DD (en-CA formats as ISO date in local timezone)
 const todayStr = () => new Date().toLocaleDateString('en-CA')
@@ -397,6 +398,10 @@ export function DashboardPage() {
             </div>
           </details>
         )}
+
+        <div className="pt-2">
+          <InstallButton label="📲 安裝後台到桌面" />
+        </div>
       </div>
     </div>
   )
