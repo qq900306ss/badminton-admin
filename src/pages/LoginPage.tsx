@@ -1,3 +1,5 @@
+import { InstallButton } from '../components/InstallButton'
+
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 const REDIRECT_URI = `${location.origin}/auth/callback`
 
@@ -37,6 +39,9 @@ export function LoginPage() {
       <p className="text-xs text-gray-300 mt-6 text-center max-w-xs">
         只有被授權的團主與管理員能登入
       </p>
+      <div className="w-full max-w-xs mt-6">
+        <InstallButton label="📲 安裝後台到桌面" />
+      </div>
     </div>
   )
 }

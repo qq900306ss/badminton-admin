@@ -1,12 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#F9A8D4"/>
-  <!-- shuttlecock feathers -->
-  <path d="M256 96 L344 348 Q256 392 168 348 Z" fill="#ffffff"/>
-  <path d="M256 96 L256 372" stroke="#FBCFE8" stroke-width="6"/>
-  <path d="M212 120 L226 360" stroke="#FBCFE8" stroke-width="6"/>
-  <path d="M300 120 L286 360" stroke="#FBCFE8" stroke-width="6"/>
-  <!-- cork -->
-  <ellipse cx="256" cy="378" rx="58" ry="50" fill="#ffffff"/>
-  <ellipse cx="256" cy="392" rx="58" ry="36" fill="#FDE68A"/>
-  <circle cx="256" cy="404" r="12" fill="#F9A8D4"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FBA4CE"/>
+      <stop offset="1" stop-color="#F472B6"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="115" fill="url(#bg)"/>
+
+  <g transform="rotate(-14 256 268)">
+    <!-- feather skirt -->
+    <path d="M256 96
+             C 298 150, 318 252, 320 356
+             L 192 356
+             C 194 252, 214 150, 256 96 Z"
+          fill="#ffffff" stroke="#F9A8D4" stroke-width="4" stroke-linejoin="round"/>
+    <!-- feather divider lines -->
+    <g stroke="#F9A8D4" stroke-width="5" stroke-linecap="round" opacity="0.8">
+      <line x1="256" y1="120" x2="256" y2="352"/>
+      <line x1="226" y1="150" x2="214" y2="352"/>
+      <line x1="286" y1="150" x2="298" y2="352"/>
+    </g>
+    <!-- cork base -->
+    <ellipse cx="256" cy="372" rx="64" ry="54" fill="#ffffff" stroke="#F9A8D4" stroke-width="4"/>
+    <path d="M198 384 a58 50 0 0 0 116 0 Z" fill="#FB7185"/>
+  </g>
 </svg>
