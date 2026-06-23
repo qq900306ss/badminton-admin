@@ -20,7 +20,7 @@ export function SessionManagePage() {
   const { data: session, isLoading } = useSessionView(sid)
   const { data: players } = useSessionPlayers(sid)
   const { data: roster } = useMembers()
-  const { endCourt, kick, addPlaying, addCourt, addPlayer, setLevel, renameCourt, removeCourt, addQueue } = useManageActions(sid)
+  const { endCourt, kick, addPlaying, addCourt, addPlayer, setLevel, renameCourt, removeCourt, addQueue, removePlayer } = useManageActions(sid)
   const confirm = useConfirm()
 
   const [showQR, setShowQR] = useState(true)
@@ -219,9 +219,21 @@ export function SessionManagePage() {
                   }}
                   className="px-3 h-8 rounded-lg text-xs font-bold bg-gray-100 text-gray-500"
                 >
-                  清除
+                  清除等級
                 </button>
               </div>
+              <button
+                onClick={async () => {
+                  const name = (players ?? []).find((p) => p.player_id === levelTarget)?.display_name
+                  if (await confirm({ message: `斷開「${name}」?他會被移出本場、無法再操作(可重新加入)。`, confirmText: '斷開', danger: true })) {
+                    removePlayer.mutate(levelTarget)
+                    setLevelTarget(null)
+                  }
+                }}
+                className="w-full text-xs font-bold text-red-400 border-2 border-red-200 rounded-2xl py-2"
+              >
+                🚫 斷開此人(移出本場)
+              </button>
             </div>
           )}
 

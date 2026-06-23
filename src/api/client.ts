@@ -140,6 +140,8 @@ export const sessionApi = {
       `/api/sessions/${sessionId}/players/${playerId}/level`,
       { level }
     ),
+  removePlayer: (sessionId: string, playerId: string) =>
+    api.delete(`/api/sessions/${sessionId}/players/${playerId}`),
   close: (sessionId: string) => api.post(`/api/sessions/${sessionId}/close`),
   addCourt: (sessionId: string) => api.post(`/api/sessions/${sessionId}/courts`),
   renameCourt: (sessionId: string, courtId: string, name: string) =>
