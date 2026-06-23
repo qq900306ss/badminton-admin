@@ -1,27 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FBA4CE"/>
-      <stop offset="1" stop-color="#F472B6"/>
+      <stop offset="0" stop-color="#A78BFA"/>
+      <stop offset="1" stop-color="#7C3AED"/>
     </linearGradient>
+    <clipPath id="head">
+      <ellipse cx="222" cy="196" rx="104" ry="124"/>
+    </clipPath>
   </defs>
   <rect width="512" height="512" rx="115" fill="url(#bg)"/>
 
-  <g transform="rotate(-14 256 268)">
-    <!-- feather skirt -->
-    <path d="M256 96
-             C 298 150, 318 252, 320 356
-             L 192 356
-             C 194 252, 214 150, 256 96 Z"
-          fill="#ffffff" stroke="#F9A8D4" stroke-width="4" stroke-linejoin="round"/>
-    <!-- feather divider lines -->
-    <g stroke="#F9A8D4" stroke-width="5" stroke-linecap="round" opacity="0.8">
-      <line x1="256" y1="120" x2="256" y2="352"/>
-      <line x1="226" y1="150" x2="214" y2="352"/>
-      <line x1="286" y1="150" x2="298" y2="352"/>
+  <g transform="rotate(-32 256 256)">
+    <!-- strings (clipped to head) -->
+    <g clip-path="url(#head)" stroke="#ffffff" stroke-width="6" opacity="0.55">
+      <line x1="150" y1="80" x2="150" y2="320"/>
+      <line x1="190" y1="80" x2="190" y2="320"/>
+      <line x1="230" y1="80" x2="230" y2="320"/>
+      <line x1="270" y1="80" x2="270" y2="320"/>
+      <line x1="100" y1="140" x2="350" y2="140"/>
+      <line x1="100" y1="190" x2="350" y2="190"/>
+      <line x1="100" y1="240" x2="350" y2="240"/>
     </g>
-    <!-- cork base -->
-    <ellipse cx="256" cy="372" rx="64" ry="54" fill="#ffffff" stroke="#F9A8D4" stroke-width="4"/>
-    <path d="M198 384 a58 50 0 0 0 116 0 Z" fill="#FB7185"/>
+    <!-- head ring -->
+    <ellipse cx="222" cy="196" rx="104" ry="124" fill="none" stroke="#ffffff" stroke-width="26"/>
+    <!-- throat + handle -->
+    <path d="M196 300 L150 470 Q150 486 168 486 L196 486 Q214 486 214 470 L248 300 Z" fill="#ffffff"/>
+    <rect x="150" y="450" width="64" height="40" rx="14" fill="#FDE68A"/>
+  </g>
+
+  <!-- small shuttlecock -->
+  <g transform="translate(330 322) rotate(20)">
+    <path d="M0 -44 L26 36 Q0 50 -26 36 Z" fill="#ffffff"/>
+    <ellipse cx="0" cy="44" rx="26" ry="22" fill="#ffffff"/>
+    <path d="M-24 50 a26 22 0 0 0 48 0 Z" fill="#FB7185"/>
   </g>
 </svg>
