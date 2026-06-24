@@ -240,9 +240,20 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
         {courts.length === 0 ? (
           <p className="text-center text-gray-300 mt-10">這場還沒有球場</p>
         ) : (
-          <div className={orient === 'landscape' ? 'flex flex-wrap gap-3 items-start' : 'grid grid-cols-1 sm:grid-cols-2 gap-3'}>
+          <div
+            className="grid gap-3"
+            style={{
+              // landscape: as many comfortably-sized (≥240px) courts per row as
+              // fit, then WRAP to the next row — never shrink them onto one line.
+              // portrait: a tidy 2 columns. both keep courts a good size.
+              gridTemplateColumns:
+                orient === 'landscape'
+                  ? 'repeat(auto-fill, minmax(240px, 1fr))'
+                  : 'repeat(2, minmax(0, 1fr))',
+            }}
+          >
             {courts.map((court) => (
-              <div key={court.court_id} className={orient === 'landscape' ? 'flex-1 basis-0 min-w-0' : ''}>
+              <div key={court.court_id} className="min-w-0">
                 <BoardCourt
                   court={court}
                   armed={armed}
