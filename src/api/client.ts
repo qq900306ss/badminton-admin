@@ -162,6 +162,25 @@ export const sessionApi = {
     api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/add-queue`, { player_id: playerId }),
 }
 
+// on-site seating board: the leader acts ON BEHALF OF a player, so we call the
+// same player-facing court endpoints (identical rules) with that player's id in
+// the X-Player-ID header. No leader-override — in-progress courts stay locked.
+const asPlayer = (playerId: string) => ({ headers: { 'X-Player-ID': playerId } })
+export const seatApi = {
+  joinPlaying: (sessionId: string, courtId: string, playerId: string, position: number) =>
+    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/join-playing`,
+      { position }, asPlayer(playerId)),
+  joinQueue: (sessionId: string, courtId: string, playerId: string) =>
+    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/join-queue`,
+      {}, asPlayer(playerId)),
+  leavePlaying: (sessionId: string, courtId: string, playerId: string) =>
+    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/leave-playing`,
+      {}, asPlayer(playerId)),
+  leaveQueue: (sessionId: string, courtId: string, playerId: string) =>
+    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/leave-queue`,
+      {}, asPlayer(playerId)),
+}
+
 export const adminApi = {
   listOrgs: () => api.get<{ data: Org[] }>('/api/admin/orgs'),
   createOrg: (email: string, orgName: string) =>

@@ -8,6 +8,7 @@ import { ManageCourtCard } from '../components/ManageCourtCard'
 import { StatsPanel } from '../components/StatsPanel'
 import { SessionSummary } from '../components/SessionSummary'
 import { PasswordCard } from '../components/PasswordCard'
+import { SeatingBoard } from '../components/SeatingBoard'
 import { useConfirm } from '../components/Confirm'
 import { CourtSkeleton } from '../components/Skeleton'
 import { TIERS, tierOf } from '../lib/levels'
@@ -34,6 +35,7 @@ export function SessionManagePage() {
   const [memberFilter, setMemberFilter] = useState('')
   const [onlyUnclaimed, setOnlyUnclaimed] = useState(false)
   const [addFilter, setAddFilter] = useState('')
+  const [board, setBoard] = useState(false)
 
   // roster members not yet in this session (available to quick-add)
   const inSession = new Set((players ?? []).map((p) => p.display_name))
@@ -130,6 +132,15 @@ export function SessionManagePage() {
             <p className="text-gray-300 text-sm mt-8">點任一處關閉</p>
           </div>
         )}
+
+        {/* on-site seating board — seat phone-less players from the tablet */}
+        <button
+          onClick={() => setBoard(true)}
+          className="w-full btn-primary py-3 text-base"
+        >
+          🎛 現場排點板(平板代排上下場)
+        </button>
+        {board && <SeatingBoard sessionId={sid} onClose={() => setBoard(false)} />}
 
         {/* gate code — view + change */}
         <PasswordCard sessionId={sid} />

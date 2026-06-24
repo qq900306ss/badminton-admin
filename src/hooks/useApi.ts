@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { orgApi, sessionApi } from '../api/client'
+import { orgApi, sessionApi, seatApi } from '../api/client'
 
 export function useMembers() {
   return useQuery({
@@ -55,6 +55,36 @@ export function useSetPassword(sessionId: string) {
       sessionApi.setPassword(sessionId, password).then((r) => r.data.data.password),
     onSuccess: (pw) => qc.setQueryData(['session-password', sessionId], pw),
   })
+}
+
+// on-site seating board — leader acts on behalf of a player (same rules as front-end)
+export function useSeatActions(sessionId: string) {
+  const qc = useQueryClient()
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ['session', sessionId] })
+    qc.invalidateQueries({ queryKey: ['session-players', sessionId] })
+  }
+  const seatPlaying = useMutation({
+    mutationFn: (v: { courtId: string; playerId: string; position: number }) =>
+      seatApi.joinPlaying(sessionId, v.courtId, v.playerId, v.position),
+    onSuccess: refresh,
+  })
+  const seatQueue = useMutation({
+    mutationFn: (v: { courtId: string; playerId: string }) =>
+      seatApi.joinQueue(sessionId, v.courtId, v.playerId),
+    onSuccess: refresh,
+  })
+  const unseatPlaying = useMutation({
+    mutationFn: (v: { courtId: string; playerId: string }) =>
+      seatApi.leavePlaying(sessionId, v.courtId, v.playerId),
+    onSuccess: refresh,
+  })
+  const unseatQueue = useMutation({
+    mutationFn: (v: { courtId: string; playerId: string }) =>
+      seatApi.leaveQueue(sessionId, v.courtId, v.playerId),
+    onSuccess: refresh,
+  })
+  return { seatPlaying, seatQueue, unseatPlaying, unseatQueue }
 }
 
 export function useManageActions(sessionId: string) {
