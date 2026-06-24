@@ -138,7 +138,7 @@ export function SessionManagePage() {
           onClick={() => setBoard(true)}
           className="w-full btn-primary py-3 text-base"
         >
-          🎛 現場排點板(平板代排上下場)
+          🏸 現場排點板(代排上下場)
         </button>
         {board && <SeatingBoard sessionId={sid} onClose={() => setBoard(false)} />}
 

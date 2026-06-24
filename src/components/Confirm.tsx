@@ -1,4 +1,4 @@
-import { createContext, useContext, useCallback, useRef, useState, type ReactNode } from 'react'
+import { createContext, useContext, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface ConfirmOptions {
@@ -15,6 +15,20 @@ export const useConfirm = () => useContext(ConfirmCtx)
 export function ConfirmProvider({ children }: { children: ReactNode }) {
   const [opts, setOpts] = useState<ConfirmOptions | null>(null)
   const resolver = useRef<(v: boolean) => void>(() => {})
+
+  // 防呆: a destructive confirm button stays disabled briefly after opening, so a
+  // reflexive double-tap (e.g. bleeding through from another button) can't instantly
+  // confirm something irreversible like 結束開團.
+  const [armed, setArmed] = useState(true)
+  useEffect(() => {
+    if (!opts?.danger) {
+      setArmed(true)
+      return
+    }
+    setArmed(false)
+    const t = setTimeout(() => setArmed(true), 600)
+    return () => clearTimeout(t)
+  }, [opts])
 
   const confirm = useCallback((o: ConfirmOptions | string) => {
     setOpts(typeof o === 'string' ? { message: o } : o)
@@ -52,12 +66,13 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
               <div className="flex gap-2">
                 <button onClick={() => done(false)} className="btn-secondary flex-1">取消</button>
                 <button
-                  onClick={() => done(true)}
+                  onClick={() => armed && done(true)}
+                  disabled={opts.danger && !armed}
                   className={`flex-1 font-bold py-3 px-6 rounded-2xl text-white active:scale-95 transition-transform ${
                     opts.danger ? 'bg-red-400' : 'bg-brand-pink'
-                  }`}
+                  } ${opts.danger && !armed ? 'opacity-40 cursor-not-allowed' : ''}`}
                 >
-                  {opts.confirmText || '確定'}
+                  {opts.danger && !armed ? '請稍候…' : opts.confirmText || '確定'}
                 </button>
               </div>
             </motion.div>

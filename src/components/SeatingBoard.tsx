@@ -215,15 +215,13 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
 
   return (
     <div className="fixed inset-0 z-50 bg-brand-bg flex flex-col">
-      {/* header */}
-      <div className="bg-white shadow-sm px-4 py-2.5 flex items-center justify-between shrink-0">
-        <span className="font-extrabold text-gray-800">🎛 現場排點板</span>
-        <div className="flex items-center gap-2">
-          <div className="flex rounded-full bg-gray-100 p-0.5 text-xs font-bold">
-            <button onClick={() => setOrient('landscape')} className={`px-3 py-1 rounded-full ${orient === 'landscape' ? 'bg-brand-pink text-white' : 'text-gray-500'}`}>橫向</button>
-            <button onClick={() => setOrient('portrait')} className={`px-3 py-1 rounded-full ${orient === 'portrait' ? 'bg-brand-pink text-white' : 'text-gray-500'}`}>直版</button>
-          </div>
-          <button onClick={onClose} className="text-sm font-bold text-gray-400 px-2">✕ 關閉</button>
+      {/* header — close is on the LEFT so a stray double-tap can't reach 結束開團 */}
+      <div className="bg-white shadow-sm px-4 py-2.5 flex items-center gap-2 shrink-0">
+        <button onClick={onClose} className="text-sm font-bold text-gray-500 bg-gray-100 rounded-full px-3 py-1.5 active:scale-95">✕ 關閉</button>
+        <span className="font-extrabold text-gray-800 flex-1 text-center">🏸 現場排點板</span>
+        <div className="flex rounded-full bg-gray-100 p-0.5 text-xs font-bold">
+          <button onClick={() => setOrient('landscape')} className={`px-3 py-1 rounded-full ${orient === 'landscape' ? 'bg-brand-pink text-white' : 'text-gray-500'}`}>橫向</button>
+          <button onClick={() => setOrient('portrait')} className={`px-3 py-1 rounded-full ${orient === 'portrait' ? 'bg-brand-pink text-white' : 'text-gray-500'}`}>直版</button>
         </div>
       </div>
 
@@ -236,14 +234,15 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
         )}
       </div>
 
-      {/* courts */}
-      <div className="flex-1 overflow-auto px-4 pb-2">
+      {/* body: courts + bench flow together so there's no big middle gap.
+          landscape → all courts share one row (equal width, no horizontal scroll). */}
+      <div className="flex-1 overflow-y-auto px-4 pb-4">
         {courts.length === 0 ? (
           <p className="text-center text-gray-300 mt-10">這場還沒有球場</p>
         ) : (
-          <div className={orient === 'landscape' ? 'flex gap-3 overflow-x-auto pb-2' : 'grid grid-cols-1 sm:grid-cols-2 gap-3'}>
+          <div className={orient === 'landscape' ? 'flex flex-wrap gap-3 items-start' : 'grid grid-cols-1 sm:grid-cols-2 gap-3'}>
             {courts.map((court) => (
-              <div key={court.court_id} className={orient === 'landscape' ? 'w-64 shrink-0' : ''}>
+              <div key={court.court_id} className={orient === 'landscape' ? 'flex-1 basis-0 min-w-0' : ''}>
                 <BoardCourt
                   court={court}
                   armed={armed}
@@ -258,38 +257,38 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
             ))}
           </div>
         )}
-      </div>
 
-      {/* bench — players not on any court */}
-      <div className="shrink-0 bg-white border-t px-4 py-3 max-h-[34vh] overflow-y-auto">
-        <p className="text-xs font-bold text-gray-500 mb-2">
-          未在場上的人 <span className="text-gray-300">({bench.length})</span>
-        </p>
-        {bench.length === 0 ? (
-          <p className="text-sm text-gray-300">所有人都在場上或排隊中</p>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {bench.map((p) => {
-              const tier = tierOf(p.level)
-              const sel = pending?.kind === 'player' && pending.playerId === p.player_id
-              return (
-                <button
-                  key={p.player_id}
-                  onClick={() => tapPlayer(p)}
-                  className={`px-3 py-2 rounded-2xl text-sm font-semibold flex items-center gap-1.5 transition-all active:scale-95
-                    ${sel ? 'bg-brand-pink text-white ring-4 ring-brand-pink/30 scale-105' : tier ? tier.chip : 'bg-gray-100 text-gray-600'}
-                    ${p.claimed ? '' : 'opacity-60'}`}
-                >
-                  {p.display_name}
-                  <span className={`text-[10px] rounded-full px-1.5 ${sel ? 'bg-white/30' : 'bg-white/70 text-gray-600'}`}>
-                    {p.level > 0 ? `Lv${p.level}` : '?'}
-                  </span>
-                  {!p.claimed && <span className="text-[10px]">未到</span>}
-                </button>
-              )
-            })}
-          </div>
-        )}
+        {/* bench — players not on any court, hugging the courts above */}
+        <div className="mt-3 bg-white rounded-2xl border border-gray-100 px-4 py-3">
+          <p className="text-xs font-bold text-gray-500 mb-2">
+            未在場上的人 <span className="text-gray-300">({bench.length})</span>
+          </p>
+          {bench.length === 0 ? (
+            <p className="text-sm text-gray-300">所有人都在場上或排隊中</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {bench.map((p) => {
+                const tier = tierOf(p.level)
+                const sel = pending?.kind === 'player' && pending.playerId === p.player_id
+                return (
+                  <button
+                    key={p.player_id}
+                    onClick={() => tapPlayer(p)}
+                    className={`px-3 py-2 rounded-2xl text-sm font-semibold flex items-center gap-1.5 transition-all active:scale-95
+                      ${sel ? 'bg-brand-pink text-white ring-4 ring-brand-pink/30 scale-105' : tier ? tier.chip : 'bg-gray-100 text-gray-600'}
+                      ${p.claimed ? '' : 'opacity-60'}`}
+                  >
+                    {p.display_name}
+                    <span className={`text-[10px] rounded-full px-1.5 ${sel ? 'bg-white/30' : 'bg-white/70 text-gray-600'}`}>
+                      {p.level > 0 ? `Lv${p.level}` : '?'}
+                    </span>
+                    {!p.claimed && <span className="text-[10px]">未到</span>}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
