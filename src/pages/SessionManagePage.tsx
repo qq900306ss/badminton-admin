@@ -7,6 +7,7 @@ import { useSessionView, useSessionPlayers, useManageActions, useMembers } from 
 import { ManageCourtCard } from '../components/ManageCourtCard'
 import { StatsPanel } from '../components/StatsPanel'
 import { SessionSummary } from '../components/SessionSummary'
+import { PasswordCard } from '../components/PasswordCard'
 import { useConfirm } from '../components/Confirm'
 import { CourtSkeleton } from '../components/Skeleton'
 import { TIERS, tierOf } from '../lib/levels'
@@ -129,6 +130,9 @@ export function SessionManagePage() {
             <p className="text-gray-300 text-sm mt-8">點任一處關閉</p>
           </div>
         )}
+
+        {/* gate code — view + change */}
+        <PasswordCard sessionId={sid} />
 
         {/* people in this session */}
         <div className="card space-y-3">

@@ -143,6 +143,10 @@ export const sessionApi = {
   removePlayer: (sessionId: string, playerId: string) =>
     api.delete(`/api/sessions/${sessionId}/players/${playerId}`),
   close: (sessionId: string) => api.post(`/api/sessions/${sessionId}/close`),
+  getPassword: (sessionId: string) =>
+    api.get<{ data: { password: string } }>(`/api/sessions/${sessionId}/password`),
+  setPassword: (sessionId: string, password: string) =>
+    api.put<{ data: { password: string } }>(`/api/sessions/${sessionId}/password`, { password }),
   addCourt: (sessionId: string) => api.post(`/api/sessions/${sessionId}/courts`),
   renameCourt: (sessionId: string, courtId: string, name: string) =>
     api.put(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/name`, { name }),

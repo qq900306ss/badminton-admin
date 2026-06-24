@@ -40,6 +40,23 @@ export function useSessionPlayers(sessionId: string) {
   })
 }
 
+export function useSessionPassword(sessionId: string) {
+  return useQuery({
+    queryKey: ['session-password', sessionId],
+    queryFn: () => sessionApi.getPassword(sessionId).then((r) => r.data.data.password),
+    enabled: !!sessionId,
+  })
+}
+
+export function useSetPassword(sessionId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (password: string) =>
+      sessionApi.setPassword(sessionId, password).then((r) => r.data.data.password),
+    onSuccess: (pw) => qc.setQueryData(['session-password', sessionId], pw),
+  })
+}
+
 export function useManageActions(sessionId: string) {
   const qc = useQueryClient()
   const invalidate = () => qc.invalidateQueries({ queryKey: ['session', sessionId] })
