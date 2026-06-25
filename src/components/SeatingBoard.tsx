@@ -3,15 +3,11 @@ import type { CourtView, PlayerSlot, SessionPlayer } from '../api/client'
 import { useSessionView, useSessionPlayers, useSeatActions } from '../hooks/useApi'
 import { tierOf } from '../lib/levels'
 
-// the leader's on-site seating board: seat people who have no phone, by tapping.
-// works in BOTH orders — tap a person then a slot, or a slot then a person.
-// rules are identical to the player front-end (in-progress courts are locked).
-
-type Pending =
-  | { kind: 'player'; playerId: string; name: string }
-  | { kind: 'slot'; courtId: string; position: number }
-  | { kind: 'queue'; courtId: string }
-  | null
+// the leader's on-site seating board for people without a phone.
+// flow: tap an empty slot (circle) or 排隊 + → a name-list popup appears → pick a
+// person → they go in. no scrolling to a bottom bench. rules match the player
+// front-end (in-progress / full courts are locked — tap a playing person to 下場
+// only while the court is still gathering).
 
 const PALETTE = ['bg-brand-pink', 'bg-brand-mint', 'bg-brand-yellow', 'bg-brand-peach', 'bg-brand-lavender', 'bg-purple-200', 'bg-blue-200', 'bg-teal-200']
 function fallbackColor(id: string) {
@@ -25,7 +21,7 @@ function elapsedMins(startedAt?: string): number | null {
   return ms < 0 ? null : Math.floor(ms / 60000)
 }
 
-function Avatar({ slot, onClick, locked, dim }: { slot: PlayerSlot; onClick?: () => void; locked?: boolean; dim?: boolean }) {
+function Avatar({ slot, onClick, locked }: { slot: PlayerSlot; onClick?: () => void; locked?: boolean }) {
   const initial = slot.display_name?.[0]?.toUpperCase() ?? '?'
   const tier = tierOf(slot.level)
   const bg = tier ? tier.avatarBg : fallbackColor(slot.player_id)
@@ -33,7 +29,7 @@ function Avatar({ slot, onClick, locked, dim }: { slot: PlayerSlot; onClick?: ()
     <button
       onClick={onClick}
       disabled={!onClick}
-      className={`flex flex-col items-center gap-1 ${onClick ? 'active:scale-90 transition-transform' : ''} ${dim ? 'opacity-90' : ''}`}
+      className={`flex flex-col items-center gap-1 ${onClick ? 'active:scale-90 transition-transform' : ''}`}
     >
       <div className="relative">
         <div className={`w-11 h-11 rounded-full ${bg} flex items-center justify-center text-base font-extrabold text-white shadow-md ring-2 ring-white`}>
@@ -53,16 +49,14 @@ function Avatar({ slot, onClick, locked, dim }: { slot: PlayerSlot; onClick?: ()
   )
 }
 
-function EmptySlot({ armed, highlight, onClick }: { armed: boolean; highlight: boolean; onClick: () => void }) {
+function EmptySlot({ onClick }: { onClick: () => void }) {
   return (
     <div className="flex flex-col items-center gap-1">
       <button
         onClick={onClick}
-        className={`w-11 h-11 rounded-full border-2 border-dashed flex items-center justify-center text-xl font-bold transition-all active:scale-90
-          ${highlight ? 'border-brand-pink bg-brand-pink text-white ring-4 ring-brand-pink/40'
-            : armed ? 'border-brand-pink text-brand-pink bg-white animate-pulse'
-              : 'border-gray-300 text-gray-300 bg-white/40'}`}
-        aria-label="放這個位置"
+        className="w-11 h-11 rounded-full border-2 border-dashed border-brand-pink/60 text-brand-pink flex items-center justify-center
+          text-xl font-bold bg-white/50 hover:bg-brand-pink hover:text-white active:scale-90 transition-all"
+        aria-label="加人到這個位置"
       >
         +
       </button>
@@ -73,16 +67,13 @@ function EmptySlot({ armed, highlight, onClick }: { armed: boolean; highlight: b
 
 interface CourtProps {
   court: CourtView
-  armed: boolean
-  pendingSlot: number | null // position highlighted on THIS court
-  pendingQueue: boolean // queue zone highlighted on THIS court
   onEmptySlot: (position: number) => void
   onQueueZone: () => void
   onFilledPlayer: (playerId: string, removable: boolean) => void
   onQueuedPlayer: (playerId: string) => void
 }
 
-function BoardCourt({ court, armed, pendingSlot, pendingQueue, onEmptySlot, onQueueZone, onFilledPlayer, onQueuedPlayer }: CourtProps) {
+function BoardCourt({ court, onEmptySlot, onQueueZone, onFilledPlayer, onQueuedPlayer }: CourtProps) {
   const slots = court.playing
   const filled = slots.filter((s) => s.player_id).length
   const full = filled === 4
@@ -110,13 +101,9 @@ function BoardCourt({ court, armed, pendingSlot, pendingQueue, onEmptySlot, onQu
           {slots.map((slot, i) => (
             <div key={i} className="h-16 flex items-center justify-center">
               {slot.player_id ? (
-                <Avatar
-                  slot={slot}
-                  locked={full}
-                  onClick={() => onFilledPlayer(slot.player_id, !full)}
-                />
+                <Avatar slot={slot} locked={full} onClick={() => onFilledPlayer(slot.player_id, !full)} />
               ) : (
-                <EmptySlot armed={armed} highlight={pendingSlot === i} onClick={() => onEmptySlot(i)} />
+                <EmptySlot onClick={() => onEmptySlot(i)} />
               )}
             </div>
           ))}
@@ -124,7 +111,7 @@ function BoardCourt({ court, armed, pendingSlot, pendingQueue, onEmptySlot, onQu
       </div>
 
       {/* queue */}
-      <div className={`rounded-xl p-2 ${pendingQueue ? 'ring-2 ring-brand-pink bg-brand-pink/10' : armed && queueRoom ? 'bg-amber-50' : ''}`}>
+      <div className="rounded-xl p-2 bg-gray-50/60">
         <div className="flex items-center gap-2 flex-wrap min-h-[1.5rem]">
           <button
             onClick={onQueueZone}
@@ -136,7 +123,59 @@ function BoardCourt({ court, armed, pendingSlot, pendingQueue, onEmptySlot, onQu
           {court.queue.map((p) => (
             <Avatar key={p.player_id} slot={p} onClick={() => onQueuedPlayer(p.player_id)} />
           ))}
-          {court.queue.length === 0 && <span className="text-[11px] text-gray-300">點「排隊 +」再點人</span>}
+          {court.queue.length === 0 && <span className="text-[11px] text-gray-300">點「排隊 +」加人</span>}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// the name-list popup that opens when you tap a slot / 排隊 — pick a person to seat.
+function PickerModal({ title, people, onPick, onClose }: {
+  title: string
+  people: SessionPlayer[]
+  onPick: (playerId: string) => void
+  onClose: () => void
+}) {
+  const [q, setQ] = useState('')
+  const list = people.filter((p) => p.display_name.includes(q.trim()))
+  return (
+    <div className="fixed inset-0 z-[60] bg-black/40 flex items-end sm:items-center justify-center p-3" onClick={onClose}>
+      <div className="bg-white rounded-3xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="px-4 py-3 border-b shrink-0">
+          <div className="flex items-center justify-between">
+            <span className="font-extrabold text-gray-800">{title}</span>
+            <button onClick={onClose} className="text-sm font-bold text-gray-400 px-1">✕</button>
+          </div>
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            autoFocus
+            placeholder="🔍 搜尋名字"
+            className="mt-2 w-full border-2 border-gray-200 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:border-brand-pink"
+          />
+        </div>
+        <div className="overflow-y-auto p-3 space-y-1.5">
+          {list.length === 0 ? (
+            <p className="text-center text-sm text-gray-300 py-6">沒有可加入的人</p>
+          ) : (
+            list.map((p) => {
+              const tier = tierOf(p.level)
+              return (
+                <button
+                  key={p.player_id}
+                  onClick={() => onPick(p.player_id)}
+                  className={`w-full flex items-center justify-between gap-2 px-3 py-3 rounded-2xl bg-gray-50 active:scale-[0.98] transition-transform ${p.claimed ? '' : 'opacity-60'}`}
+                >
+                  <span className="font-semibold text-gray-700 truncate">{p.display_name}</span>
+                  <span className="flex items-center gap-2 shrink-0">
+                    {p.level > 0 && tier && <span className={`text-[10px] px-2 py-0.5 rounded-full ${tier.chip}`}>{tier.name} {p.level}</span>}
+                    <span className="text-[11px] text-gray-400 tabular-nums">{p.claimed ? `${p.games} 場` : '未到'}</span>
+                  </span>
+                </button>
+              )
+            })
+          )}
         </div>
       </div>
     </div>
@@ -149,7 +188,9 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
   const { seatPlaying, seatQueue, unseatPlaying, unseatQueue } = useSeatActions(sessionId)
 
   const [orient, setOrient] = useState<'landscape' | 'portrait'>('landscape')
-  const [pending, setPending] = useState<Pending>(null)
+  // a slot/queue waiting for a person to be picked from the popup.
+  // position === null means the queue.
+  const [picker, setPicker] = useState<{ courtId: string; position: number | null } | null>(null)
   const [msg, setMsg] = useState<string | null>(null)
 
   useEffect(() => {
@@ -167,51 +208,32 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
   const onCourt = new Set(
     courts.flatMap((c) => [...c.playing.map((s) => s.player_id), ...c.queue.map((s) => s.player_id)]).filter(Boolean)
   )
-  const bench = (players ?? [])
+  // off-court people, fair-sorted (已到 first, then fewest games) — the popup list
+  const offCourt = (players ?? [])
     .filter((p) => !onCourt.has(p.player_id))
     .slice()
     .sort((a, b) => Number(b.claimed) - Number(a.claimed) || a.games - b.games || a.display_name.localeCompare(b.display_name))
 
-  // place the pending player into a target, or arm a target waiting for a player
-  function place(playerId: string, target: { kind: 'slot'; courtId: string; position: number } | { kind: 'queue'; courtId: string }) {
-    if (target.kind === 'slot') {
-      seatPlaying.mutate({ courtId: target.courtId, playerId, position: target.position }, { onError: onErr })
+  function pick(playerId: string) {
+    if (!picker) return
+    if (picker.position != null) {
+      seatPlaying.mutate({ courtId: picker.courtId, playerId, position: picker.position }, { onError: onErr })
     } else {
-      seatQueue.mutate({ courtId: target.courtId, playerId }, { onError: onErr })
+      seatQueue.mutate({ courtId: picker.courtId, playerId }, { onError: onErr })
     }
-    setPending(null)
-  }
-
-  function tapPlayer(p: SessionPlayer) {
-    if (pending?.kind === 'slot') return place(p.player_id, pending)
-    if (pending?.kind === 'queue') return place(p.player_id, pending)
-    if (pending?.kind === 'player' && pending.playerId === p.player_id) return setPending(null)
-    setPending({ kind: 'player', playerId: p.player_id, name: p.display_name })
-  }
-  function tapEmptySlot(courtId: string, position: number) {
-    if (pending?.kind === 'player') return place(pending.playerId, { kind: 'slot', courtId, position })
-    setPending((cur) => (cur?.kind === 'slot' && cur.courtId === courtId && cur.position === position ? null : { kind: 'slot', courtId, position }))
-  }
-  function tapQueueZone(courtId: string) {
-    if (pending?.kind === 'player') return place(pending.playerId, { kind: 'queue', courtId })
-    setPending((cur) => (cur?.kind === 'queue' && cur.courtId === courtId ? null : { kind: 'queue', courtId }))
+    setPicker(null)
   }
   function tapFilledPlayer(courtId: string, playerId: string, removable: boolean) {
     if (!removable) { setMsg('進行中(滿 4 人),不能換下 — 請按「結束換場」'); return }
     unseatPlaying.mutate({ courtId, playerId }, { onError: onErr })
-    setPending(null)
   }
   function tapQueuedPlayer(courtId: string, playerId: string) {
     unseatQueue.mutate({ courtId, playerId }, { onError: onErr })
-    setPending(null)
   }
 
-  const hint =
-    pending?.kind === 'player' ? `已選「${pending.name}」→ 點球場空位上場,或點「排隊 +」`
-      : pending?.kind === 'slot' ? '已選一個空位 → 點下方一個人放上去'
-        : pending?.kind === 'queue' ? '已選排隊 → 點下方一個人'
-          : '點一個人、再點球場位置(或反過來)就能排點'
-  const armed = pending?.kind === 'player'
+  const pickerCourt = picker ? courts.find((c) => c.court_id === picker.courtId) : null
+  const pickerCourtName = pickerCourt ? (pickerCourt.name?.trim() ? pickerCourt.name : `場地 ${pickerCourt.court_num}`) : ''
+  const pickerTitle = picker ? (picker.position != null ? `選人上「${pickerCourtName}」` : `排進「${pickerCourtName}」排隊`) : ''
 
   return (
     <div className="fixed inset-0 z-50 bg-brand-bg flex flex-col">
@@ -230,12 +252,11 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
         {msg ? (
           <span className="inline-block bg-red-100 text-red-500 text-sm font-bold rounded-full px-4 py-1">{msg}</span>
         ) : (
-          <span className={`text-sm font-semibold ${armed ? 'text-brand-pink' : 'text-gray-400'}`}>{hint}</span>
+          <span className="text-sm font-semibold text-gray-400">點空位 ＋ 或「排隊 +」挑人加入 · 點場上的人可換下</span>
         )}
       </div>
 
-      {/* body: courts + bench flow together so there's no big middle gap.
-          landscape → all courts share one row (equal width, no horizontal scroll). */}
+      {/* courts fill the screen — picking happens in a popup, no bottom bench to scroll to */}
       <div className="flex-1 overflow-y-auto px-4 pb-4">
         {courts.length === 0 ? (
           <p className="text-center text-gray-300 mt-10">這場還沒有球場</p>
@@ -244,8 +265,7 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
             className="grid gap-3"
             style={{
               // landscape: as many comfortably-sized (≥240px) courts per row as
-              // fit, then WRAP to the next row — never shrink them onto one line.
-              // portrait: a tidy 2 columns. both keep courts a good size.
+              // fit, then WRAP to the next row. portrait: a tidy 2 columns.
               gridTemplateColumns:
                 orient === 'landscape'
                   ? 'repeat(auto-fill, minmax(240px, 1fr))'
@@ -256,11 +276,8 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
               <div key={court.court_id} className="min-w-0">
                 <BoardCourt
                   court={court}
-                  armed={armed}
-                  pendingSlot={pending?.kind === 'slot' && pending.courtId === court.court_id ? pending.position : null}
-                  pendingQueue={pending?.kind === 'queue' && pending.courtId === court.court_id}
-                  onEmptySlot={(pos) => tapEmptySlot(court.court_id, pos)}
-                  onQueueZone={() => tapQueueZone(court.court_id)}
+                  onEmptySlot={(pos) => setPicker({ courtId: court.court_id, position: pos })}
+                  onQueueZone={() => setPicker({ courtId: court.court_id, position: null })}
                   onFilledPlayer={(pid, removable) => tapFilledPlayer(court.court_id, pid, removable)}
                   onQueuedPlayer={(pid) => tapQueuedPlayer(court.court_id, pid)}
                 />
@@ -268,39 +285,11 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
             ))}
           </div>
         )}
-
-        {/* bench — players not on any court, hugging the courts above */}
-        <div className="mt-3 bg-white rounded-2xl border border-gray-100 px-4 py-3">
-          <p className="text-xs font-bold text-gray-500 mb-2">
-            未在場上的人 <span className="text-gray-300">({bench.length})</span>
-          </p>
-          {bench.length === 0 ? (
-            <p className="text-sm text-gray-300">所有人都在場上或排隊中</p>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {bench.map((p) => {
-                const tier = tierOf(p.level)
-                const sel = pending?.kind === 'player' && pending.playerId === p.player_id
-                return (
-                  <button
-                    key={p.player_id}
-                    onClick={() => tapPlayer(p)}
-                    className={`px-3 py-2 rounded-2xl text-sm font-semibold flex items-center gap-1.5 transition-all active:scale-95
-                      ${sel ? 'bg-brand-pink text-white ring-4 ring-brand-pink/30 scale-105' : tier ? tier.chip : 'bg-gray-100 text-gray-600'}
-                      ${p.claimed ? '' : 'opacity-60'}`}
-                  >
-                    {p.display_name}
-                    <span className={`text-[10px] rounded-full px-1.5 ${sel ? 'bg-white/30' : 'bg-white/70 text-gray-600'}`}>
-                      {p.level > 0 ? `Lv${p.level}` : '?'}
-                    </span>
-                    {!p.claimed && <span className="text-[10px]">未到</span>}
-                  </button>
-                )
-              })}
-            </div>
-          )}
-        </div>
       </div>
+
+      {picker && (
+        <PickerModal title={pickerTitle} people={offCourt} onPick={pick} onClose={() => setPicker(null)} />
+      )}
     </div>
   )
 }
