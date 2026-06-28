@@ -167,6 +167,10 @@ export const sessionApi = {
     api.get<{ data: { password: string } }>(`/api/sessions/${sessionId}/password`),
   setPassword: (sessionId: string, password: string) =>
     api.put<{ data: { password: string } }>(`/api/sessions/${sessionId}/password`, { password }),
+  setTimes: (
+    sessionId: string,
+    times: { start_at: string; end_at: string; queue_open_at: string }
+  ) => api.put(`/api/sessions/${sessionId}/times`, times),
   addCourt: (sessionId: string) => api.post(`/api/sessions/${sessionId}/courts`),
   renameCourt: (sessionId: string, courtId: string, name: string) =>
     api.put(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/name`, { name }),

@@ -10,6 +10,7 @@ import { StatsPanel } from '../components/StatsPanel'
 import { ActionLogPanel } from '../components/ActionLogPanel'
 import { SessionSummary } from '../components/SessionSummary'
 import { PasswordCard } from '../components/PasswordCard'
+import { TimesCard } from '../components/TimesCard'
 import { SeatingBoard } from '../components/SeatingBoard'
 import { useConfirm } from '../components/Confirm'
 import { CourtSkeleton } from '../components/Skeleton'
@@ -197,6 +198,14 @@ export function SessionManagePage() {
         {/* gate code — view + change */}
         <PasswordCard sessionId={sid} />
 
+        {/* play window + queue-open time — view + change */}
+        <TimesCard
+          sessionId={sid}
+          startAt={session?.start_at}
+          endAt={session?.end_at}
+          queueOpenAt={session?.queue_open_at}
+        />
+
         {/* people in this session */}
         <div className="card space-y-3">
           <div className="flex items-center justify-between">
@@ -273,6 +282,9 @@ export function SessionManagePage() {
                   {p.owner_id && (
                     <span className="text-[10px] text-violet-500" title={ownerLabel(p)}>👪</span>
                   )}
+                  {p.is_temp && !p.owner_id && (
+                    <span className="text-[10px] text-sky-500" title="團主現場加入(無手機)">🏸現場</span>
+                  )}
                   {p.pending && <span className="text-[10px] font-bold text-orange-500">待核准</span>}
                   {!p.claimed && <span className="text-[10px] text-gray-400">未到</span>}
                 </button>
@@ -293,6 +305,9 @@ export function SessionManagePage() {
                 {targetPlayer && dup[targetPlayer.player_id] ? ` #${dup[targetPlayer.player_id]}` : ''}」
                 {targetPlayer?.owner_id && (
                   <span className="text-[11px] text-violet-500">👪 {ownerLabel(targetPlayer)}</span>
+                )}
+                {targetPlayer?.is_temp && !targetPlayer?.owner_id && (
+                  <span className="text-[11px] text-sky-500">🏸 現場加入</span>
                 )}
               </div>
               {/* 家人待核准 → 核准鈕 */}
