@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { sessionApi, type Org } from '../api/client'
 import { InstallButton } from '../components/InstallButton'
 import { TimeSelect } from '../components/TimeSelect'
+import { TW_CITIES } from '../lib/twCities'
 
 // local YYYY-MM-DD (en-CA formats as ISO date in local timezone)
 const todayStr = () => new Date().toLocaleDateString('en-CA')
@@ -40,6 +41,8 @@ export function DashboardPage() {
     .sort((a, b) => (b.opened_at || '').localeCompare(a.opened_at || ''))
 
   const [title, setTitle] = useState('')
+  const [city, setCity] = useState('台中市')
+  const [district, setDistrict] = useState('')
   const [password, setPassword] = useState('')
   const [numCourts, setNumCourts] = useState(4)
   const [date, setDate] = useState(todayStr())
@@ -62,6 +65,8 @@ export function DashboardPage() {
     try {
       const res = await sessionApi.create({
         title: title.trim() || org?.org_name || '羽球團',
+        city,
+        district: district.trim(),
         password,
         num_courts: numCourts,
         player_names: playerNames,
@@ -180,6 +185,31 @@ export function DashboardPage() {
                 focus:outline-none focus:border-brand-pink"
             />
           </label>
+          <div className="flex gap-2">
+            <label className="block flex-1">
+              <span className="text-sm font-bold text-gray-600">縣市</span>
+              <select
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-3 py-2.5 bg-white
+                  focus:outline-none focus:border-brand-pink"
+              >
+                {TW_CITIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </label>
+            <label className="block flex-1">
+              <span className="text-sm font-bold text-gray-600">區</span>
+              <input
+                value={district}
+                onChange={(e) => setDistrict(e.target.value)}
+                placeholder="例如 西屯區"
+                className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-3 py-2.5
+                  focus:outline-none focus:border-brand-pink"
+              />
+            </label>
+          </div>
           <label className="block">
             <span className="text-sm font-bold text-gray-600">場地密碼(臨打人進場用)</span>
             <input

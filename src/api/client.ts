@@ -103,6 +103,8 @@ export interface SessionSummary {
 
 export interface CreateSessionInput {
   title: string
+  city?: string
+  district?: string
   password: string
   num_courts: number
   player_names: string[]
