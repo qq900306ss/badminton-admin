@@ -129,6 +129,7 @@ export const sessionApi = {
   create: (input: CreateSessionInput) =>
     api.post<{ data: { session_id: string } }>('/api/sessions', input),
   mySessions: () => api.get<{ data: SessionSummary[] }>('/api/my/sessions'),
+  sendFeedback: (message: string) => api.post('/api/my/feedback', { message }),
   games: (sessionId: string) =>
     api.get<{ data: GameLog[] }>(`/api/sessions/${sessionId}/games`),
   actionLogs: (sessionId: string) =>
@@ -216,4 +217,15 @@ export const adminApi = {
   impersonate: (orgId: string) =>
     api.post<{ data: { token: string; org: Org } }>(`/api/admin/impersonate/${orgId}`),
   listSessions: () => api.get<{ data: SessionSummary[] }>('/api/admin/sessions'),
+  listFeedback: () => api.get<{ data: Feedback[] }>('/api/admin/feedback'),
+}
+
+export interface Feedback {
+  id: string
+  role: 'player' | 'leader'
+  author_id: string
+  author_name: string
+  email?: string
+  message: string
+  created_at: string
 }

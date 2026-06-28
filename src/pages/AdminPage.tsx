@@ -27,6 +27,10 @@ export function AdminPage() {
     queryFn: () => adminApi.listSessions().then((r) => r.data.data),
     refetchInterval: 5000,
   })
+  const { data: feedback } = useQuery({
+    queryKey: ['admin-feedback'],
+    queryFn: () => adminApi.listFeedback().then((r) => r.data.data),
+  })
 
   const orgNameOf = (id: string) =>
     (orgs ?? []).find((o) => o.org_id === id)?.org_name ?? '未知'
@@ -206,6 +210,41 @@ export function AdminPage() {
               </div>
               <span className="text-brand-pink text-sm font-semibold">查看 →</span>
             </button>
+          ))}
+        </div>
+
+        {/* 意見回饋(玩家 + 團主)*/}
+        <div className="card space-y-2">
+          <span className="font-bold text-gray-700">💬 意見回饋 ({(feedback ?? []).length})</span>
+          {(feedback ?? []).length === 0 && (
+            <p className="text-sm text-gray-300">目前沒有任何回饋</p>
+          )}
+          {(feedback ?? []).map((f) => (
+            <div key={f.id} className="py-2 border-b last:border-0 space-y-0.5">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    f.role === 'leader'
+                      ? 'bg-brand-yellow text-amber-700'
+                      : 'bg-brand-mint text-emerald-700'
+                  }`}
+                >
+                  {f.role === 'leader' ? '團主' : '玩家'}
+                </span>
+                <span className="font-semibold text-gray-700 text-sm">{f.author_name || '(匿名)'}</span>
+                {f.email && <span className="text-xs text-gray-400">{f.email}</span>}
+                <span className="text-[11px] text-gray-300 ml-auto">
+                  {new Date(f.created_at).toLocaleString('zh-TW', {
+                    month: 'numeric',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false,
+                  })}
+                </span>
+              </div>
+              <p className="text-sm text-gray-600 whitespace-pre-wrap">{f.message}</p>
+            </div>
           ))}
         </div>
       </div>

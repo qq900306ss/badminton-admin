@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { FeedbackButton } from '../components/FeedbackButton'
 import { sessionApi, type Org } from '../api/client'
 import { InstallButton } from '../components/InstallButton'
 import { TimeSelect } from '../components/TimeSelect'
@@ -107,6 +108,7 @@ export function DashboardPage() {
           <span className="font-extrabold text-gray-800">團主後台</span>
         </div>
         <div className="flex items-center gap-3">
+          <FeedbackButton />
           {org?.role === 'superadmin' && (
             <button onClick={() => nav('/admin')} className="text-sm font-semibold text-brand-pink">
               管理員
