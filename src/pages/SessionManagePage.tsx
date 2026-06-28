@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { QRCodeSVG } from 'qrcode.react'
 import { sessionApi } from '../api/client'
 import type { SessionPlayer } from '../api/client'
@@ -12,6 +13,7 @@ import { SeatingBoard } from '../components/SeatingBoard'
 import { useConfirm } from '../components/Confirm'
 import { CourtSkeleton } from '../components/Skeleton'
 import { TIERS, tierOf } from '../lib/levels'
+import { connectSessionWS } from '../lib/realtime'
 
 const BOOKING_URL = import.meta.env.VITE_BOOKING_URL || 'http://localhost:5174'
 
@@ -24,6 +26,16 @@ export function SessionManagePage() {
   const { data: players } = useSessionPlayers(sid)
   const { endCourt, kick, addPlaying, addCourt, addPlayer, setLevel, renameCourt, removeCourt, addQueue, removePlayer } = useManageActions(sid)
   const confirm = useConfirm()
+  const qc = useQueryClient()
+
+  // real-time: refetch the moment anything changes (players, courts, seating)
+  useEffect(() => {
+    if (!sid) return
+    return connectSessionWS(sid, () => {
+      qc.invalidateQueries({ queryKey: ['session', sid] })
+      qc.invalidateQueries({ queryKey: ['session-players', sid] })
+    })
+  }, [sid, qc])
 
   const [showQR, setShowQR] = useState(true)
   const [poster, setPoster] = useState(false)
