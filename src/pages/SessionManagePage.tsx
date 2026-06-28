@@ -82,6 +82,7 @@ export function SessionManagePage() {
   const [renameInput, setRenameInput] = useState('') // 團主改該玩家本場名稱
   const [memberFilter, setMemberFilter] = useState('')
   const [onlyUnclaimed, setOnlyUnclaimed] = useState(false)
+  const [onlyUnpaid, setOnlyUnpaid] = useState(false)
   const [addFilter, setAddFilter] = useState('')
   const [board, setBoard] = useState(false)
 
@@ -228,6 +229,14 @@ export function SessionManagePage() {
               >
                 只看未到
               </button>
+              <button
+                onClick={() => setOnlyUnpaid(!onlyUnpaid)}
+                className={`px-3 rounded-2xl text-sm font-bold shrink-0 ${
+                  onlyUnpaid ? 'bg-amber-400 text-white' : 'bg-gray-100 text-gray-500'
+                }`}
+              >
+                只看沒繳錢
+              </button>
             </div>
           )}
 
@@ -236,6 +245,7 @@ export function SessionManagePage() {
             {(players ?? [])
               .filter((p) => p.display_name.includes(memberFilter.trim()))
               .filter((p) => (onlyUnclaimed ? !p.claimed : true))
+              .filter((p) => (onlyUnpaid ? !p.paid : true))
               .slice()
               .sort((a, b) => Number(b.claimed) - Number(a.claimed)) // 未到的排最後
               .map((p) => {
