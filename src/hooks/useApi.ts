@@ -1,26 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { orgApi, sessionApi, seatApi } from '../api/client'
-
-export function useMembers() {
-  return useQuery({
-    queryKey: ['members'],
-    queryFn: () => orgApi.getMembers().then((r) => r.data.data),
-  })
-}
-
-export function useMemberActions() {
-  const qc = useQueryClient()
-  const invalidate = () => qc.invalidateQueries({ queryKey: ['members'] })
-  const add = useMutation({
-    mutationFn: (name: string) => orgApi.addMember(name),
-    onSuccess: invalidate,
-  })
-  const remove = useMutation({
-    mutationFn: (id: string) => orgApi.deleteMember(id),
-    onSuccess: invalidate,
-  })
-  return { add, remove }
-}
+import { sessionApi, seatApi } from '../api/client'
 
 export function useSessionView(sessionId: string) {
   return useQuery({

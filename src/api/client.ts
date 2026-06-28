@@ -31,12 +31,6 @@ export interface Org {
   disabled?: boolean
 }
 
-export interface OrgMember {
-  org_id: string
-  member_id: string
-  display_name: string
-  is_active: boolean
-}
 
 export interface PlayerSlot {
   player_id: string
@@ -117,13 +111,6 @@ export const authApi = {
   google: (code: string) =>
     api.post<{ data: { token: string; org: Org } }>('/api/auth/google', { code }),
   me: () => api.get<{ data: Org }>('/api/auth/me'),
-}
-
-export const orgApi = {
-  getMembers: () => api.get<{ data: OrgMember[] }>('/api/orgs/members'),
-  addMember: (display_name: string) =>
-    api.post<{ data: OrgMember }>('/api/orgs/members', { display_name }),
-  deleteMember: (memberId: string) => api.delete(`/api/orgs/members/${memberId}`),
 }
 
 export const sessionApi = {
