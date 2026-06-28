@@ -92,6 +92,11 @@ export function useManageActions(sessionId: string) {
       invalidate()
     },
   })
+  const setPaid = useMutation({
+    mutationFn: (v: { playerId: string; paid: boolean }) =>
+      sessionApi.setPaid(sessionId, v.playerId, v.paid),
+    onSuccess: invalidatePlayers,
+  })
   const removePlayer = useMutation({
     mutationFn: (playerId: string) => sessionApi.removePlayer(sessionId, playerId),
     onSuccess: () => {
@@ -136,5 +141,5 @@ export function useManageActions(sessionId: string) {
       sessionApi.addQueue(sessionId, v.courtId, v.playerId),
     onSuccess: invalidate,
   })
-  return { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, renameCourt, removeCourt, addQueue, removePlayer }
+  return { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, renameCourt, removeCourt, addQueue, removePlayer }
 }

@@ -24,7 +24,7 @@ export function SessionManagePage() {
 
   const { data: session, isLoading } = useSessionView(sid)
   const { data: players } = useSessionPlayers(sid)
-  const { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, renameCourt, removeCourt, addQueue, removePlayer } = useManageActions(sid)
+  const { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, renameCourt, removeCourt, addQueue, removePlayer } = useManageActions(sid)
   const confirm = useConfirm()
   const qc = useQueryClient()
 
@@ -161,6 +161,9 @@ export function SessionManagePage() {
               已到 <span className="font-bold text-emerald-600">
                 {(players ?? []).filter((p) => p.claimed).length}
               </span> / 共 {players?.length ?? 0} 人
+              　💰 已收臨打費 <span className="font-bold text-amber-500">
+                {(players ?? []).filter((p) => p.paid).length}
+              </span>
             </span>
           </div>
 
@@ -210,6 +213,7 @@ export function SessionManagePage() {
                   <span className="bg-white/70 text-gray-700 rounded-full px-1.5 text-xs">
                     {p.level > 0 ? `Lv${p.level}` : '?'}
                   </span>
+                  {p.paid && <span className="text-[11px]" title="已收臨打費">💰</span>}
                   {!p.claimed && <span className="text-[10px] text-gray-400">未到</span>}
                 </button>
               )
@@ -249,6 +253,23 @@ export function SessionManagePage() {
                   改名
                 </button>
               </div>
+              {/* 臨打費 */}
+              {(() => {
+                const paid = (players ?? []).find((p) => p.player_id === levelTarget)?.paid ?? false
+                return (
+                  <button
+                    onClick={() => setPaid.mutate({ playerId: levelTarget, paid: !paid })}
+                    disabled={setPaid.isPending}
+                    className={`w-full rounded-2xl py-2 text-sm font-bold border-2 ${
+                      paid
+                        ? 'bg-amber-50 border-amber-300 text-amber-600'
+                        : 'bg-gray-50 border-gray-200 text-gray-400'
+                    }`}
+                  >
+                    {paid ? '💰 已收臨打費(點一下取消)' : '尚未收臨打費(點一下標記已收)'}
+                  </button>
+                )
+              })()}
               <p className="text-xs text-gray-400 font-semibold pt-1">程度</p>
               <div className="flex flex-wrap gap-1.5">
                 {TIERS.flatMap((t) =>

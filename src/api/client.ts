@@ -79,6 +79,7 @@ export interface SessionPlayer {
   claimed: boolean
   games: number
   total_minutes: number
+  paid: boolean
   is_temp: boolean
   avatar_url?: string
 }
@@ -136,6 +137,11 @@ export const sessionApi = {
     api.post<{ data: SessionPlayer }>(
       `/api/sessions/${sessionId}/players/${playerId}/name`,
       { name }
+    ),
+  setPaid: (sessionId: string, playerId: string, paid: boolean) =>
+    api.post<{ data: SessionPlayer }>(
+      `/api/sessions/${sessionId}/players/${playerId}/paid`,
+      { paid }
     ),
   removePlayer: (sessionId: string, playerId: string) =>
     api.delete(`/api/sessions/${sessionId}/players/${playerId}`),
