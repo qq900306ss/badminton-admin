@@ -45,7 +45,7 @@ function Avatar({ slot, onClick, locked }: { slot: PlayerSlot; onClick?: () => v
           </div>
         )}
         {slot.level > 0 && (
-          <span className="absolute -top-1 -right-1 bg-white text-gray-700 text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow border border-gray-100">
+          <span className={`absolute -top-1 -right-1 ${tier ? tier.avatarBg : 'bg-gray-400'} text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow border-2 border-white`}>
             {slot.level}
           </span>
         )}
