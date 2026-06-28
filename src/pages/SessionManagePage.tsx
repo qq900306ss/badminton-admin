@@ -24,7 +24,7 @@ export function SessionManagePage() {
 
   const { data: session, isLoading } = useSessionView(sid)
   const { data: players } = useSessionPlayers(sid)
-  const { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, renameCourt, removeCourt, addQueue, removePlayer } = useManageActions(sid)
+  const { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, renameCourt, removeCourt, addQueue, removePlayer } = useManageActions(sid)
   const confirm = useConfirm()
   const qc = useQueryClient()
 
@@ -43,6 +43,7 @@ export function SessionManagePage() {
   const [addTarget, setAddTarget] = useState<string | null>(null) // court_id to add a player to
   const [newName, setNewName] = useState('')
   const [levelTarget, setLevelTarget] = useState<string | null>(null) // player_id being re-leveled
+  const [renameInput, setRenameInput] = useState('') // 團主改該玩家本場名稱
   const [memberFilter, setMemberFilter] = useState('')
   const [onlyUnclaimed, setOnlyUnclaimed] = useState(false)
   const [addFilter, setAddFilter] = useState('')
@@ -196,7 +197,11 @@ export function SessionManagePage() {
               return (
                 <button
                   key={p.player_id}
-                  onClick={() => setLevelTarget(levelTarget === p.player_id ? null : p.player_id)}
+                  onClick={() => {
+                    const next = levelTarget === p.player_id ? null : p.player_id
+                    setLevelTarget(next)
+                    setRenameInput(next ? p.display_name : '')
+                  }}
                   className={`px-3 py-1.5 rounded-full text-sm font-semibold flex items-center gap-1.5
                     ${tier ? tier.chip : 'bg-gray-100 text-gray-500'} ${p.claimed ? '' : 'opacity-50'}`}
                 >
@@ -218,8 +223,33 @@ export function SessionManagePage() {
           {levelTarget && (
             <div className="border-t pt-3 space-y-2">
               <p className="text-xs text-gray-500 font-semibold">
-                設定「{(players ?? []).find((p) => p.player_id === levelTarget)?.display_name}」的程度
+                設定「{(players ?? []).find((p) => p.player_id === levelTarget)?.display_name}」
               </p>
+              {/* 改本場名稱 */}
+              <div className="flex gap-2">
+                <input
+                  value={renameInput}
+                  onChange={(e) => setRenameInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    const n = renameInput.trim()
+                    if (e.key === 'Enter' && n) setPlayerName.mutate({ playerId: levelTarget, name: n })
+                  }}
+                  placeholder="改名字"
+                  className="flex-1 border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm
+                    focus:outline-none focus:border-brand-pink"
+                />
+                <button
+                  onClick={() => {
+                    const n = renameInput.trim()
+                    if (n) setPlayerName.mutate({ playerId: levelTarget, name: n })
+                  }}
+                  disabled={!renameInput.trim() || setPlayerName.isPending}
+                  className="px-3 rounded-2xl text-sm font-bold bg-brand-pink text-white disabled:opacity-40"
+                >
+                  改名
+                </button>
+              </div>
+              <p className="text-xs text-gray-400 font-semibold pt-1">程度</p>
               <div className="flex flex-wrap gap-1.5">
                 {TIERS.flatMap((t) =>
                   Array.from({ length: t.max - t.min + 1 }, (_, i) => t.min + i).map((lv) => (

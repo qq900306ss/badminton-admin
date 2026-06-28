@@ -132,6 +132,11 @@ export const sessionApi = {
       `/api/sessions/${sessionId}/players/${playerId}/level`,
       { level }
     ),
+  setPlayerName: (sessionId: string, playerId: string, name: string) =>
+    api.post<{ data: SessionPlayer }>(
+      `/api/sessions/${sessionId}/players/${playerId}/name`,
+      { name }
+    ),
   removePlayer: (sessionId: string, playerId: string) =>
     api.delete(`/api/sessions/${sessionId}/players/${playerId}`),
   close: (sessionId: string) => api.post(`/api/sessions/${sessionId}/close`),
