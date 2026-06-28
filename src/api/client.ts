@@ -82,6 +82,8 @@ export interface SessionPlayer {
   paid: boolean
   is_temp: boolean
   avatar_url?: string
+  owner_id?: string // 家人子身份:帶它來的手機帳號
+  pending?: boolean // 家人待團主核准
 }
 
 export interface SessionSummary {
@@ -153,6 +155,10 @@ export const sessionApi = {
     api.post<{ data: SessionPlayer }>(
       `/api/sessions/${sessionId}/players/${playerId}/paid`,
       { paid }
+    ),
+  approveFamily: (sessionId: string, playerId: string) =>
+    api.post<{ data: SessionPlayer }>(
+      `/api/sessions/${sessionId}/players/${playerId}/approve`
     ),
   removePlayer: (sessionId: string, playerId: string) =>
     api.delete(`/api/sessions/${sessionId}/players/${playerId}`),

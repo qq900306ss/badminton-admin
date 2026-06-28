@@ -55,7 +55,7 @@ export function SessionManagePage() {
 
   const { data: session, isLoading } = useSessionView(sid)
   const { data: players } = useSessionPlayers(sid)
-  const { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, renameCourt, removeCourt, addQueue, removePlayer } = useManageActions(sid)
+  const { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, approveFamily, renameCourt, removeCourt, addQueue, removePlayer } = useManageActions(sid)
   const confirm = useConfirm()
   const qc = useQueryClient()
 
@@ -103,6 +103,10 @@ export function SessionManagePage() {
 
   const dup = dupOrdinals(players ?? [])
   const targetPlayer = (players ?? []).find((p) => p.player_id === levelTarget)
+  // owner_id → display name, so family members can show "(○○ 的家人)"
+  const nameById = new Map((players ?? []).map((p) => [p.player_id, p.display_name]))
+  const ownerLabel = (p: SessionPlayer) =>
+    p.owner_id ? `${nameById.get(p.owner_id) ?? '某人'} 的家人` : ''
 
   return (
     <div className="min-h-screen bg-brand-bg pb-10">
@@ -256,6 +260,10 @@ export function SessionManagePage() {
                     {p.level > 0 ? `Lv${p.level}` : '?'}
                   </span>
                   {p.paid && <span className="text-[11px]" title="已收臨打費">💰</span>}
+                  {p.owner_id && (
+                    <span className="text-[10px] text-violet-500" title={ownerLabel(p)}>👪</span>
+                  )}
+                  {p.pending && <span className="text-[10px] font-bold text-orange-500">待核准</span>}
                   {!p.claimed && <span className="text-[10px] text-gray-400">未到</span>}
                 </button>
               )
@@ -273,7 +281,20 @@ export function SessionManagePage() {
                 {targetPlayer && <MiniAvatar slot={targetPlayer} />}
                 「{targetPlayer?.display_name}
                 {targetPlayer && dup[targetPlayer.player_id] ? ` #${dup[targetPlayer.player_id]}` : ''}」
+                {targetPlayer?.owner_id && (
+                  <span className="text-[11px] text-violet-500">👪 {ownerLabel(targetPlayer)}</span>
+                )}
               </div>
+              {/* 家人待核准 → 核准鈕 */}
+              {targetPlayer?.pending && (
+                <button
+                  onClick={() => approveFamily.mutate(targetPlayer.player_id)}
+                  disabled={approveFamily.isPending}
+                  className="w-full rounded-2xl py-2 text-sm font-bold bg-emerald-500 text-white disabled:opacity-40"
+                >
+                  ✅ 核准這位家人(核准後才能上場/排隊)
+                </button>
+              )}
               {/* 改本場名稱 */}
               <div className="flex gap-2">
                 <input
@@ -432,6 +453,7 @@ export function SessionManagePage() {
                 // and never get the 建議 badge — they're not physically on court.
                 const candidates = (players ?? [])
                   .filter((p) => !busy.has(p.player_id))
+                  .filter((p) => !p.pending) // 待核准的家人不能排
                   .filter((p) => p.display_name.includes(addFilter.trim()))
                   .slice()
                   .sort((a, b) => {

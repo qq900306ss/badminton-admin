@@ -220,6 +220,7 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
   // off-court people, fair-sorted (已到 first, then fewest games) — the popup list
   const offCourt = (players ?? [])
     .filter((p) => !onCourt.has(p.player_id))
+    .filter((p) => !p.pending) // 待核准的家人先不出現在排點板
     .slice()
     .sort((a, b) => Number(b.claimed) - Number(a.claimed) || a.games - b.games || a.display_name.localeCompare(b.display_name))
 
