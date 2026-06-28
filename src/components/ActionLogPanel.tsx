@@ -14,7 +14,11 @@ export function ActionLogPanel({ sessionId }: { sessionId: string }) {
   return (
     <div className="card">
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          const next = !open
+          setOpen(next)
+          if (next) refetch() // re-pull on open so it's never a stale snapshot
+        }}
         className="w-full flex items-center justify-between text-sm font-bold text-gray-600"
       >
         <span>📋 操作紀錄</span>
