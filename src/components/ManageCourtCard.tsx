@@ -32,8 +32,14 @@ function Chip({ slot, onKick }: { slot: PlayerSlot; onKick: () => void }) {
   const bg = tier ? tier.avatarBg : fallbackColor(slot.player_id)
   return (
     <span className={`inline-flex items-center gap-1 pl-1 pr-2 py-1 rounded-full text-sm font-semibold text-white ${bg}`}>
-      <span className="w-5 h-5 rounded-full bg-white/30 flex items-center justify-center text-xs">
-        {slot.level > 0 ? slot.level : slot.display_name?.[0]?.toUpperCase()}
+      <span className="w-5 h-5 rounded-full bg-white/30 flex items-center justify-center text-xs overflow-hidden">
+        {slot.avatar_url ? (
+          <img src={slot.avatar_url} alt="" className="w-full h-full object-cover" />
+        ) : slot.level > 0 ? (
+          slot.level
+        ) : (
+          [...(slot.display_name ?? '')][0]?.toUpperCase()
+        )}
       </span>
       {slot.display_name}
       <button onClick={onKick} className="ml-0.5 text-white/80 hover:text-white font-bold">×</button>

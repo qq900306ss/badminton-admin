@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { sessionApi } from '../api/client'
 import type { SessionPlayer } from '../api/client'
-import { useSessionView, useSessionPlayers, useManageActions, useMembers } from '../hooks/useApi'
+import { useSessionView, useSessionPlayers, useManageActions } from '../hooks/useApi'
 import { ManageCourtCard } from '../components/ManageCourtCard'
 import { StatsPanel } from '../components/StatsPanel'
 import { SessionSummary } from '../components/SessionSummary'
@@ -22,7 +22,6 @@ export function SessionManagePage() {
 
   const { data: session, isLoading } = useSessionView(sid)
   const { data: players } = useSessionPlayers(sid)
-  const { data: roster } = useMembers()
   const { endCourt, kick, addPlaying, addCourt, addPlayer, setLevel, renameCourt, removeCourt, addQueue, removePlayer } = useManageActions(sid)
   const confirm = useConfirm()
 
@@ -36,10 +35,6 @@ export function SessionManagePage() {
   const [onlyUnclaimed, setOnlyUnclaimed] = useState(false)
   const [addFilter, setAddFilter] = useState('')
   const [board, setBoard] = useState(false)
-
-  // roster members not yet in this session (available to quick-add)
-  const inSession = new Set((players ?? []).map((p) => p.display_name))
-  const rosterAvailable = (roster ?? []).filter((m) => !inSession.has(m.display_name))
 
   const joinUrl = `${BOOKING_URL}/?s=${sid}`
 
@@ -250,25 +245,6 @@ export function SessionManagePage() {
               >
                 🚫 斷開此人(移出本場)
               </button>
-            </div>
-          )}
-
-          {/* quick-add from roster */}
-          {rosterAvailable.length > 0 && (
-            <div className="border-t pt-3 space-y-2">
-              <p className="text-xs text-gray-400">從常駐名單加入(點一下)</p>
-              <div className="flex flex-wrap gap-2">
-                {rosterAvailable.map((m) => (
-                  <button
-                    key={m.member_id}
-                    onClick={() => addPlayer.mutate(m.display_name)}
-                    className="px-3 py-1.5 rounded-full text-sm font-semibold bg-gray-100 text-gray-600
-                      hover:bg-brand-pink hover:text-white transition-colors"
-                  >
-                    ＋ {m.display_name}
-                  </button>
-                ))}
-              </div>
             </div>
           )}
 

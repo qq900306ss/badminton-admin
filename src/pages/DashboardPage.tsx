@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { sessionApi, type Org } from '../api/client'
-import { useMembers, useMemberActions } from '../hooks/useApi'
 import { InstallButton } from '../components/InstallButton'
 import { TimeSelect } from '../components/TimeSelect'
 
@@ -30,8 +29,6 @@ function fmtRange(s: { start_at?: string; end_at?: string }): string {
 export function DashboardPage() {
   const nav = useNavigate()
   const org: Org | null = JSON.parse(localStorage.getItem('org') || 'null')
-  const { data: members } = useMembers()
-  const { add, remove } = useMemberActions()
 
   const { data: mySessions } = useQuery({
     queryKey: ['my-sessions'],
@@ -49,18 +46,10 @@ export function DashboardPage() {
   const [startTime, setStartTime] = useState('18:00')
   const [endTime, setEndTime] = useState('21:00')
   const [queueTime, setQueueTime] = useState('18:00')
-  const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [newMember, setNewMember] = useState('')
   const [tempNames, setTempNames] = useState<string[]>([])
   const [tempInput, setTempInput] = useState('')
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState('')
-
-  function toggle(name: string) {
-    const next = new Set(selected)
-    next.has(name) ? next.delete(name) : next.add(name)
-    setSelected(next)
-  }
 
   async function openSession() {
     if (!password.trim()) {
@@ -69,7 +58,7 @@ export function DashboardPage() {
     }
     setCreating(true)
     setError('')
-    const playerNames = [...selected, ...tempNames]
+    const playerNames = tempNames
     try {
       const res = await sessionApi.create({
         title: title.trim() || org?.org_name || '羽球團',
@@ -273,54 +262,6 @@ export function DashboardPage() {
           </label>
         </div>
 
-        {/* roster picker */}
-        <div className="card space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="font-bold text-gray-700">常駐名單</span>
-            <span className="text-xs text-gray-400">勾選這次來的人</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {(members ?? []).map((m) => (
-              <button
-                key={m.member_id}
-                onClick={() => toggle(m.display_name)}
-                className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-                  selected.has(m.display_name)
-                    ? 'bg-brand-mint text-emerald-700'
-                    : 'bg-gray-100 text-gray-500'
-                }`}
-              >
-                {selected.has(m.display_name) ? '✓ ' : ''}
-                {m.display_name}
-              </button>
-            ))}
-            {(members ?? []).length === 0 && (
-              <p className="text-sm text-gray-300">名單還是空的,先在下面新增吧</p>
-            )}
-          </div>
-          {/* add to roster */}
-          <div className="flex gap-2 border-t pt-3">
-            <input
-              value={newMember}
-              onChange={(e) => setNewMember(e.target.value)}
-              placeholder="新增常駐成員"
-              className="flex-1 border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm
-                focus:outline-none focus:border-brand-pink"
-            />
-            <button
-              onClick={() => {
-                if (newMember.trim()) {
-                  add.mutate(newMember.trim())
-                  setNewMember('')
-                }
-              }}
-              className="btn-secondary px-4 py-1.5 text-sm"
-            >
-              加入名單
-            </button>
-          </div>
-        </div>
-
         {/* temp guests for this session only */}
         <div className="card space-y-3">
           <span className="font-bold text-gray-700">臨時加入(只限這場)</span>
@@ -360,25 +301,8 @@ export function DashboardPage() {
         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
         <button onClick={openSession} disabled={creating} className="btn-primary w-full text-lg py-4">
-          {creating ? '開團中...' : `🏸 開團(${selected.size + tempNames.length} 人)`}
+          {creating ? '開團中...' : `🏸 開團(${tempNames.length} 人)`}
         </button>
-
-        {/* roster management hint */}
-        {members && members.length > 0 && (
-          <details className="text-sm text-gray-400">
-            <summary className="cursor-pointer">管理常駐名單</summary>
-            <div className="mt-2 space-y-1">
-              {members.map((m) => (
-                <div key={m.member_id} className="flex justify-between items-center px-2 py-1">
-                  <span>{m.display_name}</span>
-                  <button onClick={() => remove.mutate(m.member_id)} className="text-red-300 text-xs">
-                    刪除
-                  </button>
-                </div>
-              ))}
-            </div>
-          </details>
-        )}
 
         <div className="pt-2">
           <InstallButton label="📲 安裝後台到桌面" />
