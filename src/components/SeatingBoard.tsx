@@ -22,7 +22,8 @@ function elapsedMins(startedAt?: string): number | null {
 }
 
 function Avatar({ slot, onClick, locked }: { slot: PlayerSlot; onClick?: () => void; locked?: boolean }) {
-  const initial = slot.display_name?.[0]?.toUpperCase() ?? '?'
+  // [...str][0] is emoji-safe (str[0] breaks surrogate pairs → 亂碼)
+  const initial = [...(slot.display_name ?? '')][0]?.toUpperCase() ?? '?'
   const tier = tierOf(slot.level)
   const bg = tier ? tier.avatarBg : fallbackColor(slot.player_id)
   return (
@@ -32,9 +33,14 @@ function Avatar({ slot, onClick, locked }: { slot: PlayerSlot; onClick?: () => v
       className={`flex flex-col items-center gap-1 ${onClick ? 'active:scale-90 transition-transform' : ''}`}
     >
       <div className="relative">
-        <div className={`w-11 h-11 rounded-full ${bg} flex items-center justify-center text-base font-extrabold text-white shadow-md ring-2 ring-white`}>
-          {initial}
-        </div>
+        {slot.avatar_url ? (
+          <img src={slot.avatar_url} alt={slot.display_name}
+            className="w-11 h-11 rounded-full object-cover shadow-md ring-2 ring-white" />
+        ) : (
+          <div className={`w-11 h-11 rounded-full ${bg} flex items-center justify-center text-base font-extrabold text-white shadow-md ring-2 ring-white`}>
+            {initial}
+          </div>
+        )}
         {slot.level > 0 && (
           <span className="absolute -top-1 -right-1 bg-white text-gray-700 text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow border border-gray-100">
             {slot.level}

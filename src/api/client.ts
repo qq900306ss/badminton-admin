@@ -43,6 +43,7 @@ export interface PlayerSlot {
   display_name: string
   level: number
   games: number
+  avatar_url?: string
 }
 
 export interface CourtView {
@@ -84,6 +85,7 @@ export interface SessionPlayer {
   games: number
   total_minutes: number
   is_temp: boolean
+  avatar_url?: string
 }
 
 export interface SessionSummary {
@@ -162,23 +164,22 @@ export const sessionApi = {
     api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/add-queue`, { player_id: playerId }),
 }
 
-// on-site seating board: the leader acts ON BEHALF OF a player, so we call the
-// same player-facing court endpoints (identical rules) with that player's id in
-// the X-Player-ID header. No leader-override — in-progress courts stay locked.
-const asPlayer = (playerId: string) => ({ headers: { 'X-Player-ID': playerId } })
+// on-site seating board: leader-authorized, but with the SAME rules as the
+// player front-end (in-progress courts stay locked). Uses dedicated leader
+// endpoints with the target player in the body (leader JWT auto-attached).
 export const seatApi = {
   joinPlaying: (sessionId: string, courtId: string, playerId: string, position: number) =>
-    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/join-playing`,
-      { position }, asPlayer(playerId)),
+    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/seat-playing`,
+      { player_id: playerId, position }),
   joinQueue: (sessionId: string, courtId: string, playerId: string) =>
-    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/join-queue`,
-      {}, asPlayer(playerId)),
+    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/seat-queue`,
+      { player_id: playerId }),
   leavePlaying: (sessionId: string, courtId: string, playerId: string) =>
-    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/leave-playing`,
-      {}, asPlayer(playerId)),
+    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/unseat-playing`,
+      { player_id: playerId }),
   leaveQueue: (sessionId: string, courtId: string, playerId: string) =>
-    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/leave-queue`,
-      {}, asPlayer(playerId)),
+    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/unseat-queue`,
+      { player_id: playerId }),
 }
 
 export const adminApi = {
