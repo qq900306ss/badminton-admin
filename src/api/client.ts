@@ -54,6 +54,7 @@ export interface CourtView {
   playing: PlayerSlot[]
   queue: PlayerSlot[]
   started_at?: string
+  can_undo?: boolean
 }
 
 export interface GameLog {
@@ -156,6 +157,8 @@ export const sessionApi = {
     api.delete(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}`),
   endCourt: (sessionId: string, courtId: string) =>
     api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/end`),
+  undoEnd: (sessionId: string, courtId: string) =>
+    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/undo-end`),
   kick: (sessionId: string, courtId: string, playerId: string) =>
     api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/kick`, { player_id: playerId }),
   addPlaying: (sessionId: string, courtId: string, playerId: string) =>

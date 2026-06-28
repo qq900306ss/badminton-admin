@@ -22,6 +22,7 @@ function elapsedMins(startedAt?: string): number | null {
 interface Props {
   court: CourtView
   onEnd: () => void
+  onUndoEnd: () => void
   onKick: (playerId: string) => void
   onRename: (name: string) => void
   onRemove: () => void
@@ -47,7 +48,7 @@ function Chip({ slot, onKick }: { slot: PlayerSlot; onKick: () => void }) {
   )
 }
 
-export function ManageCourtCard({ court, onEnd, onKick, onRename, onRemove }: Props) {
+export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onRemove }: Props) {
   const [editing, setEditing] = useState(false)
   const [nameInput, setNameInput] = useState(court.name ?? '')
   const title = court.name?.trim() ? court.name : `場地 ${court.court_num}`
@@ -116,13 +117,22 @@ export function ManageCourtCard({ court, onEnd, onKick, onRename, onRemove }: Pr
         </div>
       </div>
 
-      <button
-        onClick={onEnd}
-        disabled={filled === 0 && court.queue.length === 0}
-        className="btn-primary w-full text-sm disabled:opacity-40"
-      >
-        {filled === 4 ? '結束這場 → 換下一組' : '結束這場'}
-      </button>
+      {court.can_undo ? (
+        <button
+          onClick={onUndoEnd}
+          className="w-full text-sm font-bold py-2.5 rounded-2xl bg-amber-100 text-amber-700 active:scale-95 transition-transform"
+        >
+          ↩ 復原剛剛的結束(10 分鐘內)
+        </button>
+      ) : (
+        <button
+          onClick={onEnd}
+          disabled={filled === 0 && court.queue.length === 0}
+          className="btn-primary w-full text-sm disabled:opacity-40"
+        >
+          {filled === 4 ? '結束這場 → 換下一組' : '結束這場'}
+        </button>
+      )}
 
       <button onClick={onRemove} className="w-full text-xs text-red-300 hover:text-red-400">
         刪除這個場地

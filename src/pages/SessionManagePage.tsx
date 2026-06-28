@@ -24,7 +24,7 @@ export function SessionManagePage() {
 
   const { data: session, isLoading } = useSessionView(sid)
   const { data: players } = useSessionPlayers(sid)
-  const { endCourt, kick, addPlaying, addCourt, addPlayer, setLevel, renameCourt, removeCourt, addQueue, removePlayer } = useManageActions(sid)
+  const { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, renameCourt, removeCourt, addQueue, removePlayer } = useManageActions(sid)
   const confirm = useConfirm()
   const qc = useQueryClient()
 
@@ -303,6 +303,7 @@ export function SessionManagePage() {
               <ManageCourtCard
                 court={court}
                 onEnd={() => endCourt.mutate(court.court_id)}
+                onUndoEnd={() => undoEnd.mutate(court.court_id)}
                 onKick={(playerId) => kick.mutate({ courtId: court.court_id, playerId })}
                 onRename={(name) => renameCourt.mutate({ courtId: court.court_id, name })}
                 onRemove={async () => {

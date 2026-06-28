@@ -117,6 +117,10 @@ export function useManageActions(sessionId: string) {
     mutationFn: (courtId: string) => sessionApi.endCourt(sessionId, courtId),
     onSuccess: invalidate,
   })
+  const undoEnd = useMutation({
+    mutationFn: (courtId: string) => sessionApi.undoEnd(sessionId, courtId),
+    onSuccess: invalidate,
+  })
   const kick = useMutation({
     mutationFn: (v: { courtId: string; playerId: string }) =>
       sessionApi.kick(sessionId, v.courtId, v.playerId),
@@ -145,5 +149,5 @@ export function useManageActions(sessionId: string) {
       sessionApi.addQueue(sessionId, v.courtId, v.playerId),
     onSuccess: invalidate,
   })
-  return { endCourt, kick, addPlaying, addCourt, addPlayer, setLevel, renameCourt, removeCourt, addQueue, removePlayer }
+  return { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, renameCourt, removeCourt, addQueue, removePlayer }
 }
