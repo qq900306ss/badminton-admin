@@ -13,9 +13,39 @@ import { SeatingBoard } from '../components/SeatingBoard'
 import { useConfirm } from '../components/Confirm'
 import { CourtSkeleton } from '../components/Skeleton'
 import { TIERS, tierOf } from '../lib/levels'
+import { isPhotoUrl } from '../lib/avatar'
 import { connectSessionWS } from '../lib/realtime'
 
 const BOOKING_URL = import.meta.env.VITE_BOOKING_URL || 'http://localhost:5174'
+
+// small avatar for the people list, so same-named players are still distinguishable
+function MiniAvatar({ slot }: { slot: SessionPlayer }) {
+  const tier = tierOf(slot.level)
+  const bg = tier ? tier.avatarBg : 'bg-gray-300'
+  if (isPhotoUrl(slot.avatar_url))
+    return <img src={slot.avatar_url} alt="" className="w-5 h-5 rounded-full object-cover shrink-0" />
+  return (
+    <span className={`w-5 h-5 rounded-full ${bg} shrink-0 flex items-center justify-center text-[11px] leading-none text-white`}>
+      {slot.avatar_url ? slot.avatar_url : [...(slot.display_name ?? '')][0]?.toUpperCase()}
+    </span>
+  )
+}
+
+// among players sharing a display_name, give each a stable 1-based ordinal so the
+// leader can tell "蔡川海 #1" from "蔡川海 #2". Returns {} when no name collides.
+function dupOrdinals(players: SessionPlayer[]): Record<string, number> {
+  const count: Record<string, number> = {}
+  for (const p of players) count[p.display_name] = (count[p.display_name] ?? 0) + 1
+  const seen: Record<string, number> = {}
+  const out: Record<string, number> = {}
+  for (const p of [...players].sort((a, b) => a.player_id.localeCompare(b.player_id))) {
+    if (count[p.display_name] > 1) {
+      seen[p.display_name] = (seen[p.display_name] ?? 0) + 1
+      out[p.player_id] = seen[p.display_name]
+    }
+  }
+  return out
+}
 
 export function SessionManagePage() {
   const { sessionId } = useParams<{ sessionId: string }>()
@@ -64,6 +94,9 @@ export function SessionManagePage() {
       </div>
     )
   }
+
+  const dup = dupOrdinals(players ?? [])
+  const targetPlayer = (players ?? []).find((p) => p.player_id === levelTarget)
 
   return (
     <div className="min-h-screen bg-brand-bg pb-10">
@@ -205,11 +238,14 @@ export function SessionManagePage() {
                     setLevelTarget(next)
                     setRenameInput(next ? p.display_name : '')
                   }}
-                  className={`px-3 py-1.5 rounded-full text-sm font-semibold flex items-center gap-1.5
+                  className={`pl-1 pr-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1.5
                     ${tier ? tier.chip : 'bg-gray-100 text-gray-500'} ${p.claimed ? '' : 'opacity-50'}`}
                 >
-                  <span className={p.claimed ? 'text-emerald-600' : 'text-gray-300'}>●</span>
+                  <MiniAvatar slot={p} />
                   {p.display_name}
+                  {dup[p.player_id] && (
+                    <span className="text-[10px] text-gray-400 font-bold">#{dup[p.player_id]}</span>
+                  )}
                   <span className="bg-white/70 text-gray-700 rounded-full px-1.5 text-xs">
                     {p.level > 0 ? `Lv${p.level}` : '?'}
                   </span>
@@ -226,9 +262,12 @@ export function SessionManagePage() {
           {/* level editor for the tapped player */}
           {levelTarget && (
             <div className="border-t pt-3 space-y-2">
-              <p className="text-xs text-gray-500 font-semibold">
-                設定「{(players ?? []).find((p) => p.player_id === levelTarget)?.display_name}」
-              </p>
+              <div className="flex items-center gap-1.5 text-xs text-gray-500 font-semibold">
+                設定
+                {targetPlayer && <MiniAvatar slot={targetPlayer} />}
+                「{targetPlayer?.display_name}
+                {targetPlayer && dup[targetPlayer.player_id] ? ` #${dup[targetPlayer.player_id]}` : ''}」
+              </div>
               {/* 改本場名稱 */}
               <div className="flex gap-2">
                 <input
@@ -420,7 +459,11 @@ export function SessionManagePage() {
                             ${sug ? 'bg-brand-mint/40' : ''}`}
                         >
                           <div className="min-w-0 flex items-center gap-1.5">
+                            <MiniAvatar slot={p} />
                             <span className="text-sm font-semibold text-gray-600 truncate">{p.display_name}</span>
+                            {dup[p.player_id] && (
+                              <span className="shrink-0 text-[10px] text-gray-400 font-bold">#{dup[p.player_id]}</span>
+                            )}
                             {sug && (
                               <span className="shrink-0 text-[10px] font-bold text-emerald-700
                                 bg-white rounded-full px-1.5 py-0.5">⭐ 建議</span>
