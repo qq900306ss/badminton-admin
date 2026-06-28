@@ -59,12 +59,17 @@ export function SessionManagePage() {
   const confirm = useConfirm()
   const qc = useQueryClient()
 
-  // real-time: refetch the moment anything changes (players, courts, seating)
+  // real-time: WebSocket nudge → refetch the moment ANYTHING changes (courts,
+  // players, seating, stats, action log). The server broadcasts after every
+  // write — including this leader's own — so actions reflect instantly without
+  // polling.
   useEffect(() => {
     if (!sid) return
     return connectSessionWS(sid, () => {
       qc.invalidateQueries({ queryKey: ['session', sid] })
       qc.invalidateQueries({ queryKey: ['session-players', sid] })
+      qc.invalidateQueries({ queryKey: ['games', sid] })
+      qc.invalidateQueries({ queryKey: ['action-logs', sid] })
     })
   }, [sid, qc])
 
@@ -511,7 +516,7 @@ export function SessionManagePage() {
         {/* 團主操作紀錄 */}
         <ActionLogPanel sessionId={sid} />
 
-        <p className="text-center text-xs text-gray-300">每 3 秒自動更新 · 已報到 {players?.length ?? 0} 人</p>
+        <p className="text-center text-xs text-gray-300">⚡ 即時更新(WebSocket) · 已報到 {players?.length ?? 0} 人</p>
       </div>
     </div>
   )

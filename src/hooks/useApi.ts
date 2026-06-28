@@ -5,7 +5,9 @@ export function useSessionView(sessionId: string) {
   return useQuery({
     queryKey: ['session', sessionId],
     queryFn: () => sessionApi.getView(sessionId).then((r) => r.data.data),
-    refetchInterval: 3000,
+    // real-time updates come via WebSocket (see SessionManagePage); this slow
+    // interval is just a safety net for when the socket drops.
+    refetchInterval: 30000,
     enabled: !!sessionId,
   })
 }
@@ -14,7 +16,7 @@ export function useSessionPlayers(sessionId: string) {
   return useQuery({
     queryKey: ['session-players', sessionId],
     queryFn: () => sessionApi.getPlayers(sessionId).then((r) => r.data.data),
-    refetchInterval: 3000,
+    refetchInterval: 30000, // WS-driven; slow fallback only
     enabled: !!sessionId,
   })
 }

@@ -11,7 +11,7 @@ export function StatsPanel({ sessionId, players }: { sessionId: string; players:
   const { data: games } = useQuery({
     queryKey: ['games', sessionId],
     queryFn: () => sessionApi.games(sessionId).then((r) => r.data.data),
-    refetchInterval: 5000,
+    // WS invalidates ['games', sid] on every change; no polling needed
     enabled: !!sessionId,
   })
 
