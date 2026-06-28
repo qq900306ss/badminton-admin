@@ -7,6 +7,7 @@ import type { SessionPlayer } from '../api/client'
 import { useSessionView, useSessionPlayers, useManageActions } from '../hooks/useApi'
 import { ManageCourtCard } from '../components/ManageCourtCard'
 import { StatsPanel } from '../components/StatsPanel'
+import { ActionLogPanel } from '../components/ActionLogPanel'
 import { SessionSummary } from '../components/SessionSummary'
 import { PasswordCard } from '../components/PasswordCard'
 import { SeatingBoard } from '../components/SeatingBoard'
@@ -506,6 +507,9 @@ export function SessionManagePage() {
 
         {/* stats dashboard */}
         <StatsPanel sessionId={sid} players={players ?? []} />
+
+        {/* 團主操作紀錄 */}
+        <ActionLogPanel sessionId={sid} />
 
         <p className="text-center text-xs text-gray-300">每 3 秒自動更新 · 已報到 {players?.length ?? 0} 人</p>
       </div>

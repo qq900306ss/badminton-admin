@@ -96,6 +96,15 @@ export interface SessionSummary {
   opened_at: string
 }
 
+export interface ActionLog {
+  session_id: string
+  ts_id: string
+  actor: string
+  action: string
+  detail: string
+  at: string
+}
+
 export interface CreateSessionInput {
   title: string
   city?: string
@@ -120,6 +129,8 @@ export const sessionApi = {
   mySessions: () => api.get<{ data: SessionSummary[] }>('/api/my/sessions'),
   games: (sessionId: string) =>
     api.get<{ data: GameLog[] }>(`/api/sessions/${sessionId}/games`),
+  actionLogs: (sessionId: string) =>
+    api.get<{ data: ActionLog[] }>(`/api/sessions/${sessionId}/action-logs`),
   getView: (sessionId: string) =>
     api.get<{ data: SessionView }>(`/api/sessions/${sessionId}`),
   getPlayers: (sessionId: string) =>
