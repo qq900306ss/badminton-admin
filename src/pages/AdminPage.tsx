@@ -84,13 +84,15 @@ export function AdminPage() {
         (p.email || '').includes(q)
       )
     })
-    .sort((a, b) =>
-      // 依名字排序(中文用 zh-Hant 排序規則),以現用名稱為主、退回登入名
-      (a.join_name || a.display_name || '').localeCompare(
-        b.join_name || b.display_name || '',
-        'zh-Hant'
-      )
-    )
+    .sort((a, b) => {
+      // 英文/數字開頭的名字排前面,中文名接在後面(依筆劃 zh-Hant)。
+      const na = (a.join_name || a.display_name || '').trim()
+      const nb = (b.join_name || b.display_name || '').trim()
+      const aLatin = /^[A-Za-z0-9]/.test(na)
+      const bLatin = /^[A-Za-z0-9]/.test(nb)
+      if (aLatin !== bLatin) return aLatin ? -1 : 1
+      return na.localeCompare(nb, 'zh-Hant')
+    })
   // jump from a stat card straight to the relevant view
   const goSessions = (status: 'all' | 'open') => {
     setSelectedOrg(null)

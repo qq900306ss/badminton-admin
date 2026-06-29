@@ -82,6 +82,10 @@ export function DashboardPage() {
       setError('請設定場地密碼')
       return
     }
+    if (!district.trim()) {
+      setError('請選擇(或填寫)區')
+      return
+    }
     setCreating(true)
     setError('')
     const playerNames = tempNames
