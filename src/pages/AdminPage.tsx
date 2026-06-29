@@ -45,7 +45,7 @@ export function AdminPage() {
   const { data: allSessions } = useQuery({
     queryKey: ['admin-sessions'],
     queryFn: () => adminApi.listSessions().then((r) => r.data.data),
-    refetchInterval: 5000,
+    refetchInterval: 15000, // superadmin dashboard (no WS here) — 15s is plenty
   })
   const { data: feedback } = useQuery({
     queryKey: ['admin-feedback'],
