@@ -164,6 +164,7 @@ export const sessionApi = {
   removePlayer: (sessionId: string, playerId: string) =>
     api.delete(`/api/sessions/${sessionId}/players/${playerId}`),
   close: (sessionId: string) => api.post(`/api/sessions/${sessionId}/close`),
+  hide: (sessionId: string) => api.post(`/api/sessions/${sessionId}/hide`),
   getPassword: (sessionId: string) =>
     api.get<{ data: { password: string } }>(`/api/sessions/${sessionId}/password`),
   setPassword: (sessionId: string, password: string) =>
@@ -218,6 +219,19 @@ export const adminApi = {
     api.post<{ data: { token: string; org: Org } }>(`/api/admin/impersonate/${orgId}`),
   listSessions: () => api.get<{ data: SessionSummary[] }>('/api/admin/sessions'),
   listFeedback: () => api.get<{ data: Feedback[] }>('/api/admin/feedback'),
+  listPlayers: () => api.get<{ data: AdminPlayer[] }>('/api/admin/players'),
+}
+
+export interface AdminPlayer {
+  player_id: string
+  provider: 'google' | 'line'
+  display_name: string // 登入時的名字
+  join_name?: string // 現在使用的名稱
+  avatar_url?: string // 現在使用的頭像(emoji 或照片網址)
+  photo_url?: string // 登入提供的大頭貼
+  default_level?: number
+  email?: string
+  created_at: string
 }
 
 export interface Feedback {

@@ -1,11 +1,21 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { FeedbackButton } from '../components/FeedbackButton'
 import { sessionApi, type Org } from '../api/client'
 import { InstallButton } from '../components/InstallButton'
 import { TimeSelect } from '../components/TimeSelect'
+import { useConfirm } from '../components/Confirm'
 import { TW_CITIES } from '../lib/twCities'
+
+// tolerate corrupted localStorage without crashing the whole page
+function readOrg(): Org | null {
+  try {
+    return JSON.parse(localStorage.getItem('org') || 'null')
+  } catch {
+    return null
+  }
+}
 
 // local YYYY-MM-DD (en-CA formats as ISO date in local timezone)
 const todayStr = () => new Date().toLocaleDateString('en-CA')
@@ -30,11 +40,17 @@ function fmtRange(s: { start_at?: string; end_at?: string }): string {
 
 export function DashboardPage() {
   const nav = useNavigate()
-  const org: Org | null = JSON.parse(localStorage.getItem('org') || 'null')
+  const qc = useQueryClient()
+  const confirm = useConfirm()
+  const org: Org | null = readOrg()
 
   const { data: mySessions } = useQuery({
     queryKey: ['my-sessions'],
     queryFn: () => sessionApi.mySessions().then((r) => r.data.data),
+  })
+  const hide = useMutation({
+    mutationFn: (sessionId: string) => sessionApi.hide(sessionId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['my-sessions'] }),
   })
   const openSessions = (mySessions ?? []).filter((s) => s.status === 'open')
   const pastSessions = (mySessions ?? [])
@@ -159,15 +175,36 @@ export function DashboardPage() {
             </summary>
             <div className="mt-3 space-y-1">
               {pastSessions.map((s) => (
-                <button
+                <div
                   key={s.session_id}
-                  onClick={() => nav(`/session/${s.session_id}`)}
-                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-gray-50
-                    flex items-center justify-between"
+                  className="px-3 py-2 rounded-xl hover:bg-gray-50 flex items-center gap-2"
                 >
-                  <span className="text-gray-600">{s.title || '未命名'}</span>
-                  <span className="text-xs text-gray-400">{fmtRange(s)}</span>
-                </button>
+                  <button
+                    onClick={() => nav(`/session/${s.session_id}`)}
+                    className="flex-1 text-left flex items-center justify-between gap-2 min-w-0"
+                  >
+                    <span className="text-gray-600 truncate">{s.title || '未命名'}</span>
+                    <span className="text-xs text-gray-400 shrink-0">{fmtRange(s)}</span>
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (
+                        await confirm({
+                          message: `從歷史清單移除「${s.title || '未命名'}」?資料仍會保留一段時間,只是不再顯示在這裡。`,
+                          confirmText: '移除',
+                          danger: true,
+                        })
+                      ) {
+                        hide.mutate(s.session_id)
+                      }
+                    }}
+                    disabled={hide.isPending}
+                    className="text-gray-300 hover:text-red-400 text-lg shrink-0 px-1 disabled:opacity-40"
+                    aria-label="移除"
+                  >
+                    ×
+                  </button>
+                </div>
               ))}
             </div>
           </details>
