@@ -59,6 +59,8 @@ export function DashboardPage() {
 
   const [settingsOpen, setSettingsOpen] = useState(false)
   const openSessions = (mySessions ?? []).filter((s) => s.status === 'open')
+  const MAX_OPEN = 7 // 與後端 maxOpenPerOrg 一致;同時開團上限,擋濫開
+  const atOpenLimit = openSessions.length >= MAX_OPEN
   const pastSessions = (mySessions ?? [])
     .filter((s) => s.status !== 'open')
     .sort((a, b) => (b.opened_at || '').localeCompare(a.opened_at || ''))
@@ -413,7 +415,17 @@ export function DashboardPage() {
 
         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
-        <button onClick={openSession} disabled={creating} className="btn-primary w-full text-lg py-4">
+        {atOpenLimit && (
+          <p className="text-amber-600 text-sm text-center bg-amber-50 rounded-2xl py-2 px-3">
+            已達同時開團上限({MAX_OPEN} 個),請先結束或關閉舊的團再開新的。
+          </p>
+        )}
+
+        <button
+          onClick={openSession}
+          disabled={creating || atOpenLimit}
+          className="btn-primary w-full text-lg py-4 disabled:opacity-40"
+        >
           {creating ? '開團中...' : '🏸 開團'}
         </button>
 
