@@ -12,6 +12,7 @@ import { SessionSummary } from '../components/SessionSummary'
 import { PasswordCard } from '../components/PasswordCard'
 import { TimesCard } from '../components/TimesCard'
 import { LocationCard } from '../components/LocationCard'
+import { ContactCard } from '../components/ContactCard'
 import { SeatingBoard } from '../components/SeatingBoard'
 import { useConfirm } from '../components/Confirm'
 import { CourtSkeleton } from '../components/Skeleton'
@@ -287,6 +288,7 @@ export function SessionManagePage() {
                 </button>
               </div>
               <LocationCard sessionId={sid} city={session?.city} district={session?.district} />
+              <ContactCard sessionId={sid} contactUrl={session?.contact_url} />
               <PasswordCard sessionId={sid} />
               <TimesCard
                 sessionId={sid}

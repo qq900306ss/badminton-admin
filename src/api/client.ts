@@ -71,6 +71,7 @@ export interface SessionView {
   start_at?: string
   end_at?: string
   queue_open_at?: string
+  contact_url?: string // 團主自填的聯繫/報名連結(外部,選填)
   courts: CourtView[]
 }
 
@@ -176,6 +177,8 @@ export const sessionApi = {
     api.put<{ data: SessionView }>(`/api/sessions/${sessionId}/title`, { title }),
   setLocation: (sessionId: string, city: string, district: string) =>
     api.put<{ data: SessionView }>(`/api/sessions/${sessionId}/location`, { city, district }),
+  setContact: (sessionId: string, contactUrl: string) =>
+    api.put<{ data: SessionView }>(`/api/sessions/${sessionId}/contact`, { contact_url: contactUrl }),
   setTimes: (
     sessionId: string,
     times: { start_at: string; end_at: string; queue_open_at: string }
