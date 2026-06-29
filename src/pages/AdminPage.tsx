@@ -83,6 +83,10 @@ export function AdminPage() {
     mutationFn: (orgId: string) => adminApi.deleteOrg(orgId),
     onSuccess: invalidate,
   })
+  const renameOrg = useMutation({
+    mutationFn: (v: { orgId: string; name: string }) => adminApi.renameOrg(v.orgId, v.name),
+    onSuccess: invalidate,
+  })
   const toggleDisabled = useMutation({
     mutationFn: (v: { orgId: string; disabled: boolean }) => adminApi.setDisabled(v.orgId, v.disabled),
     onSuccess: invalidate,
@@ -200,6 +204,15 @@ export function AdminPage() {
                     </button>
                     {o.role !== 'superadmin' && (
                       <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          onClick={() => {
+                            const n = window.prompt('新團名', o.org_name)?.trim()
+                            if (n) renameOrg.mutate({ orgId: o.org_id, name: n })
+                          }}
+                          className="text-xs font-semibold text-gray-500"
+                        >
+                          改名
+                        </button>
                         <button onClick={() => impersonate(o.org_id)} className="text-xs font-semibold text-brand-pink">
                           以此身份
                         </button>

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { isUpdateAvailable, forceUpdate } from '../lib/appUpdate'
 
-// Polls /version.json and, when a newer build is deployed, shows a banner so the
-// leader KNOWS a new version exists (a manual refresh button alone isn't enough —
-// they'd never know when to press it). Checks on mount, every 2 min, and whenever
-// the tab regains focus (covers PWAs resumed from background).
+// Polls /version.json and, when a newer build is deployed, shows a prominent
+// banner so the user KNOWS a new version exists and is nudged to update. Checks
+// on mount, every 2 min, and whenever the tab regains focus (PWAs resumed from
+// background).
 export function UpdateBanner() {
   const [show, setShow] = useState(false)
 
@@ -28,13 +28,17 @@ export function UpdateBanner() {
 
   if (!show) return null
   return (
-    <div className="fixed bottom-0 inset-x-0 z-[80] bg-brand-pink text-white px-4 py-3 flex items-center justify-between gap-3 shadow-lg">
-      <span className="text-sm font-bold">✨ 有新版本可以更新囉</span>
+    <div className="fixed top-0 inset-x-0 z-[90] px-3 py-3 bg-gradient-to-r from-brand-pink to-amber-400
+      text-white shadow-xl flex items-center justify-center gap-3">
+      <span className="text-sm sm:text-base font-extrabold animate-pulse">✨ 有新版本可以用囉!</span>
       <button
         onClick={() => forceUpdate()}
-        className="bg-white text-brand-pink text-sm font-extrabold rounded-full px-4 py-1.5 shrink-0 active:scale-95"
+        className="relative bg-white text-brand-pink text-sm font-extrabold rounded-full
+          px-5 py-2 shadow active:scale-95"
       >
-        立即更新
+        {/* pulsing ring to draw the eye */}
+        <span className="absolute inset-0 rounded-full ring-2 ring-white/70 animate-ping" />
+        🔄 立即更新
       </button>
     </div>
   )

@@ -86,6 +86,7 @@ export function SessionManagePage() {
   const [onlyUnpaid, setOnlyUnpaid] = useState(false)
   const [addFilter, setAddFilter] = useState('')
   const [board, setBoard] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   const joinUrl = `${BOOKING_URL}/?s=${sid}`
 
@@ -195,16 +196,37 @@ export function SessionManagePage() {
         </button>
         {board && <SeatingBoard sessionId={sid} onClose={() => setBoard(false)} />}
 
-        {/* gate code — view + change */}
-        <PasswordCard sessionId={sid} />
-
-        {/* play window + queue-open time — view + change */}
-        <TimesCard
-          sessionId={sid}
-          startAt={session?.start_at}
-          endAt={session?.end_at}
-          queueOpenAt={session?.queue_open_at}
-        />
+        {/* settings (gate code + times) tucked into a modal so the page stays short */}
+        <button onClick={() => setSettingsOpen(true)} className="btn-secondary w-full text-sm">
+          ⚙️ 設定(密碼 / 時間)
+        </button>
+        {settingsOpen && (
+          <div
+            className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
+            onClick={() => setSettingsOpen(false)}
+          >
+            <div
+              className="w-full max-w-sm space-y-3 max-h-[88vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setSettingsOpen(false)}
+                  className="text-white font-bold text-sm bg-black/30 rounded-full px-3 py-1"
+                >
+                  ✕ 關閉
+                </button>
+              </div>
+              <PasswordCard sessionId={sid} />
+              <TimesCard
+                sessionId={sid}
+                startAt={session?.start_at}
+                endAt={session?.end_at}
+                queueOpenAt={session?.queue_open_at}
+              />
+            </div>
+          </div>
+        )}
 
         {/* people in this session */}
         <div className="card space-y-3">
@@ -564,7 +586,7 @@ export function SessionManagePage() {
         {/* 團主操作紀錄 */}
         <ActionLogPanel sessionId={sid} />
 
-        <p className="text-center text-xs text-gray-300">⚡ 即時更新(WebSocket) · 已報到 {players?.length ?? 0} 人</p>
+        <p className="text-center text-xs text-gray-300">⚡ 即時同步 · 已報到 {players?.length ?? 0} 人</p>
       </div>
     </div>
   )

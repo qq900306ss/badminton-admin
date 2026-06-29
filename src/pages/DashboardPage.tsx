@@ -54,6 +54,20 @@ export function DashboardPage() {
     mutationFn: (sessionId: string) => sessionApi.hide(sessionId),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['my-sessions'] }),
   })
+
+  // 改團名
+  const [orgName, setOrgName] = useState(org?.org_name ?? '')
+  const [renameOpen, setRenameOpen] = useState(false)
+  const [nameInput, setNameInput] = useState('')
+  const rename = useMutation({
+    mutationFn: (name: string) => sessionApi.renameMyOrg(name),
+    onSuccess: (r) => {
+      const updated = r.data.data
+      setOrgName(updated.org_name)
+      localStorage.setItem('org', JSON.stringify(updated)) // keep cached org in sync
+      setRenameOpen(false)
+    },
+  })
   const openSessions = (mySessions ?? []).filter((s) => s.status === 'open')
   const pastSessions = (mySessions ?? [])
     .filter((s) => s.status !== 'open')
@@ -139,7 +153,16 @@ export function DashboardPage() {
               管理員
             </button>
           )}
-          <span className="text-sm text-gray-500">{org?.org_name}</span>
+          <button
+            onClick={() => {
+              setNameInput(orgName)
+              setRenameOpen(true)
+            }}
+            className="text-sm text-gray-500 hover:text-brand-pink"
+            title="改團名"
+          >
+            {orgName} ✏️
+          </button>
           <button
             onClick={() => {
               localStorage.clear()
@@ -151,6 +174,41 @@ export function DashboardPage() {
           </button>
         </div>
       </header>
+
+      {renameOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-6"
+          onClick={() => setRenameOpen(false)}
+        >
+          <div className="card w-full max-w-sm space-y-3" onClick={(e) => e.stopPropagation()}>
+            <p className="font-extrabold text-gray-700">改團名</p>
+            <input
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && nameInput.trim()) rename.mutate(nameInput.trim())
+              }}
+              maxLength={40}
+              autoFocus
+              placeholder="輸入新團名"
+              className="w-full border-2 border-gray-200 rounded-2xl px-4 py-2.5 text-sm
+                focus:outline-none focus:border-brand-pink"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => rename.mutate(nameInput.trim())}
+                disabled={!nameInput.trim() || rename.isPending}
+                className="btn-primary flex-1 text-sm disabled:opacity-40"
+              >
+                {rename.isPending ? '儲存中…' : '儲存'}
+              </button>
+              <button onClick={() => setRenameOpen(false)} className="btn-secondary px-4 text-sm">
+                取消
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-md mx-auto p-4 space-y-4">
         {/* my ongoing sessions */}

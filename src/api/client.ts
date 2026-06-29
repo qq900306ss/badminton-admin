@@ -130,6 +130,7 @@ export const sessionApi = {
     api.post<{ data: { session_id: string } }>('/api/sessions', input),
   mySessions: () => api.get<{ data: SessionSummary[] }>('/api/my/sessions'),
   sendFeedback: (message: string) => api.post('/api/my/feedback', { message }),
+  renameMyOrg: (orgName: string) => api.put<{ data: Org }>('/api/my/org', { org_name: orgName }),
   games: (sessionId: string) =>
     api.get<{ data: GameLog[] }>(`/api/sessions/${sessionId}/games`),
   actionLogs: (sessionId: string) =>
@@ -213,6 +214,8 @@ export const adminApi = {
   createOrg: (email: string, orgName: string) =>
     api.post<{ data: Org }>('/api/admin/orgs', { email, org_name: orgName }),
   deleteOrg: (orgId: string) => api.delete(`/api/admin/orgs/${orgId}`),
+  renameOrg: (orgId: string, orgName: string) =>
+    api.post<{ data: Org }>(`/api/admin/orgs/${orgId}/name`, { org_name: orgName }),
   setDisabled: (orgId: string, disabled: boolean) =>
     api.post<{ data: Org }>(`/api/admin/orgs/${orgId}/disabled`, { disabled }),
   impersonate: (orgId: string) =>
