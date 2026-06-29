@@ -11,7 +11,6 @@ import { ActionLogPanel } from '../components/ActionLogPanel'
 import { SessionSummary } from '../components/SessionSummary'
 import { PasswordCard } from '../components/PasswordCard'
 import { TimesCard } from '../components/TimesCard'
-import { SessionTitleCard } from '../components/SessionTitleCard'
 import { SeatingBoard } from '../components/SeatingBoard'
 import { useConfirm } from '../components/Confirm'
 import { CourtSkeleton } from '../components/Skeleton'
@@ -102,6 +101,24 @@ export function SessionManagePage() {
   const [addFilter, setAddFilter] = useState('')
   const [board, setBoard] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [editTitle, setEditTitle] = useState(false)
+  const [titleInput, setTitleInput] = useState('')
+  const [savingTitle, setSavingTitle] = useState(false)
+
+  async function saveTitle() {
+    const t = titleInput.trim()
+    if (!t) return
+    setSavingTitle(true)
+    try {
+      await sessionApi.setTitle(sid, t)
+      qc.invalidateQueries({ queryKey: ['session', sid] })
+      setEditTitle(false)
+    } catch {
+      /* keep editing on failure */
+    } finally {
+      setSavingTitle(false)
+    }
+  }
 
   const joinUrl = `${BOOKING_URL}/?s=${sid}`
 
@@ -150,6 +167,42 @@ export function SessionManagePage() {
       )}
 
       <div className="max-w-2xl mx-auto p-4 space-y-4">
+        {/* editable 開團名稱 — tap to rename (this is what 臨打人 see) */}
+        {editTitle ? (
+          <div className="flex gap-2">
+            <input
+              value={titleInput}
+              onChange={(e) => setTitleInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') saveTitle()
+                if (e.key === 'Escape') setEditTitle(false)
+              }}
+              maxLength={40}
+              autoFocus
+              className="flex-1 text-xl font-extrabold border-2 border-brand-pink rounded-2xl px-3 py-1.5
+                focus:outline-none"
+            />
+            <button onClick={saveTitle} disabled={!titleInput.trim() || savingTitle} className="btn-primary px-4 text-sm disabled:opacity-40">
+              {savingTitle ? '…' : '儲存'}
+            </button>
+            <button onClick={() => setEditTitle(false)} className="btn-secondary px-3 text-sm">取消</button>
+          </div>
+        ) : (
+          <button
+            onClick={() => {
+              setTitleInput(session?.title ?? '')
+              setEditTitle(true)
+            }}
+            className="flex items-center gap-2 text-left group"
+            title="點一下改開團名稱"
+          >
+            <span className="text-xl font-extrabold text-gray-800">
+              {session?.title?.trim() ? session.title : '未命名開團'}
+            </span>
+            <span className="text-gray-300 group-hover:text-brand-pink text-base">✏️</span>
+          </button>
+        )}
+
         {/* QR code share */}
         <div className="card">
           <button
@@ -232,7 +285,6 @@ export function SessionManagePage() {
                   ✕ 關閉
                 </button>
               </div>
-              <SessionTitleCard sessionId={sid} title={session?.title} />
               <PasswordCard sessionId={sid} />
               <TimesCard
                 sessionId={sid}
