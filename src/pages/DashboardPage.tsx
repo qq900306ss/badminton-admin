@@ -8,6 +8,7 @@ import { TimeSelect } from '../components/TimeSelect'
 import { useConfirm } from '../components/Confirm'
 import { ChangelogButton } from '../components/ChangelogButton'
 import { HelpButton } from '../components/HelpButton'
+import { OrgAvatarCard } from '../components/OrgAvatarCard'
 import { forceUpdate } from '../lib/appUpdate'
 import { TW_CITIES } from '../lib/twCities'
 import { TW_DISTRICTS } from '../lib/twDistricts'
@@ -169,7 +170,7 @@ export function DashboardPage() {
           className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-6"
           onClick={() => setSettingsOpen(false)}
         >
-          <div className="w-full max-w-sm space-y-3" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-sm space-y-3 max-h-[88vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-end">
               <button
                 onClick={() => setSettingsOpen(false)}
@@ -178,6 +179,7 @@ export function DashboardPage() {
                 ✕ 關閉
               </button>
             </div>
+            <OrgAvatarCard org={org} />
             <div className="card grid grid-cols-2 gap-2">
               <HelpButton className="btn-secondary text-sm col-span-2" />
               <ChangelogButton className="btn-secondary text-sm" />

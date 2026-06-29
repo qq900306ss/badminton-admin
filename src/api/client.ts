@@ -27,6 +27,7 @@ export interface Org {
   org_id: string
   google_email: string
   org_name: string
+  avatar_url?: string // 團主頭像(emoji 或照片網址),空=預設 🐰
   role: 'superadmin' | 'leader'
   disabled?: boolean
 }
@@ -135,6 +136,13 @@ export const sessionApi = {
   mySessions: () => api.get<{ data: SessionSummary[] }>('/api/my/sessions'),
   sendFeedback: (message: string) => api.post('/api/my/feedback', { message }),
   renameMyOrg: (orgName: string) => api.put<{ data: Org }>('/api/my/org', { org_name: orgName }),
+  setMyOrgAvatar: (avatarUrl: string) =>
+    api.put<{ data: Org }>('/api/my/org/avatar', { avatar_url: avatarUrl }),
+  orgAvatarUploadUrl: (contentType: string) =>
+    api.post<{ data: { upload_url: string; public_url: string } }>(
+      '/api/my/org/avatar-upload-url',
+      { content_type: contentType }
+    ),
   games: (sessionId: string) =>
     api.get<{ data: GameLog[] }>(`/api/sessions/${sessionId}/games`),
   actionLogs: (sessionId: string) =>
