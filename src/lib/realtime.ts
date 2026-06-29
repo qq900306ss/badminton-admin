@@ -1,7 +1,7 @@
 // real-time: connect to a session's WebSocket room; the server nudges on any
 // change (with a `scope` saying WHAT changed) so the leader's view updates
 // instantly + surgically. Auto-reconnects.
-export type RTNudge = { t?: string; scope?: 'court' | 'player' | 'game' | 'all' }
+export type RTNudge = { t?: string; scope?: 'court' | 'player' | 'game' | 'session' | 'all' }
 export function connectSessionWS(sessionId: string, onChange: (m: RTNudge) => void): () => void {
   const base = (import.meta.env.VITE_API_URL || '').replace(/^http/, 'ws')
   if (!base || !sessionId) return () => {}

@@ -70,7 +70,7 @@ export function SessionManagePage() {
       const inval = (k: string) => qc.invalidateQueries({ queryKey: [k, sid] })
       const scope = m.scope ?? 'all'
       // refetch only what actually changed (server tells us via scope)
-      if (scope === 'court') {
+      if (scope === 'court' || scope === 'session') {
         inval('session')
       } else if (scope === 'player') {
         inval('session') // names/levels also render on court
