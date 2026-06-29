@@ -74,15 +74,23 @@ export function AdminPage() {
       if (!q) return true
       return (s.title || '').includes(q) || orgNameOf(s.org_id).includes(q)
     })
-  const shownPlayers = (players ?? []).filter((p) => {
-    const q = playerSearch.trim()
-    if (!q) return true
-    return (
-      (p.display_name || '').includes(q) ||
-      (p.join_name || '').includes(q) ||
-      (p.email || '').includes(q)
+  const shownPlayers = (players ?? [])
+    .filter((p) => {
+      const q = playerSearch.trim()
+      if (!q) return true
+      return (
+        (p.display_name || '').includes(q) ||
+        (p.join_name || '').includes(q) ||
+        (p.email || '').includes(q)
+      )
+    })
+    .sort((a, b) =>
+      // 依名字排序(中文用 zh-Hant 排序規則),以現用名稱為主、退回登入名
+      (a.join_name || a.display_name || '').localeCompare(
+        b.join_name || b.display_name || '',
+        'zh-Hant'
+      )
     )
-  })
   // jump from a stat card straight to the relevant view
   const goSessions = (status: 'all' | 'open') => {
     setSelectedOrg(null)
