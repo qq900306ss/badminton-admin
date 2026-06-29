@@ -170,6 +170,8 @@ export const sessionApi = {
     api.get<{ data: { password: string } }>(`/api/sessions/${sessionId}/password`),
   setPassword: (sessionId: string, password: string) =>
     api.put<{ data: { password: string } }>(`/api/sessions/${sessionId}/password`, { password }),
+  setTitle: (sessionId: string, title: string) =>
+    api.put<{ data: SessionView }>(`/api/sessions/${sessionId}/title`, { title }),
   setTimes: (
     sessionId: string,
     times: { start_at: string; end_at: string; queue_open_at: string }

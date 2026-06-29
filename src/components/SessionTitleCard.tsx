@@ -1,35 +1,25 @@
 import { useState } from 'react'
-import { sessionApi, type Org } from '../api/client'
+import { useQueryClient } from '@tanstack/react-query'
+import { sessionApi } from '../api/client'
 
-function readOrg(): Org | null {
-  try {
-    return JSON.parse(localStorage.getItem('org') || 'null')
-  } catch {
-    return null
-  }
-}
-
-// Leader edits their own team name. Lives inside the ⚙️ settings modal. Keeps the
-// cached `org` in localStorage in sync and notifies the parent so the header
-// updates live.
-export function OrgNameCard({ onRenamed }: { onRenamed?: (name: string) => void }) {
-  const [name, setName] = useState(readOrg()?.org_name ?? '')
+// Rename the 開團 — this is the title 臨打人 see (lobby / 進場 / 球場頁). Lives in
+// the session's ⚙️ settings modal. Invalidates the session query so the new name
+// shows everywhere immediately.
+export function SessionTitleCard({ sessionId, title }: { sessionId: string; title?: string }) {
+  const qc = useQueryClient()
   const [editing, setEditing] = useState(false)
   const [input, setInput] = useState('')
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState('')
 
   async function save() {
-    const n = input.trim()
-    if (!n) return
+    const t = input.trim()
+    if (!t) return
     setSaving(true)
     setErr('')
     try {
-      const r = await sessionApi.renameMyOrg(n)
-      const updated = r.data.data
-      localStorage.setItem('org', JSON.stringify(updated))
-      setName(updated.org_name)
-      onRenamed?.(updated.org_name)
+      await sessionApi.setTitle(sessionId, t)
+      qc.invalidateQueries({ queryKey: ['session', sessionId] })
       setEditing(false)
     } catch (e: unknown) {
       const m = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
@@ -41,13 +31,13 @@ export function OrgNameCard({ onRenamed }: { onRenamed?: (name: string) => void 
 
   return (
     <div className="card space-y-3">
-      <span className="font-bold text-gray-700">👥 團名</span>
+      <span className="font-bold text-gray-700">🏷️ 開團名稱(臨打人看到的)</span>
       {!editing ? (
         <div className="flex items-center gap-2">
-          <span className="flex-1 font-bold text-gray-700 truncate">{name || '(未命名)'}</span>
+          <span className="flex-1 font-bold text-gray-700 truncate">{title || '(未命名)'}</span>
           <button
             onClick={() => {
-              setInput(name)
+              setInput(title ?? '')
               setErr('')
               setEditing(true)
             }}
@@ -66,7 +56,7 @@ export function OrgNameCard({ onRenamed }: { onRenamed?: (name: string) => void 
             }}
             maxLength={40}
             autoFocus
-            placeholder="輸入新團名"
+            placeholder="例如 週六晚雙打團"
             className="w-full border-2 border-gray-200 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-pink"
           />
           {err && <p className="text-red-400 text-xs">{err}</p>}

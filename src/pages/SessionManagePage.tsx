@@ -11,7 +11,7 @@ import { ActionLogPanel } from '../components/ActionLogPanel'
 import { SessionSummary } from '../components/SessionSummary'
 import { PasswordCard } from '../components/PasswordCard'
 import { TimesCard } from '../components/TimesCard'
-import { OrgNameCard } from '../components/OrgNameCard'
+import { SessionTitleCard } from '../components/SessionTitleCard'
 import { SeatingBoard } from '../components/SeatingBoard'
 import { useConfirm } from '../components/Confirm'
 import { CourtSkeleton } from '../components/Skeleton'
@@ -232,7 +232,7 @@ export function SessionManagePage() {
                   ✕ 關閉
                 </button>
               </div>
-              <OrgNameCard />
+              <SessionTitleCard sessionId={sid} title={session?.title} />
               <PasswordCard sessionId={sid} />
               <TimesCard
                 sessionId={sid}

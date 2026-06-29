@@ -6,7 +6,6 @@ import { sessionApi, type Org } from '../api/client'
 import { InstallButton } from '../components/InstallButton'
 import { TimeSelect } from '../components/TimeSelect'
 import { useConfirm } from '../components/Confirm'
-import { OrgNameCard } from '../components/OrgNameCard'
 import { ChangelogButton } from '../components/ChangelogButton'
 import { forceUpdate } from '../lib/appUpdate'
 import { TW_CITIES } from '../lib/twCities'
@@ -57,8 +56,6 @@ export function DashboardPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['my-sessions'] }),
   })
 
-  // 團隊設定(目前:改團名)
-  const [orgName, setOrgName] = useState(org?.org_name ?? '')
   const [settingsOpen, setSettingsOpen] = useState(false)
   const openSessions = (mySessions ?? []).filter((s) => s.status === 'open')
   const pastSessions = (mySessions ?? [])
@@ -129,7 +126,7 @@ export function DashboardPage() {
       <header className="bg-white shadow-sm px-4 py-3 flex items-center justify-between gap-2 sticky top-0 z-10">
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-2xl shrink-0">🏸</span>
-          <span className="font-extrabold text-gray-800 truncate">{orgName || '團主後台'}</span>
+          <span className="font-extrabold text-gray-800 truncate">團主後台</span>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           {org?.role === 'superadmin' && (
@@ -170,7 +167,6 @@ export function DashboardPage() {
                 ✕ 關閉
               </button>
             </div>
-            <OrgNameCard onRenamed={setOrgName} />
             <div className="card grid grid-cols-2 gap-2">
               <ChangelogButton className="btn-secondary text-sm" />
               <FeedbackButton className="btn-secondary text-sm" />
