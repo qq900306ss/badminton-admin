@@ -7,6 +7,7 @@ import { SessionManagePage } from './pages/SessionManagePage'
 import { AdminPage } from './pages/AdminPage'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { ConnectionBanner } from './components/ConnectionBanner'
+import { UpdateBanner } from './components/UpdateBanner'
 import { ConfirmProvider } from './components/Confirm'
 
 const qc = new QueryClient()
@@ -23,6 +24,7 @@ export default function App() {
       <ErrorBoundary>
       <ConfirmProvider>
       <ConnectionBanner />
+      <UpdateBanner />
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
