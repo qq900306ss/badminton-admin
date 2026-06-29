@@ -224,8 +224,12 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
     .slice()
     .sort((a, b) => Number(b.claimed) - Number(a.claimed) || a.games - b.games || a.display_name.localeCompare(b.display_name))
 
+  // ignore taps while a seat/unseat is in flight → no duplicate mutations
+  const busy =
+    seatPlaying.isPending || seatQueue.isPending || unseatPlaying.isPending || unseatQueue.isPending
+
   function pick(playerId: string) {
-    if (!picker) return
+    if (!picker || busy) return
     if (picker.position != null) {
       seatPlaying.mutate({ courtId: picker.courtId, playerId, position: picker.position }, { onError: onErr })
     } else {
@@ -235,9 +239,11 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
   }
   function tapFilledPlayer(courtId: string, playerId: string, removable: boolean) {
     if (!removable) { setMsg('進行中(滿 4 人),不能換下 — 請按「結束換場」'); return }
+    if (busy) return
     unseatPlaying.mutate({ courtId, playerId }, { onError: onErr })
   }
   function tapQueuedPlayer(courtId: string, playerId: string) {
+    if (busy) return
     unseatQueue.mutate({ courtId, playerId }, { onError: onErr })
   }
 

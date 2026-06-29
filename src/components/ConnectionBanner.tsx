@@ -12,9 +12,15 @@ export function ConnectionBanner() {
     window.addEventListener('offline', offline)
 
     const unsub = qc.getQueryCache().subscribe((event) => {
-      const t = (event as { action?: { type?: string } })?.action?.type
-      if (t === 'error') setDown(true)
-      else if (t === 'success') setDown(false)
+      const action = (event as { action?: { type?: string; error?: unknown } })?.action
+      if (action?.type === 'error') {
+        // only treat genuine network failures as "連線不穩" — a 401/404/500 has a
+        // response and means a data/auth problem, not a flaky connection
+        const hasResponse = !!(action.error as { response?: unknown })?.response
+        if (!hasResponse) setDown(true)
+      } else if (action?.type === 'success') {
+        setDown(false)
+      }
     })
 
     return () => {

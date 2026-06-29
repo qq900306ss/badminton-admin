@@ -424,7 +424,8 @@ export function SessionManagePage() {
                   setNewName('')
                 }
               }}
-              className="btn-primary px-4 py-2 text-sm"
+              disabled={addPlayer.isPending}
+              className="btn-primary px-4 py-2 text-sm disabled:opacity-40"
             >
               加入
             </button>

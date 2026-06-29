@@ -7,6 +7,7 @@ import { InstallButton } from '../components/InstallButton'
 import { TimeSelect } from '../components/TimeSelect'
 import { useConfirm } from '../components/Confirm'
 import { TW_CITIES } from '../lib/twCities'
+import { TW_DISTRICTS } from '../lib/twDistricts'
 
 // tolerate corrupted localStorage without crashing the whole page
 function readOrg(): Org | null {
@@ -229,7 +230,10 @@ export function DashboardPage() {
               <span className="text-sm font-bold text-gray-600">縣市</span>
               <select
                 value={city}
-                onChange={(e) => setCity(e.target.value)}
+                onChange={(e) => {
+                  setCity(e.target.value)
+                  setDistrict('') // 換縣市就清掉舊的區
+                }}
                 className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-3 py-2.5 bg-white
                   focus:outline-none focus:border-brand-pink"
               >
@@ -240,13 +244,27 @@ export function DashboardPage() {
             </label>
             <label className="block flex-1">
               <span className="text-sm font-bold text-gray-600">區</span>
-              <input
-                value={district}
-                onChange={(e) => setDistrict(e.target.value)}
-                placeholder="例如 西屯區"
-                className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-3 py-2.5
-                  focus:outline-none focus:border-brand-pink"
-              />
+              {TW_DISTRICTS[city] ? (
+                <select
+                  value={district}
+                  onChange={(e) => setDistrict(e.target.value)}
+                  className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-3 py-2.5 bg-white
+                    focus:outline-none focus:border-brand-pink"
+                >
+                  <option value="">選擇區</option>
+                  {TW_DISTRICTS[city].map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  value={district}
+                  onChange={(e) => setDistrict(e.target.value)}
+                  placeholder="例如 竹北市"
+                  className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-3 py-2.5
+                    focus:outline-none focus:border-brand-pink"
+                />
+              )}
             </label>
           </div>
           <label className="block">

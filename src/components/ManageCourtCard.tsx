@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { CourtView, PlayerSlot } from '../api/client'
 import { tierOf } from '../lib/levels'
 import { isPhotoUrl } from '../lib/avatar'
@@ -54,6 +54,11 @@ function Chip({ slot, onKick }: { slot: PlayerSlot; onKick: () => void }) {
 export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onRemove }: Props) {
   const [editing, setEditing] = useState(false)
   const [nameInput, setNameInput] = useState(court.name ?? '')
+  // keep the field in sync with live data when not actively editing (a WS rename
+  // from elsewhere shouldn't be silently overwritten by a stale input)
+  useEffect(() => {
+    if (!editing) setNameInput(court.name ?? '')
+  }, [court.name, editing])
   const title = court.name?.trim() ? court.name : `場地 ${court.court_num}`
   const playing = court.playing.filter((p) => p.player_id) // 去掉空位
   const filled = playing.length
