@@ -1,9 +1,11 @@
 import { InstallButton } from '../components/InstallButton'
+import { isInAppBrowser } from '../lib/inAppBrowser'
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 const REDIRECT_URI = `${location.origin}/auth/callback`
 
 export function LoginPage() {
+  const inApp = isInAppBrowser()
   function loginWithGoogle() {
     const params = new URLSearchParams({
       client_id: CLIENT_ID,
@@ -23,6 +25,21 @@ export function LoginPage() {
         <h1 className="text-3xl font-extrabold text-gray-800">羽球場地管理</h1>
         <p className="text-gray-400 mt-2">團主後台</p>
       </div>
+      {inApp && (
+        <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-3 mb-5 max-w-xs text-left space-y-2">
+          <p className="text-sm font-bold text-amber-700">⚠️ 請用瀏覽器開啟才能登入</p>
+          <p className="text-xs text-amber-600">
+            你現在是從 App 內建瀏覽器(Threads/IG/LINE…)開啟的,Google 登入會被擋。請點右上「⋯」或分享鍵 →
+            選「在瀏覽器開啟 / 用 Safari 開啟」後再登入。
+          </p>
+          <button
+            onClick={() => navigator.clipboard?.writeText(window.location.href)}
+            className="text-xs font-bold text-amber-700 underline"
+          >
+            📋 複製網址(貼到瀏覽器開)
+          </button>
+        </div>
+      )}
       <button
         onClick={loginWithGoogle}
         className="bg-white shadow-md rounded-2xl px-6 py-3 flex items-center gap-3
