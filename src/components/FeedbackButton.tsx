@@ -3,7 +3,7 @@ import { sessionApi } from '../api/client'
 
 // Leader feedback: a small button that opens a textarea modal and posts to
 // /my/feedback (super admin reads it). Self-contained.
-export function FeedbackButton() {
+export function FeedbackButton({ className = '' }: { className?: string }) {
   const [open, setOpen] = useState(false)
   const [msg, setMsg] = useState('')
   const [sending, setSending] = useState(false)
@@ -35,7 +35,7 @@ export function FeedbackButton() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="text-xs font-bold text-gray-400 hover:text-brand-pink"
+        className={className || 'text-xs font-bold text-gray-400 hover:text-brand-pink'}
       >
         💬 意見回饋
       </button>

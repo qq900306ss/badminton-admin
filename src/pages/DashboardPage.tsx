@@ -126,38 +126,30 @@ export function DashboardPage() {
           <button onClick={stopImpersonating} className="underline font-bold">返回管理員</button>
         </div>
       )}
-      <header className="bg-white shadow-sm px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🏸</span>
-          <span className="font-extrabold text-gray-800">團主後台</span>
+      <header className="bg-white shadow-sm px-4 py-3 flex items-center justify-between gap-2 sticky top-0 z-10">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-2xl shrink-0">🏸</span>
+          <span className="font-extrabold text-gray-800 truncate">{orgName || '團主後台'}</span>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => forceUpdate()}
-            title="清除快取、更新到最新版"
-            className="text-xs font-bold text-gray-400 hover:text-brand-pink"
-          >
-            🔄 更新
-          </button>
-          <FeedbackButton />
+        <div className="flex items-center gap-3 shrink-0">
           {org?.role === 'superadmin' && (
-            <button onClick={() => nav('/admin')} className="text-sm font-semibold text-brand-pink">
+            <button onClick={() => nav('/admin')} className="text-sm font-semibold text-brand-pink whitespace-nowrap">
               管理員
             </button>
           )}
           <button
             onClick={() => setSettingsOpen(true)}
-            className="text-sm text-gray-500 hover:text-brand-pink"
+            className="text-sm text-gray-500 hover:text-brand-pink whitespace-nowrap"
             title="設定"
           >
-            {orgName} ⚙️
+            ⚙️ 設定
           </button>
           <button
             onClick={() => {
               localStorage.clear()
               nav('/login')
             }}
-            className="text-sm text-gray-400"
+            className="text-sm text-gray-400 whitespace-nowrap"
           >
             登出
           </button>
@@ -179,7 +171,17 @@ export function DashboardPage() {
               </button>
             </div>
             <OrgNameCard onRenamed={setOrgName} />
-            <ChangelogButton className="btn-secondary w-full text-sm" />
+            <div className="card grid grid-cols-2 gap-2">
+              <ChangelogButton className="btn-secondary text-sm" />
+              <FeedbackButton className="btn-secondary text-sm" />
+              <button
+                onClick={() => forceUpdate()}
+                className="btn-secondary text-sm col-span-2"
+                title="清除快取、更新到最新版"
+              >
+                🔄 更新到最新版
+              </button>
+            </div>
           </div>
         </div>
       )}
