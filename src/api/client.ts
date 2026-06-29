@@ -64,6 +64,8 @@ export interface GameLog {
 export interface SessionView {
   session_id: string
   title?: string
+  city?: string
+  district?: string
   num_courts: number
   status: string
   start_at?: string
@@ -172,6 +174,8 @@ export const sessionApi = {
     api.put<{ data: { password: string } }>(`/api/sessions/${sessionId}/password`, { password }),
   setTitle: (sessionId: string, title: string) =>
     api.put<{ data: SessionView }>(`/api/sessions/${sessionId}/title`, { title }),
+  setLocation: (sessionId: string, city: string, district: string) =>
+    api.put<{ data: SessionView }>(`/api/sessions/${sessionId}/location`, { city, district }),
   setTimes: (
     sessionId: string,
     times: { start_at: string; end_at: string; queue_open_at: string }
