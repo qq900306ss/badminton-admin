@@ -179,7 +179,7 @@ export function SessionManagePage() {
                 if (e.key === 'Enter') saveTitle()
                 if (e.key === 'Escape') setEditTitle(false)
               }}
-              maxLength={40}
+              maxLength={20}
               autoFocus
               className="flex-1 text-xl font-extrabold border-2 border-brand-pink rounded-2xl px-3 py-1.5
                 focus:outline-none"

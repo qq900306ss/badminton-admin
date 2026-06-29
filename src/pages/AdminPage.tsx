@@ -35,6 +35,8 @@ export function AdminPage() {
   const [tab, setTab] = useState<Tab>('orgs')
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null) // filter sessions by leader
   const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'closed'>('all')
+  const [citySel, setCitySel] = useState('')
+  const [distSel, setDistSel] = useState('')
   const [sessionSearch, setSessionSearch] = useState('')
   const [playerSearch, setPlayerSearch] = useState('')
   const [email, setEmail] = useState('')
@@ -66,9 +68,16 @@ export function AdminPage() {
     .slice()
     .sort((a, b) => (b.opened_at || '').localeCompare(a.opened_at || ''))
   const openCount = sessions.filter((s) => s.status === 'open').length
+  // 縣市 / 區 選項從實際開團資料推導(只列有開團的地區)
+  const cityOpts = [...new Set(sessions.map((s) => s.city).filter(Boolean))] as string[]
+  const distOpts = [
+    ...new Set(sessions.filter((s) => !citySel || s.city === citySel).map((s) => s.district).filter(Boolean)),
+  ] as string[]
   const shownSessions = sessions
     .filter((s) => (selectedOrg ? s.org_id === selectedOrg : true))
     .filter((s) => (statusFilter === 'all' ? true : s.status === statusFilter))
+    .filter((s) => (citySel ? s.city === citySel : true))
+    .filter((s) => (distSel ? s.district === distSel : true))
     .filter((s) => {
       const q = sessionSearch.trim()
       if (!q) return true
@@ -309,6 +318,23 @@ export function AdminPage() {
                   <option value="all">全部狀態</option>
                   <option value="open">進行中</option>
                   <option value="closed">已結束</option>
+                </select>
+                <select
+                  value={citySel}
+                  onChange={(e) => { setCitySel(e.target.value); setDistSel('') }}
+                  className="border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm bg-white focus:outline-none focus:border-brand-pink"
+                >
+                  <option value="">全部縣市</option>
+                  {cityOpts.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <select
+                  value={distSel}
+                  onChange={(e) => setDistSel(e.target.value)}
+                  disabled={distOpts.length === 0}
+                  className="border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm bg-white disabled:opacity-40 focus:outline-none focus:border-brand-pink"
+                >
+                  <option value="">全部區</option>
+                  {distOpts.map((d) => <option key={d} value={d}>{d}</option>)}
                 </select>
                 <input
                   value={sessionSearch}

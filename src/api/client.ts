@@ -94,6 +94,8 @@ export interface SessionSummary {
   session_id: string
   org_id: string
   title: string
+  city?: string
+  district?: string
   num_courts: number
   status: string
   start_at?: string
