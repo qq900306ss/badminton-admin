@@ -17,6 +17,9 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request
   if (req.method !== 'GET') return
+  // never cache API calls or the version check — always hit the network so we
+  // don't serve stale session/court data; the app handles offline itself.
+  if (req.url.includes('/api/') || req.url.includes('/version.json')) return
   e.respondWith(
     fetch(req)
       .then((res) => {

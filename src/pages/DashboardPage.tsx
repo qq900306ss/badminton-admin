@@ -7,6 +7,7 @@ import { InstallButton } from '../components/InstallButton'
 import { TimeSelect } from '../components/TimeSelect'
 import { useConfirm } from '../components/Confirm'
 import { OrgNameCard } from '../components/OrgNameCard'
+import { ChangelogButton } from '../components/ChangelogButton'
 import { forceUpdate } from '../lib/appUpdate'
 import { TW_CITIES } from '../lib/twCities'
 import { TW_DISTRICTS } from '../lib/twDistricts'
@@ -178,6 +179,7 @@ export function DashboardPage() {
               </button>
             </div>
             <OrgNameCard onRenamed={setOrgName} />
+            <ChangelogButton className="btn-secondary w-full text-sm" />
           </div>
         </div>
       )}
