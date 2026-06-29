@@ -6,6 +6,7 @@ import { sessionApi, type Org } from '../api/client'
 import { InstallButton } from '../components/InstallButton'
 import { TimeSelect } from '../components/TimeSelect'
 import { useConfirm } from '../components/Confirm'
+import { forceUpdate } from '../lib/appUpdate'
 import { TW_CITIES } from '../lib/twCities'
 import { TW_DISTRICTS } from '../lib/twDistricts'
 
@@ -125,6 +126,13 @@ export function DashboardPage() {
           <span className="font-extrabold text-gray-800">團主後台</span>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => forceUpdate()}
+            title="清除快取、更新到最新版"
+            className="text-xs font-bold text-gray-400 hover:text-brand-pink"
+          >
+            🔄 更新
+          </button>
           <FeedbackButton />
           {org?.role === 'superadmin' && (
             <button onClick={() => nav('/admin')} className="text-sm font-semibold text-brand-pink">
