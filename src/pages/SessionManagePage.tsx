@@ -11,6 +11,7 @@ import { ActionLogPanel } from '../components/ActionLogPanel'
 import { SessionSummary } from '../components/SessionSummary'
 import { PasswordCard } from '../components/PasswordCard'
 import { TimesCard } from '../components/TimesCard'
+import { OrgNameCard } from '../components/OrgNameCard'
 import { SeatingBoard } from '../components/SeatingBoard'
 import { useConfirm } from '../components/Confirm'
 import { CourtSkeleton } from '../components/Skeleton'
@@ -66,11 +67,25 @@ export function SessionManagePage() {
   // polling.
   useEffect(() => {
     if (!sid) return
-    return connectSessionWS(sid, () => {
-      qc.invalidateQueries({ queryKey: ['session', sid] })
-      qc.invalidateQueries({ queryKey: ['session-players', sid] })
-      qc.invalidateQueries({ queryKey: ['games', sid] })
-      qc.invalidateQueries({ queryKey: ['action-logs', sid] })
+    return connectSessionWS(sid, (m) => {
+      const inval = (k: string) => qc.invalidateQueries({ queryKey: [k, sid] })
+      const scope = m.scope ?? 'all'
+      // refetch only what actually changed (server tells us via scope)
+      if (scope === 'court') {
+        inval('session')
+      } else if (scope === 'player') {
+        inval('session') // names/levels also render on court
+        inval('session-players')
+      } else if (scope === 'game') {
+        inval('session')
+        inval('session-players') // stats changed
+        inval('games')
+      } else {
+        inval('session')
+        inval('session-players')
+        inval('games')
+      }
+      inval('action-logs') // cheap: query is disabled unless the log panel is open
     })
   }, [sid, qc])
 
@@ -217,6 +232,7 @@ export function SessionManagePage() {
                   ✕ 關閉
                 </button>
               </div>
+              <OrgNameCard />
               <PasswordCard sessionId={sid} />
               <TimesCard
                 sessionId={sid}
