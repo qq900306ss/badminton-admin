@@ -34,6 +34,9 @@ export function AdminPage() {
 
   const [tab, setTab] = useState<Tab>('orgs')
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null) // filter sessions by leader
+  const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'closed'>('all')
+  const [sessionSearch, setSessionSearch] = useState('')
+  const [playerSearch, setPlayerSearch] = useState('')
   const [email, setEmail] = useState('')
   const [orgName, setOrgName] = useState('')
   const [error, setError] = useState('')
@@ -63,7 +66,30 @@ export function AdminPage() {
     .slice()
     .sort((a, b) => (b.opened_at || '').localeCompare(a.opened_at || ''))
   const openCount = sessions.filter((s) => s.status === 'open').length
-  const shownSessions = selectedOrg ? sessions.filter((s) => s.org_id === selectedOrg) : sessions
+  const shownSessions = sessions
+    .filter((s) => (selectedOrg ? s.org_id === selectedOrg : true))
+    .filter((s) => (statusFilter === 'all' ? true : s.status === statusFilter))
+    .filter((s) => {
+      const q = sessionSearch.trim()
+      if (!q) return true
+      return (s.title || '').includes(q) || orgNameOf(s.org_id).includes(q)
+    })
+  const shownPlayers = (players ?? []).filter((p) => {
+    const q = playerSearch.trim()
+    if (!q) return true
+    return (
+      (p.display_name || '').includes(q) ||
+      (p.join_name || '').includes(q) ||
+      (p.email || '').includes(q)
+    )
+  })
+  // jump from a stat card straight to the relevant view
+  const goSessions = (status: 'all' | 'open') => {
+    setSelectedOrg(null)
+    setStatusFilter(status)
+    setSessionSearch('')
+    setTab('sessions')
+  }
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['orgs'] })
   const create = useMutation({
@@ -138,18 +164,22 @@ export function AdminPage() {
         </nav>
 
         <div className="flex-1 min-w-0 space-y-4">
-          {/* stats — always on top */}
+          {/* stats — clickable, jump to the relevant view */}
           <div className="grid grid-cols-3 gap-3">
             {[
-              { label: '團主', value: leaderCount, emoji: '🧑‍🏫' },
-              { label: '進行中', value: openCount, emoji: '🏸' },
-              { label: '總場次', value: sessions.length, emoji: '📋' },
+              { label: '團主', value: leaderCount, emoji: '🧑‍🏫', onClick: () => setTab('orgs') },
+              { label: '進行中', value: openCount, emoji: '🏸', onClick: () => goSessions('open') },
+              { label: '總場次', value: sessions.length, emoji: '📋', onClick: () => goSessions('all') },
             ].map((stat) => (
-              <div key={stat.label} className="card text-center py-3">
+              <button
+                key={stat.label}
+                onClick={stat.onClick}
+                className="card text-center py-3 active:scale-95 transition-transform hover:ring-2 hover:ring-brand-pink/40"
+              >
                 <div className="text-2xl">{stat.emoji}</div>
                 <div className="text-2xl font-extrabold text-gray-800">{stat.value}</div>
-                <div className="text-xs text-gray-400">{stat.label}</div>
-              </div>
+                <div className="text-xs text-gray-400">{stat.label} ›</div>
+              </button>
             ))}
           </div>
 
@@ -242,18 +272,42 @@ export function AdminPage() {
 
           {/* === 所有開團 === */}
           {tab === 'sessions' && (
-            <div className="card space-y-2">
+            <div className="card space-y-3">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-gray-700">
-                  {selectedOrg ? `${orgNameOf(selectedOrg)} 的開團` : '所有開團'}
-                </span>
-                {selectedOrg && (
-                  <button onClick={() => setSelectedOrg(null)} className="text-xs font-semibold text-brand-pink">
-                    顯示全部 ✕
-                  </button>
-                )}
+                <span className="font-bold text-gray-700">所有開團</span>
+                <span className="text-xs text-gray-400">{shownSessions.length} 筆</span>
               </div>
-              {shownSessions.length === 0 && <p className="text-sm text-gray-300">沒有開團紀錄</p>}
+              {/* filters: 團主 + 狀態 + 搜尋 */}
+              <div className="flex flex-wrap gap-2">
+                <select
+                  value={selectedOrg ?? ''}
+                  onChange={(e) => setSelectedOrg(e.target.value || null)}
+                  className="border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm bg-white focus:outline-none focus:border-brand-pink"
+                >
+                  <option value="">全部團主</option>
+                  {(orgs ?? [])
+                    .filter((o) => o.role !== 'superadmin')
+                    .map((o) => (
+                      <option key={o.org_id} value={o.org_id}>{o.org_name}</option>
+                    ))}
+                </select>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as 'all' | 'open' | 'closed')}
+                  className="border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm bg-white focus:outline-none focus:border-brand-pink"
+                >
+                  <option value="all">全部狀態</option>
+                  <option value="open">進行中</option>
+                  <option value="closed">已結束</option>
+                </select>
+                <input
+                  value={sessionSearch}
+                  onChange={(e) => setSessionSearch(e.target.value)}
+                  placeholder="🔍 開團名稱 / 團主"
+                  className="flex-1 min-w-[8rem] border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm focus:outline-none focus:border-brand-pink"
+                />
+              </div>
+              {shownSessions.length === 0 && <p className="text-sm text-gray-300">沒有符合的開團</p>}
               {shownSessions.map((s) => (
                 <button
                   key={s.session_id}
@@ -285,11 +339,20 @@ export function AdminPage() {
           {/* === 成員管理 === */}
           {tab === 'members' && (
             <div className="card space-y-2">
-              <span className="font-bold text-gray-700">所有玩家帳號 ({players?.length ?? 0})</span>
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-gray-700">所有玩家帳號</span>
+                <span className="text-xs text-gray-400">{shownPlayers.length}/{players?.length ?? 0}</span>
+              </div>
+              <input
+                value={playerSearch}
+                onChange={(e) => setPlayerSearch(e.target.value)}
+                placeholder="🔍 搜尋名字 / email"
+                className="w-full border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm focus:outline-none focus:border-brand-pink"
+              />
               <p className="text-[11px] text-gray-400">左:登入時的名字/大頭貼　右:目前使用的名稱/頭像</p>
               {!players && <p className="text-sm text-gray-300">載入中…</p>}
-              {players?.length === 0 && <p className="text-sm text-gray-300">還沒有玩家</p>}
-              {(players ?? []).map((p: AdminPlayer) => (
+              {players && shownPlayers.length === 0 && <p className="text-sm text-gray-300">找不到玩家</p>}
+              {shownPlayers.map((p: AdminPlayer) => (
                 <div key={p.player_id} className="py-2 border-b last:border-0 flex items-center gap-3">
                   {/* login identity */}
                   <div className="flex items-center gap-2 min-w-0 flex-1">
