@@ -120,6 +120,7 @@ export interface CreateSessionInput {
   start_at?: string
   end_at?: string
   queue_open_at?: string
+  contact_url?: string
 }
 
 export const authApi = {

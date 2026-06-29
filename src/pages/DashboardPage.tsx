@@ -72,8 +72,7 @@ export function DashboardPage() {
   const [startTime, setStartTime] = useState('18:00')
   const [endTime, setEndTime] = useState('21:00')
   const [queueTime, setQueueTime] = useState('18:00')
-  const [tempNames, setTempNames] = useState<string[]>([])
-  const [tempInput, setTempInput] = useState('')
+  const [contactUrl, setContactUrl] = useState('')
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState('')
 
@@ -86,9 +85,13 @@ export function DashboardPage() {
       setError('請選擇(或填寫)區')
       return
     }
+    const contact = contactUrl.trim()
+    if (contact && !/^https?:\/\//.test(contact)) {
+      setError('聯繫連結需以 http:// 或 https:// 開頭')
+      return
+    }
     setCreating(true)
     setError('')
-    const playerNames = tempNames
     try {
       const res = await sessionApi.create({
         title: title.trim() || org?.org_name || '羽球團',
@@ -96,10 +99,11 @@ export function DashboardPage() {
         district: district.trim(),
         password,
         num_courts: numCourts,
-        player_names: playerNames,
+        player_names: [],
         start_at: toISO(date, startTime),
         end_at: toISO(date, endTime),
         queue_open_at: toISO(date, queueTime),
+        contact_url: contact || undefined,
       })
       nav(`/session/${res.data.data.session_id}`)
     } catch (err: unknown) {
@@ -393,46 +397,24 @@ export function DashboardPage() {
           </label>
         </div>
 
-        {/* temp guests for this session only */}
-        <div className="card space-y-3">
-          <span className="font-bold text-gray-700">臨時加入(只限這場)</span>
-          <div className="flex flex-wrap gap-2">
-            {tempNames.map((n) => (
-              <span
-                key={n}
-                className="px-3 py-1.5 rounded-full text-sm font-semibold bg-brand-yellow text-amber-700 flex items-center gap-1"
-              >
-                {n}
-                <button onClick={() => setTempNames(tempNames.filter((x) => x !== n))}>×</button>
-              </span>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <input
-              value={tempInput}
-              onChange={(e) => setTempInput(e.target.value)}
-              placeholder="臨時人員名字"
-              className="flex-1 border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm
-                focus:outline-none focus:border-brand-pink"
-            />
-            <button
-              onClick={() => {
-                if (tempInput.trim() && !tempNames.includes(tempInput.trim())) {
-                  setTempNames([...tempNames, tempInput.trim()])
-                  setTempInput('')
-                }
-              }}
-              className="btn-secondary px-4 py-1.5 text-sm"
-            >
-              加入
-            </button>
-          </div>
+        {/* optional 聯繫團主 link shown to players on the lobby card */}
+        <div className="card space-y-2">
+          <span className="font-bold text-gray-700">🔗 聯繫團主連結(選填)</span>
+          <input
+            value={contactUrl}
+            onChange={(e) => setContactUrl(e.target.value)}
+            placeholder="https://line.me/..."
+            inputMode="url"
+            className="w-full border-2 border-gray-200 rounded-2xl px-3 py-2 text-sm
+              focus:outline-none focus:border-brand-pink"
+          />
+          <span className="text-xs text-gray-400">臨打人首頁會出現「聯繫團主」按鈕(可放 LINE 群、報名表等),開團後也能在「⚙️ 設定」改。</span>
         </div>
 
         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
         <button onClick={openSession} disabled={creating} className="btn-primary w-full text-lg py-4">
-          {creating ? '開團中...' : `🏸 開團(${tempNames.length} 人)`}
+          {creating ? '開團中...' : '🏸 開團'}
         </button>
 
         <div className="pt-2">
