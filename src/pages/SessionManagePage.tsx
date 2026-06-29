@@ -266,9 +266,9 @@ export function SessionManagePage() {
         </button>
         {board && <SeatingBoard sessionId={sid} onClose={() => setBoard(false)} />}
 
-        {/* settings (gate code + times) tucked into a modal so the page stays short */}
+        {/* per-session settings (location / contact link / gate code / times) in a modal */}
         <button onClick={() => setSettingsOpen(true)} className="btn-secondary w-full text-sm">
-          ⚙️ 設定(密碼 / 時間)
+          ⚙️ 這場設定(地點 / 連結 / 密碼 / 時間)
         </button>
         {settingsOpen && (
           <div
