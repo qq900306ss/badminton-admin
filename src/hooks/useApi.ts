@@ -105,6 +105,10 @@ export function useManageActions(sessionId: string) {
       invalidatePlayers()
       invalidate()
     },
+    onError: (e: unknown) => {
+      const m = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
+      alert(m ?? '核准失敗,請稍後再試')
+    },
   })
   const removePlayer = useMutation({
     mutationFn: (playerId: string) => sessionApi.removePlayer(sessionId, playerId),
@@ -116,11 +120,18 @@ export function useManageActions(sessionId: string) {
 
   const endCourt = useMutation({
     mutationFn: (courtId: string) => sessionApi.endCourt(sessionId, courtId),
-    onSuccess: invalidate,
+    // ending a game changes player stats too → refresh players, not just courts
+    onSuccess: () => {
+      invalidate()
+      invalidatePlayers()
+    },
   })
   const undoEnd = useMutation({
     mutationFn: (courtId: string) => sessionApi.undoEnd(sessionId, courtId),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate()
+      invalidatePlayers() // undo rolls back stats too
+    },
   })
   const kick = useMutation({
     mutationFn: (v: { courtId: string; playerId: string }) =>
