@@ -7,6 +7,7 @@ import { InstallButton } from '../components/InstallButton'
 import { TimeSelect } from '../components/TimeSelect'
 import { useConfirm } from '../components/Confirm'
 import { ChangelogButton } from '../components/ChangelogButton'
+import { HelpButton } from '../components/HelpButton'
 import { forceUpdate } from '../lib/appUpdate'
 import { TW_CITIES } from '../lib/twCities'
 import { TW_DISTRICTS } from '../lib/twDistricts'
@@ -168,6 +169,7 @@ export function DashboardPage() {
               </button>
             </div>
             <div className="card grid grid-cols-2 gap-2">
+              <HelpButton className="btn-secondary text-sm col-span-2" />
               <ChangelogButton className="btn-secondary text-sm" />
               <FeedbackButton className="btn-secondary text-sm" />
               <button
