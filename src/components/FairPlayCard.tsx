@@ -51,6 +51,19 @@ export function FairPlayCard({ sessionId, view }: { sessionId: string; view?: Se
     <div className="card space-y-3">
       <span className="font-bold text-gray-700">⚖️ 進階:公平讓分</span>
 
+      {/* 目前平均(永遠顯示,讓團主決定門檻前先看到) */}
+      <div className="text-sm bg-brand-mint/30 rounded-2xl px-3 py-2">
+        {view?.fair_active ? (
+          <>目前大家平均 <b className="text-brand-pink">{view.fair_avg?.toFixed(1)}</b> 場(在輪 {view.fair_active} 人)
+            {fair && view?.fair_enforced && (
+              <span className="block text-xs text-gray-500 mt-0.5">→ 打超過 <b>{view.fair_limit?.toFixed(0)}</b> 場的人現在會被擋</span>
+            )}
+          </>
+        ) : (
+          <span className="text-gray-400">還沒有人開始打,暫時沒有平均</span>
+        )}
+      </div>
+
       {/* 公平讓分主開關 */}
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
@@ -85,14 +98,12 @@ export function FairPlayCard({ sessionId, view }: { sessionId: string; view?: Se
             />
           </div>
 
-          {/* 即時狀態:讓團主知道目前算出來的平均 */}
-          <div className="pl-3 text-xs text-gray-500 bg-brand-mint/30 rounded-2xl p-2.5">
-            {view?.fair_enforced ? (
-              <>目前平均 <b>{view.fair_avg?.toFixed(1)}</b> 場,打超過 <b>{view.fair_limit?.toFixed(0)}</b> 場的人會被擋(在輪 {view.fair_active} 人)。</>
-            ) : (
-              <>目前在輪人數不足(需 ≥ 5 人)或剛開啟,暫時不會擋任何人。</>
+          {/* 即時狀態(平均已顯示在卡片上方) */}
+          <div className="pl-3 text-xs text-gray-500">
+            {!view?.fair_enforced && (
+              <p className="text-amber-600">目前在輪人數不足(需 ≥ 5 人)或剛存檔,暫時不會擋任何人,人多了才生效。</p>
             )}
-            <span className="block text-gray-400 mt-1">數字會隨大家場數上升自動調整,被擋的人等別人追上就自動恢復。</span>
+            <p className="text-gray-400 mt-1">數字會隨大家場數上升自動調整,被擋的人等別人追上就自動恢復。</p>
           </div>
 
           <p className="pl-3 text-xs text-amber-600">已自動開啟「顯示場數」(公平讓分需要讓大家看到場數才公平)。</p>
