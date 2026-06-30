@@ -208,13 +208,20 @@ export function DashboardPage() {
                 className="w-full text-left px-4 py-3 rounded-2xl bg-brand-mint/40
                   hover:bg-brand-mint transition-colors flex items-center justify-between"
               >
-                <div>
-                  <p className="font-bold text-gray-700">{s.title || '未命名'}</p>
+                <div className="min-w-0">
+                  <p className="font-bold text-gray-700 flex items-center gap-2 flex-wrap">
+                    {s.title || '未命名'}
+                    {!!s.playing_courts && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-brand-pink/15 text-brand-pink font-semibold">
+                        🏸 開打中 {s.playing_courts}
+                      </span>
+                    )}
+                  </p>
                   <p className="text-xs text-gray-500">
                     {fmtRange(s)} · {s.num_courts} 場
                   </p>
                 </div>
-                <span className="text-brand-pink font-semibold text-sm">管理 →</span>
+                <span className="text-brand-pink font-semibold text-sm shrink-0">管理 →</span>
               </button>
             ))}
           </div>

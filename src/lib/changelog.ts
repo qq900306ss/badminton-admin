@@ -2,6 +2,12 @@
 // short and in plain language (團主 audience).
 export const CHANGELOG: { date: string; items: string[] }[] = [
   {
+    date: '2026/06/30',
+    items: [
+      '後台「進行中的開團」會顯示「🏸 開打中 N」,一眼看出哪場正在打',
+    ],
+  },
+  {
     date: '2026/06/29',
     items: [
       '可在「⚙️ 設定」設定團主頭像(一個團主一個,所有團共用,沒設用預設 🐰)',
