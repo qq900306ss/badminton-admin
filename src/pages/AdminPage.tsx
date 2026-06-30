@@ -64,6 +64,10 @@ export function AdminPage() {
 
   const orgNameOf = (id: string) => (orgs ?? []).find((o) => o.org_id === id)?.org_name ?? '未知'
   const leaderCount = (orgs ?? []).filter((o) => o.role === 'leader').length
+  // 團主列表依建立時間排序(最新在上)
+  const shownOrgs = (orgs ?? [])
+    .slice()
+    .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''))
   const sessions = (allSessions ?? [])
     .slice()
     .sort((a, b) => (b.opened_at || '').localeCompare(a.opened_at || ''))
@@ -93,15 +97,8 @@ export function AdminPage() {
         (p.email || '').includes(q)
       )
     })
-    .sort((a, b) => {
-      // 英文/數字開頭的名字排前面,中文名接在後面(依筆劃 zh-Hant)。
-      const na = (a.join_name || a.display_name || '').trim()
-      const nb = (b.join_name || b.display_name || '').trim()
-      const aLatin = /^[A-Za-z0-9]/.test(na)
-      const bLatin = /^[A-Za-z0-9]/.test(nb)
-      if (aLatin !== bLatin) return aLatin ? -1 : 1
-      return na.localeCompare(nb, 'zh-Hant')
-    })
+    // 依加入時間排序,最新的在最上面
+    .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''))
   // jump from a stat card straight to the relevant view
   const goSessions = (status: 'all' | 'open') => {
     setSelectedOrg(null)
@@ -231,7 +228,7 @@ export function AdminPage() {
 
               <div className="card space-y-2">
                 <span className="font-bold text-gray-700">所有團主(點名字看他的開團)</span>
-                {(orgs ?? []).map((o) => (
+                {shownOrgs.map((o) => (
                   <div key={o.org_id} className="flex items-center justify-between py-2 border-b last:border-0 gap-2">
                     <button
                       onClick={() => {
@@ -360,6 +357,11 @@ export function AdminPage() {
                       >
                         {s.status === 'open' ? '進行中' : '已結束'}
                       </span>
+                      {!!s.playing_courts && (
+                        <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-brand-pink/15 text-brand-pink font-semibold">
+                          🏸 開打中 {s.playing_courts}
+                        </span>
+                      )}
                     </p>
                     <p className="text-xs text-gray-400 truncate">
                       {orgNameOf(s.org_id)}

@@ -30,6 +30,7 @@ export interface Org {
   avatar_url?: string // 團主頭像(emoji 或照片網址),空=預設 🐰
   role: 'superadmin' | 'leader'
   disabled?: boolean
+  created_at?: string
 }
 
 
@@ -101,6 +102,7 @@ export interface SessionSummary {
   start_at?: string
   end_at?: string
   queue_open_at?: string
+  playing_courts?: number // 目前正在開打的球場數(僅超級後台列表會帶)
   opened_at: string
 }
 
