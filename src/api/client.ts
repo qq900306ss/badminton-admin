@@ -74,7 +74,23 @@ export interface SessionView {
   end_at?: string
   queue_open_at?: string
   contact_url?: string // 團主自填的聯繫/報名連結(外部,選填)
+  // 進階:公平讓分
+  show_games?: boolean
+  fair_play?: boolean
+  fair_grace_games?: number
+  fair_threshold?: number
+  fair_avg?: number // 即時平均(顯示用)
+  fair_limit?: number // 封鎖線 = 平均 + X
+  fair_active?: number // 目前在輪人數
+  fair_enforced?: boolean // 目前是否真的在限制(人數足夠)
   courts: CourtView[]
+}
+
+export interface AdvancedSettings {
+  show_games?: boolean
+  fair_play?: boolean
+  fair_grace_games?: number
+  fair_threshold?: number
 }
 
 export interface SessionPlayer {
@@ -192,6 +208,8 @@ export const sessionApi = {
     api.put<{ data: SessionView }>(`/api/sessions/${sessionId}/location`, { city, district }),
   setContact: (sessionId: string, contactUrl: string) =>
     api.put<{ data: SessionView }>(`/api/sessions/${sessionId}/contact`, { contact_url: contactUrl }),
+  setAdvanced: (sessionId: string, s: AdvancedSettings) =>
+    api.put<{ data: SessionView }>(`/api/sessions/${sessionId}/advanced`, s),
   setTimes: (
     sessionId: string,
     times: { start_at: string; end_at: string; queue_open_at: string }
