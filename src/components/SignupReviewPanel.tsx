@@ -26,7 +26,16 @@ interface Props {
 }
 
 export function SignupReviewPanel({ view, players, busy, onApprove, onReject }: Props) {
-  const signups = players.filter((p) => p.pending && p.is_signup)
+  const pending = players.filter((p) => p.pending && p.is_signup)
+  // 家人跟著帶他來的本人排在一起(本人在前),孤兒家人(理論上不會有)墊後
+  const mains = pending.filter((p) => !p.owner_id)
+  const companions = pending.filter((p) => p.owner_id)
+  const signups = [
+    ...mains.flatMap((m) => [m, ...companions.filter((f) => f.owner_id === m.player_id)]),
+    ...companions.filter((f) => !mains.some((m) => m.player_id === f.owner_id)),
+  ]
+  const ownerName = (id?: string) =>
+    players.find((x) => x.player_id === id)?.display_name ?? '同行者'
   if (signups.length === 0) return null
 
   const quota = view?.signup_quota ?? 0
@@ -47,7 +56,14 @@ export function SignupReviewPanel({ view, players, busy, onApprove, onReject }: 
             <div className="flex items-center gap-2.5">
               <Avatar p={p} />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-gray-700 truncate">{p.display_name}</p>
+                <p className="text-sm font-bold text-gray-700 truncate">
+                  {p.display_name}
+                  {p.owner_id && (
+                    <span className="ml-1.5 text-[10px] font-semibold text-amber-600 bg-amber-100 rounded-full px-1.5 py-0.5">
+                      👨‍👩‍👧 {ownerName(p.owner_id)} 帶的
+                    </span>
+                  )}
+                </p>
                 {p.level > 0 && <p className="text-[11px] text-gray-400">程度 {p.level} 級</p>}
               </div>
               <div className="flex gap-1.5 shrink-0">
