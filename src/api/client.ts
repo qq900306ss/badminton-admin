@@ -74,6 +74,12 @@ export interface SessionView {
   end_at?: string
   queue_open_at?: string
   contact_url?: string // 團主自填的聯繫/報名連結(外部,選填)
+  // 前台報名
+  description?: string // 團簡介(選填,公開)
+  signup_open?: boolean // 開放前台報名
+  signup_quota?: number // 收人名額(0=不限,軟上限)
+  joined_count?: number // 已加入人數(非 pending)
+  pending_signups?: number // 報名中(等核准)人數
   // 進階:公平讓分
   show_games?: boolean
   fair_play?: boolean
@@ -104,7 +110,9 @@ export interface SessionPlayer {
   is_temp: boolean
   avatar_url?: string
   owner_id?: string // 家人子身份:帶它來的手機帳號
-  pending?: boolean // 家人待團主核准
+  pending?: boolean // 待團主核准(家人或前台報名)
+  is_signup?: boolean // 從前台報名進來(pending 期間顯示在報名審核區)
+  signup_msg?: string // 報名留言
 }
 
 export interface SessionSummary {
@@ -120,6 +128,12 @@ export interface SessionSummary {
   queue_open_at?: string
   playing_courts?: number // 目前正在開打的球場數(僅超級後台列表會帶)
   opened_at: string
+  // 前台報名(counts 只對開放報名的進行中場次計算)
+  description?: string
+  signup_open?: boolean
+  signup_quota?: number
+  joined_count?: number
+  pending_signups?: number
 }
 
 export interface ActionLog {
@@ -142,6 +156,9 @@ export interface CreateSessionInput {
   end_at?: string
   queue_open_at?: string
   contact_url?: string
+  description?: string
+  signup_open?: boolean
+  signup_quota?: number
 }
 
 export const authApi = {
@@ -208,6 +225,10 @@ export const sessionApi = {
     api.put<{ data: SessionView }>(`/api/sessions/${sessionId}/location`, { city, district }),
   setContact: (sessionId: string, contactUrl: string) =>
     api.put<{ data: SessionView }>(`/api/sessions/${sessionId}/contact`, { contact_url: contactUrl }),
+  setDescription: (sessionId: string, description: string) =>
+    api.put<{ data: SessionView }>(`/api/sessions/${sessionId}/description`, { description }),
+  setSignupSettings: (sessionId: string, s: { signup_open?: boolean; signup_quota?: number }) =>
+    api.put<{ data: SessionView }>(`/api/sessions/${sessionId}/signup-settings`, s),
   setAdvanced: (sessionId: string, s: AdvancedSettings) =>
     api.put<{ data: SessionView }>(`/api/sessions/${sessionId}/advanced`, s),
   setTimes: (

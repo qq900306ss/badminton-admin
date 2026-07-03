@@ -2,24 +2,29 @@ import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { sessionApi } from '../api/client'
 
-// Leader sets an external 聯繫團主 link (LINE group / 報名表 / 聯絡方式) shown to
-// players on the lobby card. Optional — leave blank to hide it. The link is
-// leader-supplied; the player UI warns before opening it.
+// Leader sets the public-facing info shown to players on the lobby card /
+// session page: 團簡介 (free text) + an external 聯繫團主 link (LINE group /
+// 報名表 / 聯絡方式). Both optional — one card so the版面 stays tidy. The link
+// is leader-supplied; the player UI warns before opening it.
 export function ContactCard({
   sessionId,
   contactUrl,
+  description,
 }: {
   sessionId: string
   contactUrl?: string
+  description?: string
 }) {
   const qc = useQueryClient()
   const [editing, setEditing] = useState(false)
   const [url, setUrl] = useState('')
+  const [desc, setDesc] = useState('')
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState('')
 
   function startEdit() {
     setUrl(contactUrl || '')
+    setDesc(description || '')
     setErr('')
     setEditing(true)
   }
@@ -30,10 +35,17 @@ export function ContactCard({
       setErr('連結需以 http:// 或 https:// 開頭')
       return
     }
+    const d = desc.trim()
+    if ([...d].length > 300) {
+      setErr('簡介最多 300 字')
+      return
+    }
     setSaving(true)
     setErr('')
     try {
-      await sessionApi.setContact(sessionId, v)
+      // 兩個各自的端點,哪個變了打哪個(都變就都打)
+      if (d !== (description || '')) await sessionApi.setDescription(sessionId, d)
+      if (v !== (contactUrl || '')) await sessionApi.setContact(sessionId, v)
       qc.invalidateQueries({ queryKey: ['session', sessionId] })
       setEditing(false)
     } catch (e: unknown) {
@@ -47,26 +59,41 @@ export function ContactCard({
   return (
     <div className="card space-y-3">
       <div>
-        <span className="font-bold text-gray-700">🔗 聯繫團主連結</span>
+        <span className="font-bold text-gray-700">📣 團簡介與聯繫方式</span>
         <p className="text-xs text-gray-400 mt-1">
-          選填。臨打人首頁會出現一顆「聯繫團主」按鈕(可放 LINE 群、報名表等)。
+          選填。簡介和「聯繫團主」按鈕都會顯示在臨打人首頁(可放程度、費用、LINE 群等)。
         </p>
       </div>
       {!editing ? (
-        <div className="flex items-center gap-2">
-          <span className="flex-1 text-sm text-gray-600 break-all">
-            {contactUrl || <span className="text-gray-400">未設定</span>}
-          </span>
-          <button onClick={startEdit} className="btn-primary px-4 py-2 text-xs shrink-0">
-            {contactUrl ? '修改' : '新增'}
-          </button>
+        <div className="space-y-2">
+          {description ? (
+            <p className="text-sm text-gray-600 whitespace-pre-wrap">{description}</p>
+          ) : (
+            <p className="text-sm text-gray-400">簡介未設定</p>
+          )}
+          <div className="flex items-center gap-2">
+            <span className="flex-1 text-sm text-gray-600 break-all">
+              {contactUrl || <span className="text-gray-400">連結未設定</span>}
+            </span>
+            <button onClick={startEdit} className="btn-primary px-4 py-2 text-xs shrink-0">
+              {description || contactUrl ? '修改' : '新增'}
+            </button>
+          </div>
         </div>
       ) : (
         <div className="space-y-2">
+          <textarea
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
+            placeholder="介紹一下你的團:程度、費用、注意事項…"
+            rows={4}
+            maxLength={300}
+            className="w-full border-2 border-gray-200 rounded-2xl px-3 py-2 text-sm resize-none focus:outline-none focus:border-brand-pink"
+          />
           <input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://line.me/..."
+            placeholder="聯繫連結 https://line.me/..."
             inputMode="url"
             className="w-full border-2 border-gray-200 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:border-brand-pink"
           />
@@ -77,7 +104,7 @@ export function ContactCard({
             </button>
             <button onClick={() => setEditing(false)} className="btn-secondary px-4 text-sm">取消</button>
           </div>
-          <p className="text-[11px] text-gray-400">留空白並儲存即可移除連結。</p>
+          <p className="text-[11px] text-gray-400">欄位留空白並儲存即可移除。</p>
         </div>
       )}
     </div>

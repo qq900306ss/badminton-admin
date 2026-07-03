@@ -16,6 +16,8 @@ import { ContactCard } from '../components/ContactCard'
 import { FairPlayCard } from '../components/FairPlayCard'
 import { SeatingBoard } from '../components/SeatingBoard'
 import { SwapQueueModal } from '../components/SwapQueueModal'
+import { SignupSettingsCard } from '../components/SignupSettingsCard'
+import { SignupReviewPanel } from '../components/SignupReviewPanel'
 import { useConfirm } from '../components/Confirm'
 import { CourtSkeleton } from '../components/Skeleton'
 import { TIERS, tierOf } from '../lib/levels'
@@ -63,6 +65,9 @@ export function SessionManagePage() {
   const { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, approveFamily, renameCourt, removeCourt, addQueue, swapQueue, removePlayer } = useManageActions(sid)
   const confirm = useConfirm()
   const qc = useQueryClient()
+
+  // 報名中(等核准)的人只出現在報名審核區,不算成員
+  const roster = (players ?? []).filter((p) => !(p.pending && p.is_signup))
 
   // real-time: WebSocket nudge → refetch the moment ANYTHING changes (courts,
   // players, seating, stats, action log). The server broadcasts after every
@@ -291,7 +296,8 @@ export function SessionManagePage() {
                 </button>
               </div>
               <LocationCard sessionId={sid} city={session?.city} district={session?.district} />
-              <ContactCard sessionId={sid} contactUrl={session?.contact_url} />
+              <ContactCard sessionId={sid} contactUrl={session?.contact_url} description={session?.description} />
+              <SignupSettingsCard sessionId={sid} view={session} />
               <FairPlayCard sessionId={sid} view={session} />
               <PasswordCard sessionId={sid} />
               <TimesCard
@@ -304,22 +310,43 @@ export function SessionManagePage() {
           </div>
         )}
 
-        {/* people in this session */}
+        {/* 🙋 臨打報名審核 — 獨立於成員列表,有 pending 報名才出現 */}
+        <SignupReviewPanel
+          view={session}
+          players={players ?? []}
+          busy={approveFamily.isPending || removePlayer.isPending}
+          onApprove={async (p, overQuota) => {
+            if (overQuota && !(await confirm({
+              message: `名額已滿,確定還要核准「${p.display_name}」嗎?`,
+              confirmText: '核准',
+            }))) return
+            approveFamily.mutate(p.player_id)
+          }}
+          onReject={async (p) => {
+            if (await confirm({
+              message: `婉拒「${p.display_name}」的報名?對方不會收到通知,之後還是可以再報名。`,
+              confirmText: '婉拒',
+              danger: true,
+            })) removePlayer.mutate(p.player_id)
+          }}
+        />
+
+        {/* people in this session — 報名中(等核准)的人在上面的審核區,不列進成員 */}
         <div className="card space-y-3">
           <div className="flex items-center justify-between">
             <span className="font-bold text-gray-700">本場人員</span>
             <span className="text-xs text-gray-400">
               已到 <span className="font-bold text-emerald-600">
-                {(players ?? []).filter((p) => p.claimed).length}
-              </span> / 共 {players?.length ?? 0} 人
+                {roster.filter((p) => p.claimed).length}
+              </span> / 共 {roster.length} 人
               　💰 已收臨打費 <span className="font-bold text-amber-500">
-                {(players ?? []).filter((p) => p.paid).length}
+                {roster.filter((p) => p.paid).length}
               </span>
             </span>
           </div>
 
           {/* filter: search + 未到 toggle */}
-          {(players ?? []).length > 0 && (
+          {roster.length > 0 && (
             <div className="flex gap-2">
               <input
                 value={memberFilter}
@@ -349,7 +376,7 @@ export function SessionManagePage() {
 
           {/* current people — tap to set level; ● = 已到, 未到 = 還沒掃碼認領 */}
           <div className="flex flex-wrap gap-2">
-            {(players ?? [])
+            {roster
               .filter((p) => p.display_name.includes(memberFilter.trim()))
               .filter((p) => (onlyUnclaimed ? !p.claimed : true))
               .filter((p) => (onlyUnpaid ? !p.paid : true))
@@ -679,7 +706,7 @@ export function SessionManagePage() {
         )}
 
         {/* stats dashboard */}
-        <StatsPanel sessionId={sid} players={players ?? []} />
+        <StatsPanel sessionId={sid} players={roster} />
 
         {/* 團主操作紀錄 */}
         <ActionLogPanel sessionId={sid} />

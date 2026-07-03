@@ -76,6 +76,9 @@ export function DashboardPage() {
   const [endTime, setEndTime] = useState('21:00')
   const [queueTime, setQueueTime] = useState('18:00')
   const [contactUrl, setContactUrl] = useState('')
+  const [description, setDescription] = useState('')
+  const [signupOpen, setSignupOpen] = useState(false)
+  const [signupQuota, setSignupQuota] = useState('') // 空字串 = 不限
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState('')
 
@@ -93,6 +96,16 @@ export function DashboardPage() {
       setError('聯繫連結需以 http:// 或 https:// 開頭')
       return
     }
+    const desc = description.trim()
+    if ([...desc].length > 300) {
+      setError('簡介最多 300 字')
+      return
+    }
+    const quota = signupQuota.trim() === '' ? 0 : Number(signupQuota)
+    if (!Number.isInteger(quota) || quota < 0 || quota > 200) {
+      setError('名額請填 1~200 的整數(留空=不限)')
+      return
+    }
     setCreating(true)
     setError('')
     try {
@@ -107,6 +120,9 @@ export function DashboardPage() {
         end_at: toISO(date, endTime),
         queue_open_at: toISO(date, queueTime),
         contact_url: contact || undefined,
+        description: desc || undefined,
+        signup_open: signupOpen || undefined,
+        signup_quota: quota || undefined,
       })
       nav(`/session/${res.data.data.session_id}`)
     } catch (err: unknown) {
@@ -214,6 +230,11 @@ export function DashboardPage() {
                     {!!s.playing_courts && (
                       <span className="text-xs px-2 py-0.5 rounded-full bg-brand-pink/15 text-brand-pink font-semibold">
                         🏸 開打中 {s.playing_courts}
+                      </span>
+                    )}
+                    {!!s.pending_signups && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-semibold">
+                        🙋 報名 {s.pending_signups}
                       </span>
                     )}
                   </p>
@@ -410,18 +431,57 @@ export function DashboardPage() {
           </label>
         </div>
 
-        {/* optional 聯繫團主 link shown to players on the lobby card */}
+        {/* 公開資訊:簡介 + 聯繫連結(同一張卡,臨打人都看得到) */}
         <div className="card space-y-2">
-          <span className="font-bold text-gray-700">🔗 聯繫團主連結(選填)</span>
+          <span className="font-bold text-gray-700">📣 團簡介與聯繫方式(選填)</span>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="介紹一下你的團:程度、費用、注意事項…(例:進階團 4~6 級,一場 150,自備球拍)"
+            rows={3}
+            maxLength={300}
+            className="w-full border-2 border-gray-200 rounded-2xl px-3 py-2 text-sm resize-none
+              focus:outline-none focus:border-brand-pink"
+          />
           <input
             value={contactUrl}
             onChange={(e) => setContactUrl(e.target.value)}
-            placeholder="https://line.me/..."
+            placeholder="聯繫連結 https://line.me/..."
             inputMode="url"
             className="w-full border-2 border-gray-200 rounded-2xl px-3 py-2 text-sm
               focus:outline-none focus:border-brand-pink"
           />
-          <span className="text-xs text-gray-400">臨打人首頁會出現「聯繫團主」按鈕(可放 LINE 群、報名表等),開團後也能在「⚙️ 設定」改。</span>
+          <span className="text-xs text-gray-400">臨打人在首頁會看到簡介和「聯繫團主」按鈕(可放 LINE 群、報名表等),開團後也能在「⚙️ 設定」改。</span>
+        </div>
+
+        {/* 前台報名(預設關,不影響密碼加入) */}
+        <div className="card space-y-2">
+          <label className="flex items-center justify-between">
+            <span className="font-bold text-gray-700">🙋 開放前台報名</span>
+            <input
+              type="checkbox"
+              checked={signupOpen}
+              onChange={(e) => setSignupOpen(e.target.checked)}
+              className="w-5 h-5 accent-pink-400"
+            />
+          </label>
+          {signupOpen && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">收人名額</span>
+              <input
+                value={signupQuota}
+                onChange={(e) => setSignupQuota(e.target.value)}
+                placeholder="不限"
+                inputMode="numeric"
+                className="w-20 border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm text-center
+                  focus:outline-none focus:border-brand-pink"
+              />
+              <span className="text-xs text-gray-400">人(留空=不限;滿了還是可以報名,由你決定收誰)</span>
+            </div>
+          )}
+          <span className="text-xs text-gray-400">
+            臨打人可以直接在首頁報名、留言給你,你核准後才加入;知道密碼的人照樣直接進,不用審核。
+          </span>
         </div>
 
         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
