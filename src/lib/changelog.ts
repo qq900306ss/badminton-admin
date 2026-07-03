@@ -2,6 +2,12 @@
 // short and in plain language (團主 audience).
 export const CHANGELOG: { date: string; items: string[] }[] = [
   {
+    date: '2026/07/03',
+    items: [
+      '場地卡「排隊」列新增「⇄ 跟別場交換」:可把兩個場地排隊中的人互換(兩邊都有人排隊時才會出現)',
+    ],
+  },
+  {
     date: '2026/06/30',
     items: [
       '新增進階「公平讓分」(⚙️ 設定內):可擋住打太多的人、讓打少的人有得打,隨時開關、參數可調、有預設值',

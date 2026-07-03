@@ -229,6 +229,8 @@ export const sessionApi = {
     api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/add-playing`, { player_id: playerId }),
   addQueue: (sessionId: string, courtId: string, playerId: string) =>
     api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/add-queue`, { player_id: playerId }),
+  swapQueue: (sessionId: string, args: { court_a: string; player_a: string; court_b: string; player_b: string }) =>
+    api.post(`/api/sessions/${sessionId}/swap-queue`, args),
 }
 
 // on-site seating board: leader-authorized, but with the SAME rules as the

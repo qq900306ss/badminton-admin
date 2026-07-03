@@ -15,6 +15,7 @@ import { LocationCard } from '../components/LocationCard'
 import { ContactCard } from '../components/ContactCard'
 import { FairPlayCard } from '../components/FairPlayCard'
 import { SeatingBoard } from '../components/SeatingBoard'
+import { SwapQueueModal } from '../components/SwapQueueModal'
 import { useConfirm } from '../components/Confirm'
 import { CourtSkeleton } from '../components/Skeleton'
 import { TIERS, tierOf } from '../lib/levels'
@@ -59,7 +60,7 @@ export function SessionManagePage() {
 
   const { data: session, isLoading } = useSessionView(sid)
   const { data: players } = useSessionPlayers(sid)
-  const { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, approveFamily, renameCourt, removeCourt, addQueue, removePlayer } = useManageActions(sid)
+  const { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, approveFamily, renameCourt, removeCourt, addQueue, swapQueue, removePlayer } = useManageActions(sid)
   const confirm = useConfirm()
   const qc = useQueryClient()
 
@@ -95,6 +96,7 @@ export function SessionManagePage() {
   const [poster, setPoster] = useState(false)
   const [summary, setSummary] = useState(false)
   const [addTarget, setAddTarget] = useState<string | null>(null) // court_id to add a player to
+  const [swapSource, setSwapSource] = useState<string | null>(null) // court_id 發起排隊交換的場地
   const [newName, setNewName] = useState('')
   const [levelTarget, setLevelTarget] = useState<string | null>(null) // player_id being re-leveled
   const [renameInput, setRenameInput] = useState('') // 團主改該玩家本場名稱
@@ -545,6 +547,13 @@ export function SessionManagePage() {
                 onUndoEnd={() => undoEnd.mutate(court.court_id)}
                 onKick={(playerId) => kick.mutate({ courtId: court.court_id, playerId })}
                 onRename={(name) => renameCourt.mutate({ courtId: court.court_id, name })}
+                onSwapQueue={
+                  // 入口只在「這裡有人排隊、而且別的場地也有人排隊」時出現
+                  court.queue.length > 0 &&
+                  (session?.courts ?? []).some((c) => c.court_id !== court.court_id && c.queue.length > 0)
+                    ? () => setSwapSource(court.court_id)
+                    : undefined
+                }
                 onRemove={async () => {
                   const hasPlaying = court.playing.some((p) => p.player_id)
                   const msg = hasPlaying
@@ -653,6 +662,19 @@ export function SessionManagePage() {
             </div>
           ))}
         </div>
+
+        {/* 排隊交換(不常用 → 從場地卡排隊列的 ⇄ 進來) */}
+        {swapSource && session && (
+          <SwapQueueModal
+            courts={session.courts}
+            sourceCourtId={swapSource}
+            pending={swapQueue.isPending}
+            onClose={() => setSwapSource(null)}
+            onConfirm={(pick) =>
+              swapQueue.mutate(pick, { onSuccess: () => setSwapSource(null) })
+            }
+          />
+        )}
 
         {/* stats dashboard */}
         <StatsPanel sessionId={sid} players={players ?? []} />

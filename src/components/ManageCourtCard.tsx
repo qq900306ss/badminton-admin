@@ -27,6 +27,8 @@ interface Props {
   onKick: (playerId: string) => void
   onRename: (name: string) => void
   onRemove: () => void
+  // 跟別的場地交換排隊的人 — 只在「這裡有人排隊且別場也有人排隊」時由頁面傳入
+  onSwapQueue?: () => void
 }
 
 function Chip({ slot, onKick }: { slot: PlayerSlot; onKick: () => void }) {
@@ -51,7 +53,7 @@ function Chip({ slot, onKick }: { slot: PlayerSlot; onKick: () => void }) {
   )
 }
 
-export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onRemove }: Props) {
+export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onRemove, onSwapQueue }: Props) {
   const [editing, setEditing] = useState(false)
   const [nameInput, setNameInput] = useState(court.name ?? '')
   // keep the field in sync with live data when not actively editing (a WS rename
@@ -116,7 +118,17 @@ export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onR
 
       {/* queue */}
       <div>
-        <p className="text-xs text-gray-400 font-semibold mb-1">排隊 ({court.queue.length}/4)</p>
+        <div className="flex items-center justify-between mb-1">
+          <p className="text-xs text-gray-400 font-semibold">排隊 ({court.queue.length}/4)</p>
+          {onSwapQueue && (
+            <button
+              onClick={onSwapQueue}
+              className="text-[11px] font-bold text-gray-300 hover:text-brand-pink active:text-brand-pink"
+            >
+              ⇄ 跟別場交換
+            </button>
+          )}
+        </div>
         <div className="flex flex-wrap gap-2 min-h-[2rem]">
           {court.queue.length === 0 && <span className="text-sm text-gray-300">無</span>}
           {court.queue.map((p) => (

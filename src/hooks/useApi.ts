@@ -161,5 +161,14 @@ export function useManageActions(sessionId: string) {
       sessionApi.addQueue(sessionId, v.courtId, v.playerId),
     onSuccess: invalidate,
   })
-  return { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, approveFamily, renameCourt, removeCourt, addQueue, removePlayer }
+  const swapQueue = useMutation({
+    mutationFn: (v: { courtA: string; playerA: string; courtB: string; playerB: string }) =>
+      sessionApi.swapQueue(sessionId, { court_a: v.courtA, player_a: v.playerA, court_b: v.courtB, player_b: v.playerB }),
+    onSuccess: invalidate,
+    onError: (e: unknown) => {
+      const m = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
+      alert(m ?? '交換失敗,請稍後再試')
+    },
+  })
+  return { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, approveFamily, renameCourt, removeCourt, addQueue, swapQueue, removePlayer }
 }
