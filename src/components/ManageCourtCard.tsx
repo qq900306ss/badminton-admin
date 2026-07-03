@@ -123,7 +123,7 @@ export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onR
           {onSwapQueue && (
             <button
               onClick={onSwapQueue}
-              className="text-[11px] font-bold text-gray-300 hover:text-brand-pink active:text-brand-pink"
+              className="text-[11px] font-bold text-brand-pink bg-brand-pink/10 rounded-full px-2 py-0.5 active:scale-95 transition-transform"
             >
               ⇄ 跟別場交換
             </button>
