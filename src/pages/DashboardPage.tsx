@@ -12,6 +12,7 @@ import { OrgAvatarCard } from '../components/OrgAvatarCard'
 import { forceUpdate } from '../lib/appUpdate'
 import { TW_CITIES } from '../lib/twCities'
 import { TW_DISTRICTS } from '../lib/twDistricts'
+import { OnboardingCards, ONBOARD_KEY } from '../components/OnboardingCards'
 
 // tolerate corrupted localStorage without crashing the whole page
 function readOrg(): Org | null {
@@ -59,6 +60,10 @@ export function DashboardPage() {
   })
 
   const [settingsOpen, setSettingsOpen] = useState(false)
+  // 首次使用 → 翻頁導覽;之後可從 ⚙️ 設定重看
+  const [showOnboard, setShowOnboard] = useState(
+    () => localStorage.getItem(ONBOARD_KEY) !== '1'
+  )
   const openSessions = (mySessions ?? []).filter((s) => s.status === 'open')
   const MAX_OPEN = 7 // 與後端 maxOpenPerOrg 一致;同時開團上限,擋濫開
   const atOpenLimit = openSessions.length >= MAX_OPEN
@@ -145,6 +150,7 @@ export function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-brand-bg pb-10">
+      {showOnboard && <OnboardingCards onClose={() => setShowOnboard(false)} />}
       {impersonating && (
         <div className="bg-amber-100 text-amber-800 text-sm font-semibold px-4 py-2 flex items-center justify-between">
           <span>👁️ 正在以「{org?.org_name}」身份操作</span>
@@ -198,6 +204,12 @@ export function DashboardPage() {
             <OrgAvatarCard org={org} />
             <div className="card grid grid-cols-2 gap-2">
               <HelpButton className="btn-secondary text-sm col-span-2" />
+              <button
+                onClick={() => { setSettingsOpen(false); setShowOnboard(true) }}
+                className="btn-secondary text-sm col-span-2"
+              >
+                📖 使用教學(重看導覽)
+              </button>
               <ChangelogButton className="btn-secondary text-sm" />
               <FeedbackButton className="btn-secondary text-sm" />
               <button
