@@ -2,15 +2,17 @@ import { useEffect, useState } from 'react'
 import type { CourtView, PlayerSlot } from '../api/client'
 import { isPhotoUrl } from '../lib/avatar'
 
-// 交換排隊 modal:把來源場地排隊中的一個人,跟另一個場地排隊中的一個人互換。
-// 從 ManageCourtCard 排隊列的「⇄ 跟別場交換」進來(不常用 → 平常完全不佔版面,
-// 只在兩邊都有人排隊時才有入口)。
+// 交換排隊 modal:把來源場地排隊中的人跟另一個場地排隊中的人互換。兩邊可多選、
+// 可不等量(一邊 0 人=單純把人移過去/換過來),唯一限制是交換後兩邊排隊各 ≤ 4,
+// 超過時紅字提醒並鎖住確認鈕。從 ManageCourtCard 排隊列的「⇄ 跟別場交換」進來。
+
+const QUEUE_CAP = 4
 
 interface Props {
   courts: CourtView[]
   sourceCourtId: string
   pending: boolean
-  onConfirm: (pick: { courtA: string; playerA: string; courtB: string; playerB: string }) => void
+  onConfirm: (pick: { courtA: string; playersA: string[]; courtB: string; playersB: string[] }) => void
   onClose: () => void
 }
 
@@ -18,12 +20,15 @@ function courtTitle(c: CourtView) {
   return c.name?.trim() ? c.name : `場地 ${c.court_num}`
 }
 
-function QueueChip({ slot, selected, onClick }: { slot: PlayerSlot; selected: boolean; onClick: () => void }) {
+function QueueChip({ slot, selected, dimmed, onClick }: {
+  slot: PlayerSlot; selected: boolean; dimmed: boolean; onClick: () => void
+}) {
   return (
     <button
       onClick={onClick}
       className={`inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 rounded-full text-sm font-semibold border-2 transition-colors
-        ${selected ? 'border-brand-pink bg-brand-pink/10 text-brand-pink' : 'border-gray-200 text-gray-600'}`}
+        ${selected ? 'border-brand-pink bg-brand-pink/10 text-brand-pink' : 'border-gray-200 text-gray-600'}
+        ${dimmed ? 'opacity-40' : ''}`}
     >
       <span className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-xs overflow-hidden">
         {isPhotoUrl(slot.avatar_url) ? (
@@ -39,19 +44,73 @@ function QueueChip({ slot, selected, onClick }: { slot: PlayerSlot; selected: bo
   )
 }
 
+function toggle(set: Set<string>, id: string): Set<string> {
+  const next = new Set(set)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
+  return next
+}
+
 export function SwapQueueModal({ courts, sourceCourtId, pending, onConfirm, onClose }: Props) {
-  const [playerA, setPlayerA] = useState<string | null>(null)
-  const [target, setTarget] = useState<{ courtB: string; playerB: string } | null>(null)
+  const [picksA, setPicksA] = useState<Set<string>>(new Set())
+  const [targetId, setTargetId] = useState<string | null>(null)
+  const [picksB, setPicksB] = useState<Set<string>>(new Set())
 
   const source = courts.find((c) => c.court_id === sourceCourtId)
-  const others = courts.filter((c) => c.court_id !== sourceCourtId && c.queue.length > 0)
-  // 名單可能在打開後被 WS 更新到空 → 直接關掉比留一個空殼好
-  const shouldClose = !source || source.queue.length === 0 || others.length === 0
+  const others = courts.filter((c) => c.court_id !== sourceCourtId)
+  const anyQueue = (source?.queue.length ?? 0) > 0 || others.some((c) => c.queue.length > 0)
+  // 名單可能在打開後被 WS 更新到沒東西可換 → 直接關掉比留一個空殼好
+  const shouldClose = !source || others.length === 0 || !anyQueue
   useEffect(() => {
     if (shouldClose) onClose()
   }, [shouldClose, onClose])
+
+  // WS 更新可能把已選的人移出排隊 → 把失效的選擇自動剔除
+  useEffect(() => {
+    if (!source) return
+    const inQueue = new Set(source.queue.map((p) => p.player_id))
+    if ([...picksA].some((id) => !inQueue.has(id))) {
+      setPicksA(new Set([...picksA].filter((id) => inQueue.has(id))))
+    }
+  }, [source, picksA])
+  useEffect(() => {
+    const target = courts.find((c) => c.court_id === targetId)
+    if (!target) return
+    const inQueue = new Set(target.queue.map((p) => p.player_id))
+    if ([...picksB].some((id) => !inQueue.has(id))) {
+      setPicksB(new Set([...picksB].filter((id) => inQueue.has(id))))
+    }
+  }, [courts, targetId, picksB])
+
   if (shouldClose || !source) return null
-  const ready = playerA !== null && target !== null
+
+  const target = others.find((c) => c.court_id === targetId) ?? null
+  const totalPicked = picksA.size + picksB.size
+
+  // 交換後兩邊的排隊人數 — 超過上限就提醒並擋下
+  const srcAfter = source.queue.length - picksA.size + picksB.size
+  const tgtAfter = target ? target.queue.length - picksB.size + picksA.size : 0
+  const overCourts: string[] = []
+  if (srcAfter > QUEUE_CAP) overCourts.push(`${courtTitle(source)}(會變 ${srcAfter} 人)`)
+  if (target && tgtAfter > QUEUE_CAP) overCourts.push(`${courtTitle(target)}(會變 ${tgtAfter} 人)`)
+  const ready = target !== null && totalPicked > 0 && overCourts.length === 0
+
+  function pickTarget(courtId: string) {
+    if (targetId !== courtId) {
+      setTargetId(courtId)
+      setPicksB(new Set()) // 換對象場地 → 之前選的人作廢
+    }
+  }
+
+  const confirmLabel = !target
+    ? '選一個要交換的場地'
+    : totalPicked === 0
+      ? '選要交換的人'
+      : picksA.size === 0
+        ? '⇄ 把人換過來'
+        : picksB.size === 0
+          ? '⇄ 把人移過去'
+          : '⇄ 確認交換'
 
   return (
     <div className="fixed inset-0 z-[60] bg-black/40 flex items-center justify-center p-6" onClick={onClose}>
@@ -63,51 +122,105 @@ export function SwapQueueModal({ courts, sourceCourtId, pending, onConfirm, onCl
           <span className="font-extrabold text-gray-800">⇄ 交換排隊</span>
           <button onClick={onClose} className="text-gray-400 font-bold">✕</button>
         </div>
+        <p className="text-xs text-gray-400">
+          兩邊可各選多人、也可只選一邊(單純把人移過去/換過來),交換後每場排隊最多 {QUEUE_CAP} 人。
+        </p>
 
         <div className="space-y-1.5">
           <p className="text-xs font-bold text-gray-400">
-            {courtTitle(source)} — 選要換出去的人
+            {courtTitle(source)} — 要換出去的人(排隊 {source.queue.length}/{QUEUE_CAP})
           </p>
-          <div className="flex flex-wrap gap-2">
-            {source.queue.map((p) => (
-              <QueueChip
-                key={p.player_id}
-                slot={p}
-                selected={playerA === p.player_id}
-                onClick={() => setPlayerA(playerA === p.player_id ? null : p.player_id)}
-              />
-            ))}
-          </div>
-        </div>
-
-        {others.map((c) => (
-          <div key={c.court_id} className="space-y-1.5">
-            <p className="text-xs font-bold text-gray-400">{courtTitle(c)} — 選要換過來的人</p>
+          {source.queue.length === 0 ? (
+            <p className="text-sm text-gray-300">沒人排隊(還是可以把別場的人換過來)</p>
+          ) : (
             <div className="flex flex-wrap gap-2">
-              {c.queue.map((p) => (
+              {source.queue.map((p) => (
                 <QueueChip
                   key={p.player_id}
                   slot={p}
-                  selected={target?.courtB === c.court_id && target?.playerB === p.player_id}
-                  onClick={() =>
-                    setTarget(
-                      target?.playerB === p.player_id ? null : { courtB: c.court_id, playerB: p.player_id }
-                    )
-                  }
+                  selected={picksA.has(p.player_id)}
+                  dimmed={false}
+                  onClick={() => setPicksA(toggle(picksA, p.player_id))}
                 />
               ))}
             </div>
-          </div>
-        ))}
+          )}
+        </div>
+
+        <div className="space-y-3">
+          <p className="text-xs font-bold text-gray-400">跟哪個場地換?</p>
+          {others.map((c) => {
+            const isTarget = targetId === c.court_id
+            return (
+              <div
+                key={c.court_id}
+                className={`rounded-2xl border-2 p-2.5 space-y-1.5 transition-colors
+                  ${isTarget ? 'border-brand-pink' : 'border-gray-100'}`}
+              >
+                <button
+                  onClick={() => pickTarget(c.court_id)}
+                  className="w-full flex items-center gap-2 text-left"
+                >
+                  <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0
+                    ${isTarget ? 'border-brand-pink' : 'border-gray-300'}`}>
+                    {isTarget && <span className="w-2 h-2 rounded-full bg-brand-pink" />}
+                  </span>
+                  <span className={`text-sm font-bold ${isTarget ? 'text-brand-pink' : 'text-gray-600'}`}>
+                    {courtTitle(c)}
+                  </span>
+                  <span className="text-[11px] text-gray-400">排隊 {c.queue.length}/{QUEUE_CAP}</span>
+                </button>
+                {c.queue.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {c.queue.map((p) => (
+                      <QueueChip
+                        key={p.player_id}
+                        slot={p}
+                        selected={isTarget && picksB.has(p.player_id)}
+                        dimmed={targetId !== null && !isTarget}
+                        onClick={() => {
+                          if (!isTarget) {
+                            pickTarget(c.court_id)
+                            setPicksB(new Set([p.player_id]))
+                          } else {
+                            setPicksB(toggle(picksB, p.player_id))
+                          }
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {overCourts.length > 0 && (
+          <p className="text-xs font-bold text-red-500">
+            ⚠️ 這樣換的話 {overCourts.join('、')} 排隊會超過 {QUEUE_CAP} 人上限,請調整兩邊人數
+          </p>
+        )}
+        {ready && target && (
+          <p className="text-xs text-gray-400">
+            交換後:{courtTitle(source)} 排隊 {srcAfter}/{QUEUE_CAP} · {courtTitle(target)} 排隊 {tgtAfter}/{QUEUE_CAP}
+          </p>
+        )}
 
         <button
           disabled={!ready || pending}
           onClick={() => {
-            if (playerA && target) onConfirm({ courtA: sourceCourtId, playerA, ...target })
+            if (target) {
+              onConfirm({
+                courtA: sourceCourtId,
+                playersA: [...picksA],
+                courtB: target.court_id,
+                playersB: [...picksB],
+              })
+            }
           }}
           className="btn-primary w-full text-sm disabled:opacity-40"
         >
-          {ready ? '⇄ 確認交換' : '兩邊各選一個人'}
+          {confirmLabel}
         </button>
       </div>
     </div>

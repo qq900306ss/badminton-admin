@@ -548,9 +548,11 @@ export function SessionManagePage() {
                 onKick={(playerId) => kick.mutate({ courtId: court.court_id, playerId })}
                 onRename={(name) => renameCourt.mutate({ courtId: court.court_id, name })}
                 onSwapQueue={
-                  // 入口只在「這裡有人排隊、而且別的場地也有人排隊」時出現
-                  court.queue.length > 0 &&
-                  (session?.courts ?? []).some((c) => c.court_id !== court.court_id && c.queue.length > 0)
+                  // 入口在「有別的場地、且任一邊有人排隊」時出現(沒人排隊的場地
+                  // 也能把別場的人換過來)
+                  (session?.courts.length ?? 0) > 1 &&
+                  (court.queue.length > 0 ||
+                    (session?.courts ?? []).some((c) => c.court_id !== court.court_id && c.queue.length > 0))
                     ? () => setSwapSource(court.court_id)
                     : undefined
                 }

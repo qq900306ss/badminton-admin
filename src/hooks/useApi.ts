@@ -162,8 +162,8 @@ export function useManageActions(sessionId: string) {
     onSuccess: invalidate,
   })
   const swapQueue = useMutation({
-    mutationFn: (v: { courtA: string; playerA: string; courtB: string; playerB: string }) =>
-      sessionApi.swapQueue(sessionId, { court_a: v.courtA, player_a: v.playerA, court_b: v.courtB, player_b: v.playerB }),
+    mutationFn: (v: { courtA: string; playersA: string[]; courtB: string; playersB: string[] }) =>
+      sessionApi.swapQueue(sessionId, { court_a: v.courtA, players_a: v.playersA, court_b: v.courtB, players_b: v.playersB }),
     onSuccess: invalidate,
     onError: (e: unknown) => {
       const m = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
