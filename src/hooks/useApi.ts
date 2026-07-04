@@ -1,22 +1,24 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { sessionApi, seatApi } from '../api/client'
 
-export function useSessionView(sessionId: string) {
+// 推送求快、輪詢對帳:WS 活著時資料由伺服器主動推,輪詢降到 60 秒只做
+// 「對帳」(萬一推播漏了,最多慢一分鐘追平);WS 斷線時回到 30 秒。
+const reconcileMs = (live: boolean) => (live ? 60000 : 30000)
+
+export function useSessionView(sessionId: string, live = false) {
   return useQuery({
     queryKey: ['session', sessionId],
     queryFn: () => sessionApi.getView(sessionId).then((r) => r.data.data),
-    // real-time updates come via WebSocket (see SessionManagePage); this slow
-    // interval is just a safety net for when the socket drops.
-    refetchInterval: 30000,
+    refetchInterval: reconcileMs(live),
     enabled: !!sessionId,
   })
 }
 
-export function useSessionPlayers(sessionId: string) {
+export function useSessionPlayers(sessionId: string, live = false) {
   return useQuery({
     queryKey: ['session-players', sessionId],
     queryFn: () => sessionApi.getPlayers(sessionId).then((r) => r.data.data),
-    refetchInterval: 30000, // WS-driven; slow fallback only
+    refetchInterval: reconcileMs(live),
     enabled: !!sessionId,
   })
 }

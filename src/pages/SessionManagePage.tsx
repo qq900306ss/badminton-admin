@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { QRCodeSVG } from 'qrcode.react'
@@ -60,41 +60,53 @@ export function SessionManagePage() {
   const nav = useNavigate()
   const sid = sessionId ?? ''
 
-  const { data: session, isLoading } = useSessionView(sid)
-  const { data: players } = useSessionPlayers(sid)
+  const [wsUp, setWsUp] = useState(false) // WS 活著 → 輪詢降頻成 60 秒對帳
+  const { data: session, isLoading } = useSessionView(sid, wsUp)
+  const { data: players } = useSessionPlayers(sid, wsUp)
   const { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, approveFamily, renameCourt, removeCourt, addQueue, swapQueue, removePlayer } = useManageActions(sid)
   const confirm = useConfirm()
   const qc = useQueryClient()
 
-  // 報名中(等核准)的人只出現在報名審核區,不算成員
-  const roster = (players ?? []).filter((p) => !(p.pending && p.is_signup))
+  // 報名中(等核准)的人只出現在報名審核區,不算成員。這幾個推導值每次
+  // render 都重算會拖慢輸入框打字(整頁 718 行跟著重跑),memo 到 players 上
+  const roster = useMemo(
+    () => (players ?? []).filter((p) => !(p.pending && p.is_signup)),
+    [players]
+  )
+  const dup = useMemo(() => dupOrdinals(players ?? []), [players])
+  const nameById = useMemo(
+    () => new Map((players ?? []).map((p) => [p.player_id, p.display_name])),
+    [players]
+  )
 
-  // real-time: WebSocket nudge → refetch the moment ANYTHING changes (courts,
-  // players, seating, stats, action log). The server broadcasts after every
-  // write — including this leader's own — so actions reflect instantly without
-  // polling.
+  // real-time: 伺服器直接把最新 view/players 夾在 WS 訊息裡 → setQueryData
+  // 零重抓;沒帶 payload 才 fallback 成 invalidate。lastApplied 擋亂序。
+  const lastApplied = useRef(0)
   useEffect(() => {
     if (!sid) return
-    return connectSessionWS(sid, (m) => {
-      const inval = (k: string) => qc.invalidateQueries({ queryKey: [k, sid] })
-      const scope = m.scope ?? 'all'
-      // refetch only what actually changed (server tells us via scope)
-      if (scope === 'court' || scope === 'session') {
-        inval('session')
-      } else if (scope === 'player') {
-        inval('session') // names/levels also render on court
-        inval('session-players')
-      } else if (scope === 'game') {
-        inval('session')
-        inval('session-players') // stats changed
-        inval('games')
-      } else {
-        inval('session')
-        inval('session-players')
-        inval('games')
-      }
-      inval('action-logs') // cheap: query is disabled unless the log panel is open
-    })
+    return connectSessionWS(
+      sid,
+      (m) => {
+        if (m.t !== 'changed') return
+        const inval = (k: string) => qc.invalidateQueries({ queryKey: [k, sid] })
+        const scope = m.scope ?? 'all'
+        if (m.view) {
+          const at = m.at ?? Date.now()
+          if (at >= lastApplied.current) {
+            lastApplied.current = at
+            qc.setQueryData(['session', sid], m.view)
+            if (m.players) qc.setQueryData(['session-players', sid], m.players)
+          }
+        } else {
+          // fallback:舊格式 / payload 組失敗 → 照舊 scope 化重抓
+          inval('session')
+          if (scope !== 'court' && scope !== 'session') inval('session-players')
+        }
+        if (scope === 'game' || scope === 'all') inval('games') // 統計面板才用,開著才會真的抓
+        inval('action-logs') // cheap: query is disabled unless the log panel is open
+      },
+      setWsUp
+    )
   }, [sid, qc])
 
   const [showQR, setShowQR] = useState(true)
@@ -146,10 +158,8 @@ export function SessionManagePage() {
     )
   }
 
-  const dup = dupOrdinals(players ?? [])
   const targetPlayer = (players ?? []).find((p) => p.player_id === levelTarget)
   // owner_id → display name, so family members can show "(○○ 的家人)"
-  const nameById = new Map((players ?? []).map((p) => [p.player_id, p.display_name]))
   const ownerLabel = (p: SessionPlayer) =>
     p.owner_id ? `${nameById.get(p.owner_id) ?? '某人'} 的家人` : ''
 

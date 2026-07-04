@@ -1,8 +1,26 @@
-// real-time: connect to a session's WebSocket room; the server nudges on any
-// change (with a `scope` saying WHAT changed) so the leader's view updates
-// instantly + surgically. Auto-reconnects.
-export type RTNudge = { t?: string; scope?: 'court' | 'player' | 'game' | 'session' | 'all' }
-export function connectSessionWS(sessionId: string, onChange: (m: RTNudge) => void): () => void {
+// real-time: connect to a session's WebSocket room. The server now pushes the
+// CHANGED DATA in the message (view / players) so clients apply it directly
+// instead of re-calling the API; a bare nudge (no payload) still means
+// "refetch yourself" as fallback. Auto-reconnects; onStatus reports socket
+// health so pollers can slow down while live.
+import type { SessionView, SessionPlayer } from '../api/client'
+
+export type RTMessage =
+  | {
+      t: 'changed'
+      scope?: 'court' | 'player' | 'game' | 'session' | 'all'
+      at?: number // server ms timestamp — clients drop out-of-order payloads
+      view?: SessionView
+      players?: SessionPlayer[]
+    }
+  | { t: 'removed'; player: string; msg: string }
+  | { t: 'renamed'; player: string; msg: string }
+
+export function connectSessionWS(
+  sessionId: string,
+  onMessage: (m: RTMessage) => void,
+  onStatus?: (up: boolean) => void
+): () => void {
   const base = (import.meta.env.VITE_API_URL || '').replace(/^http/, 'ws')
   if (!base || !sessionId) return () => {}
   let ws: WebSocket | null = null
@@ -17,16 +35,18 @@ export function connectSessionWS(sessionId: string, onChange: (m: RTNudge) => vo
       schedule()
       return
     }
-    ws.onmessage = (ev) => {
-      let m: RTNudge = {}
+    ws.onopen = () => onStatus?.(true)
+    ws.onmessage = (e) => {
       try {
-        m = JSON.parse(ev.data)
+        onMessage(JSON.parse(e.data))
       } catch {
         /* ignore malformed */
       }
-      onChange(m)
     }
-    ws.onclose = () => schedule()
+    ws.onclose = () => {
+      onStatus?.(false)
+      schedule()
+    }
     ws.onerror = () => {
       try {
         ws?.close()
