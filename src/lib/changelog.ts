@@ -2,6 +2,12 @@
 // short and in plain language (團主 audience).
 export const CHANGELOG: { date: string; items: string[] }[] = [
   {
+    date: '2026/07/05',
+    items: [
+      '⚡ 全面提速:管理操作更即時、成員多時打字不卡、頁面開啟更快;多人同時搶同一位置也不會打架',
+    ],
+  },
+  {
     date: '2026/07/03',
     items: [
       '新功能「前台報名」:開團時打開後,臨打人不用密碼就能直接報名、留言給你;管理頁有獨立的「🙋 臨打報名審核」區,核准才加入(知道密碼的照樣直接進)',
