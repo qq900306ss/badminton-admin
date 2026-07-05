@@ -79,9 +79,23 @@ export function SessionManagePage() {
     [players]
   )
 
+  // 鎖屏/切走時 OS 凍結頁面,WS 被掐死、期間廣播全錯過 —— 回到前景那一刻
+  // 立刻對帳,別等 60 秒輪詢(全域 refetchOnWindowFocus 是關的,這裡自己補)
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible' && sid) {
+        qc.invalidateQueries({ queryKey: ['session', sid] })
+        qc.invalidateQueries({ queryKey: ['session-players', sid] })
+      }
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [sid, qc])
+
   // real-time: 伺服器直接把最新 view/players 夾在 WS 訊息裡 → setQueryData
   // 零重抓;沒帶 payload 才 fallback 成 invalidate。lastApplied 擋亂序。
   const lastApplied = useRef(0)
+  const wasDown = useRef(false) // WS 斷過 → 重連成功那刻補一次對帳
   useEffect(() => {
     if (!sid) return
     return connectSessionWS(
@@ -105,7 +119,16 @@ export function SessionManagePage() {
         if (scope === 'game' || scope === 'all') inval('games') // 統計面板才用,開著才會真的抓
         inval('action-logs') // cheap: query is disabled unless the log panel is open
       },
-      setWsUp
+      (up) => {
+        setWsUp(up)
+        if (up && wasDown.current) {
+          // 剛從斷線恢復:斷線期間的推播已經丟了,主動拉一次真相
+          wasDown.current = false
+          qc.invalidateQueries({ queryKey: ['session', sid] })
+          qc.invalidateQueries({ queryKey: ['session-players', sid] })
+        }
+        if (!up) wasDown.current = true
+      }
     )
   }, [sid, qc])
 
