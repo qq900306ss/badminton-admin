@@ -23,7 +23,9 @@ export function LanguageSwitcher() {
   }, [open])
 
   return (
-    <div ref={ref} className="fixed top-3 right-3 z-[60]">
+    // bottom-left so it never covers page headers (they keep their own
+    // top-right actions like 設定/登出); the menu opens upward.
+    <div ref={ref} className="fixed bottom-4 left-4 z-[60]">
       <button
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-1 rounded-full bg-white/90 backdrop-blur px-3 py-1.5
@@ -33,7 +35,7 @@ export function LanguageSwitcher() {
         🌐 {LANG_LABELS[current]}
       </button>
       {open && (
-        <div className="absolute right-0 mt-1 w-32 rounded-2xl bg-white shadow-lg border border-gray-100 overflow-hidden">
+        <div className="absolute left-0 bottom-full mb-1 w-32 rounded-2xl bg-white shadow-lg border border-gray-100 overflow-hidden">
           {SUPPORTED_LANGS.map((lng) => (
             <button
               key={lng}

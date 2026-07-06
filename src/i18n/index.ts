@@ -61,7 +61,9 @@ i18n
     resources,
     fallbackLng: 'zh-TW',
     supportedLngs: SUPPORTED_LANGS as unknown as string[],
-    nonExplicitSupportedLngs: true, // treat en-US, ja-JP, zh-Hant… as their base
+    // NOTE: no nonExplicitSupportedLngs — it makes i18next look up the base
+    // 'zh' bundle and misses our 'zh-TW' resources (keys render raw). Variants
+    // like en-US/ja-JP already resolve to en/ja via getBestMatchFromCodes.
     interpolation: { escapeValue: false }, // React already escapes
     detection: {
       order: ['localStorage', 'navigator'],
