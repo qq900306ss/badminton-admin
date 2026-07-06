@@ -66,7 +66,9 @@ i18n
     // like en-US/ja-JP already resolve to en/ja via getBestMatchFromCodes.
     interpolation: { escapeValue: false }, // React already escapes
     detection: {
-      order: ['localStorage', 'navigator'],
+      // localStorage only — default is always zh-TW; the UI changes language
+      // only when the user explicitly picks one (no browser auto-detection).
+      order: ['localStorage'],
       lookupLocalStorage: 'lang',
       caches: ['localStorage'],
     },
