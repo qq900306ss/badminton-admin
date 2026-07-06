@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 
 // Shows a thin banner when polling/requests are failing (flaky venue wifi),
 // so a stuck-looking screen reads as "reconnecting", not "frozen".
 export function ConnectionBanner() {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [down, setDown] = useState(false)
 
@@ -32,7 +34,7 @@ export function ConnectionBanner() {
   if (!down) return null
   return (
     <div className="fixed top-0 inset-x-0 z-[70] bg-amber-400 text-amber-900 text-center text-xs font-bold py-1.5">
-      📶 連線不穩,重新連線中…
+      {t('ConnectionBanner.reconnecting')}
     </div>
   )
 }

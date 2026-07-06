@@ -1,5 +1,7 @@
 # badminton-admin — 團主 / 超級管理員後台
 
+**中文** · [English](README.en.md) · [日本語](README.ja.md)
+
 羽球場地管理系統的後台:Google 登入 → 開團(設名稱/時間/密碼/球場/名單)→ QR code → 場中管理(換場、踢人、加人、改程度)→ 數據統計。超級管理員可管理團主、模擬登入。
 
 🔗 **線上**:https://d1r9u0ja59y4rv.cloudfront.net

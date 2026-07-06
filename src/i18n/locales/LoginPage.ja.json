@@ -1,0 +1,12 @@
+{
+  "LoginPage": {
+    "title": "バドミントンコート管理",
+    "subtitle": "主催者管理画面",
+    "inAppTitle": "⚠️ ブラウザで開いてログインしてください",
+    "inAppBody": "現在アプリ内ブラウザ(Threads/IG/LINE…)で開いており、Googleログインがブロックされます。右上の「⋯」または共有ボタンをタップ →「ブラウザで開く / Safariで開く」を選んでからログインしてください。",
+    "copyUrl": "📋 URLをコピー(ブラウザに貼り付け)",
+    "loginWithGoogle": "Googleでログイン",
+    "authorizedOnly": "認証された主催者と管理者のみログインできます",
+    "installLabel": "📲 管理画面をホームに追加"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "TimesCard": {
+    "notSet": "未設定",
+    "errUpdateFailed": "更新に失敗しました。しばらくしてからもう一度お試しください",
+    "heading": "🕒 時間設定",
+    "updated": "✓ 更新しました",
+    "playLabel": "プレー:",
+    "queueLabel": "順番待ち開放:",
+    "edit": "編集",
+    "fieldStart": "プレー開始",
+    "fieldEnd": "終了時刻(終了2時間後に自動でクローズ)",
+    "fieldQueue": "順番待ち開放時刻(それまでは閲覧のみ)",
+    "saving": "保存中…",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "note": "空欄は未設定を意味します。変更は即座に反映されます。"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "SignupSettingsCard": {
+    "errUpdateFailed": "更新失敗,請稍後再試",
+    "errQuota": "名額請填 1~200 的整數(留空=不限)",
+    "heading": "🙋 開放前台報名",
+    "hint": "臨打人可直接在首頁報名、留言給你,核准後才加入;知道密碼的人照樣直接進,不用審核。",
+    "quotaLabel": "收人名額",
+    "quotaPeople": "{{n}} 人",
+    "unlimited": "不限",
+    "edit": "修改",
+    "save": "存",
+    "cancel": "取消",
+    "quotaNote": "滿了還是可以報名,由你決定收誰"
+  }
+}

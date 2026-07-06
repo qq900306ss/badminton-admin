@@ -1,0 +1,9 @@
+{
+  "TimeSelect": {
+    "periodDawn": "深夜",
+    "periodMorning": "午前",
+    "periodAfternoon": "午後",
+    "periodEvening": "夜",
+    "oClock": "時"
+  }
+}

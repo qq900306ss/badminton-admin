@@ -1,0 +1,33 @@
+{
+  "levels": {
+    "tiers": {
+      "novice": { "name": "Novice", "note": "Just starting; learning the rules and etiquette" },
+      "beginner": { "name": "Beginner", "note": "1-3 years playing; beginner level in casual drop-in games" },
+      "lowerIntermediate": { "name": "Lower Intermediate", "note": "3-5 years playing; lower-mid in casual drop-in games" },
+      "intermediate": { "name": "Intermediate", "note": "5-10 years playing; mid level in casual drop-in games" },
+      "upperIntermediate": { "name": "Upper Intermediate", "note": "10+ years playing; upper-mid in casual drop-in games" },
+      "advanced": { "name": "Advanced", "note": "Front-line school team, sports-scholarship, amateur Division A, etc." },
+      "professional": { "name": "Professional", "note": "Division A / national team players" }
+    },
+    "desc": {
+      "1": "Just picked up badminton; knows the match rules and court etiquette",
+      "2": "Can rally mid-high shots 10 strokes from mid-court; serves land over half the time",
+      "3": "From a fixed spot, half of rallies reach the back two-thirds of the court; serves land over 90% of the time",
+      "4": "Correct grip; from a fixed spot clears reach the back court (men) or mid-back (women); can do basic drives; solid on both forehand and backhand",
+      "5": "Correct grip; some basic footwork; handles standard shots reliably when not under pressure",
+      "6": "Basic footwork and rotation (not yet fluent); starting to smash and drop; when not pressured, clears on the move reach the mid-back court",
+      "7": "Smash, drop and clear-stationary or moving-land 70%+ consistently; has basic defense but little variation",
+      "8": "Has basic tactics and shot placement; comfortable with basic rotation; drops, smashes, clears and net shots 70%+ accurate; some defensive variation",
+      "9": "Three of drop/smash/clear/net shots are 90%+ accurate with quality; powerful strokes; defense has variation and consistency",
+      "10": "Rotation is second nature and used well; strategic play and placement score effectively",
+      "11": "Accurate on drop, smash, clear and net shots; combines power, speed and strategy; executes all backhand shots easily; threatening defense",
+      "12": "Fast movement and agile footwork; smashes, drops and net shots are fast and aggressive; often produces one-hit finishers",
+      "13": "All shots stable and polished; airtight defense, fast high-quality strokes, strong strategy and explosiveness",
+      "14": "All shots stable and polished; airtight defense, fast high-quality strokes (school team / sports-scholarship / amateur Division A level)",
+      "15": "All shots stable and polished; top amateur level",
+      "16": "Masterful shots, tactics and footwork; has developed a distinctive personal style",
+      "17": "Professional level; Division A / national representative player",
+      "18": "Elite professional level"
+    }
+  }
+}

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { InstallButton } from '../components/InstallButton'
 import { isInAppBrowser } from '../lib/inAppBrowser'
 
@@ -5,6 +6,7 @@ const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 const REDIRECT_URI = `${location.origin}/auth/callback`
 
 export function LoginPage() {
+  const { t } = useTranslation()
   const inApp = isInAppBrowser()
   function loginWithGoogle() {
     const params = new URLSearchParams({
@@ -22,21 +24,20 @@ export function LoginPage() {
     <div className="min-h-screen bg-brand-bg flex flex-col items-center justify-center p-6">
       <div className="text-center mb-8">
         <div className="text-6xl mb-3">🏸</div>
-        <h1 className="text-3xl font-extrabold text-gray-800">羽球場地管理</h1>
-        <p className="text-gray-400 mt-2">團主後台</p>
+        <h1 className="text-3xl font-extrabold text-gray-800">{t('LoginPage.title')}</h1>
+        <p className="text-gray-400 mt-2">{t('LoginPage.subtitle')}</p>
       </div>
       {inApp && (
         <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-3 mb-5 max-w-xs text-left space-y-2">
-          <p className="text-sm font-bold text-amber-700">⚠️ 請用瀏覽器開啟才能登入</p>
+          <p className="text-sm font-bold text-amber-700">{t('LoginPage.inAppTitle')}</p>
           <p className="text-xs text-amber-600">
-            你現在是從 App 內建瀏覽器(Threads/IG/LINE…)開啟的,Google 登入會被擋。請點右上「⋯」或分享鍵 →
-            選「在瀏覽器開啟 / 用 Safari 開啟」後再登入。
+            {t('LoginPage.inAppBody')}
           </p>
           <button
             onClick={() => navigator.clipboard?.writeText(window.location.href)}
             className="text-xs font-bold text-amber-700 underline"
           >
-            📋 複製網址(貼到瀏覽器開)
+            {t('LoginPage.copyUrl')}
           </button>
         </div>
       )}
@@ -51,13 +52,13 @@ export function LoginPage() {
           <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
           <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
         </svg>
-        使用 Google 登入
+        {t('LoginPage.loginWithGoogle')}
       </button>
       <p className="text-xs text-gray-300 mt-6 text-center max-w-xs">
-        只有被授權的團主與管理員能登入
+        {t('LoginPage.authorizedOnly')}
       </p>
       <div className="w-full max-w-xs mt-6">
-        <InstallButton label="📲 安裝後台到桌面" />
+        <InstallButton label={t('LoginPage.installLabel')} />
       </div>
     </div>
   )

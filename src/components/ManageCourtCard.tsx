@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { CourtView, PlayerSlot } from '../api/client'
 import { tierOf } from '../lib/levels'
 import { isPhotoUrl } from '../lib/avatar'
@@ -54,6 +55,7 @@ function Chip({ slot, onKick }: { slot: PlayerSlot; onKick: () => void }) {
 }
 
 export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onRemove, onSwapQueue }: Props) {
+  const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
   const [nameInput, setNameInput] = useState(court.name ?? '')
   // keep the field in sync with live data when not actively editing (a WS rename
@@ -61,7 +63,7 @@ export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onR
   useEffect(() => {
     if (!editing) setNameInput(court.name ?? '')
   }, [court.name, editing])
-  const title = court.name?.trim() ? court.name : `場地 ${court.court_num}`
+  const title = court.name?.trim() ? court.name : t('ManageCourtCard.courtN', { n: court.court_num })
   const playing = court.playing.filter((p) => p.player_id) // 去掉空位
   const filled = playing.length
 
@@ -77,12 +79,12 @@ export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onR
             <input
               value={nameInput}
               onChange={(e) => setNameInput(e.target.value)}
-              placeholder={`場地 ${court.court_num}`}
+              placeholder={t('ManageCourtCard.courtN', { n: court.court_num })}
               autoFocus
               className="flex-1 border-2 border-gray-200 rounded-xl px-2 py-1 text-sm
                 focus:outline-none focus:border-brand-pink"
             />
-            <button onClick={saveName} className="text-xs font-bold text-brand-pink px-1">存</button>
+            <button onClick={saveName} className="text-xs font-bold text-brand-pink px-1">{t('ManageCourtCard.save')}</button>
           </div>
         ) : (
           <button
@@ -93,23 +95,23 @@ export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onR
           </button>
         )}
         {filled === 0 ? (
-          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">空場</span>
+          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">{t('ManageCourtCard.empty')}</span>
         ) : filled === 4 ? (
           <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-mint text-emerald-700">
-            進行中{elapsedMins(court.started_at) !== null ? ` · 已 ${elapsedMins(court.started_at)} 分` : ''}
+            {t('ManageCourtCard.inProgress')}{elapsedMins(court.started_at) !== null ? t('ManageCourtCard.minsElapsed', { mins: elapsedMins(court.started_at) }) : ''}
           </span>
         ) : (
           <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-yellow text-amber-700">
-            湊人中 {filled}/4
+            {t('ManageCourtCard.gathering', { filled })}
           </span>
         )}
       </div>
 
       {/* playing */}
       <div>
-        <p className="text-xs text-gray-400 font-semibold mb-1">場上 ({filled}/4)</p>
+        <p className="text-xs text-gray-400 font-semibold mb-1">{t('ManageCourtCard.playing', { filled })}</p>
         <div className="flex flex-wrap gap-2 min-h-[2rem]">
-          {filled === 0 && <span className="text-sm text-gray-300">無</span>}
+          {filled === 0 && <span className="text-sm text-gray-300">{t('ManageCourtCard.none')}</span>}
           {playing.map((p) => (
             <Chip key={p.player_id} slot={p} onKick={() => onKick(p.player_id)} />
           ))}
@@ -119,18 +121,18 @@ export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onR
       {/* queue */}
       <div>
         <div className="flex items-center justify-between mb-1">
-          <p className="text-xs text-gray-400 font-semibold">排隊 ({court.queue.length}/4)</p>
+          <p className="text-xs text-gray-400 font-semibold">{t('ManageCourtCard.queue', { n: court.queue.length })}</p>
           {onSwapQueue && (
             <button
               onClick={onSwapQueue}
               className="text-[11px] font-bold text-brand-pink bg-brand-pink/10 rounded-full px-2 py-0.5 active:scale-95 transition-transform"
             >
-              ⇄ 跟別場交換
+              ⇄ {t('ManageCourtCard.swapWithOther')}
             </button>
           )}
         </div>
         <div className="flex flex-wrap gap-2 min-h-[2rem]">
-          {court.queue.length === 0 && <span className="text-sm text-gray-300">無</span>}
+          {court.queue.length === 0 && <span className="text-sm text-gray-300">{t('ManageCourtCard.none')}</span>}
           {court.queue.map((p) => (
             <Chip key={p.player_id} slot={p} onKick={() => onKick(p.player_id)} />
           ))}
@@ -145,20 +147,20 @@ export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onR
           disabled={filled === 0 && court.queue.length === 0}
           className="btn-primary w-full text-sm disabled:opacity-40"
         >
-          {filled === 4 ? '結束這場 → 換下一組' : '結束這場'}
+          {filled === 4 ? t('ManageCourtCard.endRotate') : t('ManageCourtCard.endGame')}
         </button>
         {court.can_undo && (
           <button
             onClick={onUndoEnd}
             className="w-full text-sm font-bold py-2.5 rounded-2xl bg-amber-100 text-amber-700 active:scale-95 transition-transform"
           >
-            ↩ 復原剛剛的結束(10 分鐘內)
+            ↩ {t('ManageCourtCard.undoEnd')}
           </button>
         )}
       </div>
 
       <button onClick={onRemove} className="w-full text-xs text-red-300 hover:text-red-400">
-        刪除這個場地
+        {t('ManageCourtCard.removeCourt')}
       </button>
     </div>
   )

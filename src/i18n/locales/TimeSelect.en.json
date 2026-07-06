@@ -1,0 +1,9 @@
+{
+  "TimeSelect": {
+    "periodDawn": "Late night",
+    "periodMorning": "Morning",
+    "periodAfternoon": "Afternoon",
+    "periodEvening": "Evening",
+    "oClock": "o'clock"
+  }
+}

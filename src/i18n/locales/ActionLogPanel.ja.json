@@ -1,0 +1,12 @@
+{
+  "ActionLogPanel": {
+    "title": "📋 操作ログ",
+    "collapse": "閉じる ▲",
+    "expand": "開く ▼",
+    "retention": "最新200件、90日間保存",
+    "refreshing": "更新中…",
+    "refresh": "🔄 更新",
+    "loading": "読み込み中…",
+    "empty": "操作ログはまだありません"
+  }
+}

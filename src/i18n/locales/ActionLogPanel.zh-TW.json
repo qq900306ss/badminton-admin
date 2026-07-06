@@ -1,0 +1,12 @@
+{
+  "ActionLogPanel": {
+    "title": "📋 操作紀錄",
+    "collapse": "收起 ▲",
+    "expand": "展開 ▼",
+    "retention": "最近 200 筆,保留 90 天",
+    "refreshing": "更新中…",
+    "refresh": "🔄 重新整理",
+    "loading": "載入中…",
+    "empty": "還沒有任何操作紀錄"
+  }
+}

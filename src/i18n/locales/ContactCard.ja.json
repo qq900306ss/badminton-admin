@@ -1,0 +1,19 @@
+{
+  "ContactCard": {
+    "errUrlScheme": "リンクは http:// または https:// で始める必要があります",
+    "errDescMax": "紹介は最大300文字までです",
+    "errUpdateFailed": "更新に失敗しました。しばらくしてからもう一度お試しください",
+    "heading": "📣 募集の紹介と連絡先",
+    "hint": "任意。紹介と「主催者に連絡」ボタンはドロップイン参加者のホーム画面に表示されます(レベル・費用・LINEグループなどを記載可)。",
+    "noDesc": "紹介が未設定です",
+    "noLink": "リンクが未設定です",
+    "edit": "編集",
+    "add": "追加",
+    "descPlaceholder": "あなたの募集を紹介:レベル、費用、注意事項など…",
+    "urlPlaceholder": "連絡リンク https://line.me/...",
+    "saving": "保存中…",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "removeHint": "項目を空欄にして保存すると削除できます。"
+  }
+}

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { adminApi, type SessionSummary, type AdminPlayer } from '../api/client'
@@ -28,6 +29,7 @@ function Swatch({ url, fallback }: { url?: string; fallback: string }) {
 }
 
 export function AdminPage() {
+  const { t } = useTranslation()
   const nav = useNavigate()
   const qc = useQueryClient()
   const confirm = useConfirm()
@@ -62,7 +64,7 @@ export function AdminPage() {
     enabled: tab === 'members', // only scan when needed
   })
 
-  const orgNameOf = (id: string) => (orgs ?? []).find((o) => o.org_id === id)?.org_name ?? '未知'
+  const orgNameOf = (id: string) => (orgs ?? []).find((o) => o.org_id === id)?.org_name ?? t('AdminPage.unknown')
   const leaderCount = (orgs ?? []).filter((o) => o.role === 'leader').length
   // 團主列表依建立時間排序(最新在上)
   const shownOrgs = (orgs ?? [])
@@ -118,7 +120,7 @@ export function AdminPage() {
     },
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error
-      setError(msg ?? '新增失敗')
+      setError(msg ?? t('AdminPage.addHostFailed'))
     },
   })
   const remove = useMutation({
@@ -144,22 +146,22 @@ export function AdminPage() {
       nav('/')
     } catch (e: unknown) {
       const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
-      setError(msg ?? '切換身份失敗')
+      setError(msg ?? t('AdminPage.switchIdentityFailed'))
     }
   }
 
   const NAV: { key: Tab; label: string }[] = [
-    { key: 'orgs', label: '👑 團主管理' },
-    { key: 'sessions', label: '📋 所有開團' },
-    { key: 'members', label: '🧑‍🤝‍🧑 成員管理' },
-    { key: 'feedback', label: `💬 意見回饋${feedback?.length ? ` (${feedback.length})` : ''}` },
+    { key: 'orgs', label: t('AdminPage.navHosts') },
+    { key: 'sessions', label: t('AdminPage.navSessions') },
+    { key: 'members', label: t('AdminPage.navMembers') },
+    { key: 'feedback', label: `${t('AdminPage.navFeedback')}${feedback?.length ? ` (${feedback.length})` : ''}` },
   ]
 
   return (
     <div className="min-h-screen bg-brand-bg pb-10">
       <header className="bg-white shadow-sm px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-        <button onClick={() => nav('/')} className="text-sm text-gray-400">← 返回</button>
-        <span className="font-extrabold text-gray-800">超級管理員</span>
+        <button onClick={() => nav('/')} className="text-sm text-gray-400">{t('AdminPage.back')}</button>
+        <span className="font-extrabold text-gray-800">{t('AdminPage.superAdmin')}</span>
         <span className="w-12" />
       </header>
 
@@ -183,9 +185,9 @@ export function AdminPage() {
           {/* stats — clickable, jump to the relevant view */}
           <div className="grid grid-cols-3 gap-3">
             {[
-              { label: '團主', value: leaderCount, emoji: '🧑‍🏫', onClick: () => setTab('orgs') },
-              { label: '進行中', value: openCount, emoji: '🏸', onClick: () => goSessions('open') },
-              { label: '總場次', value: sessions.length, emoji: '📋', onClick: () => goSessions('all') },
+              { label: t('AdminPage.statHosts'), value: leaderCount, emoji: '🧑‍🏫', onClick: () => setTab('orgs') },
+              { label: t('AdminPage.statActive'), value: openCount, emoji: '🏸', onClick: () => goSessions('open') },
+              { label: t('AdminPage.statTotalSessions'), value: sessions.length, emoji: '📋', onClick: () => goSessions('all') },
             ].map((stat) => (
               <button
                 key={stat.label}
@@ -203,17 +205,17 @@ export function AdminPage() {
           {tab === 'orgs' && (
             <>
               <div className="card space-y-3">
-                <span className="font-bold text-gray-700">新增團主</span>
+                <span className="font-bold text-gray-700">{t('AdminPage.addHost')}</span>
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="團主的 Google email"
+                  placeholder={t('AdminPage.hostEmailPlaceholder')}
                   className="w-full border-2 border-gray-200 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-pink"
                 />
                 <input
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
-                  placeholder="團體名稱"
+                  placeholder={t('AdminPage.groupNamePlaceholder')}
                   className="w-full border-2 border-gray-200 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-pink"
                 />
                 {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -222,12 +224,12 @@ export function AdminPage() {
                   disabled={!email.trim() || !orgName.trim() || create.isPending}
                   className="btn-primary w-full text-sm disabled:opacity-50"
                 >
-                  新增團主
+                  {t('AdminPage.addHost')}
                 </button>
               </div>
 
               <div className="card space-y-2">
-                <span className="font-bold text-gray-700">所有團主(點名字看他的開團)</span>
+                <span className="font-bold text-gray-700">{t('AdminPage.allHostsTitle')}</span>
                 {shownOrgs.map((o) => (
                   <div key={o.org_id} className="flex items-center justify-between py-2 border-b last:border-0 gap-2">
                     <button
@@ -240,10 +242,10 @@ export function AdminPage() {
                       <p className="font-semibold text-gray-700 truncate">
                         {o.org_name}
                         {o.role === 'superadmin' && (
-                          <span className="ml-2 text-xs bg-brand-yellow text-amber-700 px-2 py-0.5 rounded-full">管理員</span>
+                          <span className="ml-2 text-xs bg-brand-yellow text-amber-700 px-2 py-0.5 rounded-full">{t('AdminPage.adminBadge')}</span>
                         )}
                         {o.disabled && (
-                          <span className="ml-2 text-xs bg-red-100 text-red-500 px-2 py-0.5 rounded-full">已停用</span>
+                          <span className="ml-2 text-xs bg-red-100 text-red-500 px-2 py-0.5 rounded-full">{t('AdminPage.disabledBadge')}</span>
                         )}
                       </p>
                       <p className="text-xs text-gray-400 truncate">{o.google_email}</p>
@@ -252,31 +254,31 @@ export function AdminPage() {
                       <div className="flex items-center gap-2 shrink-0">
                         <button
                           onClick={() => {
-                            const n = window.prompt('新團名', o.org_name)?.trim()
+                            const n = window.prompt(t('AdminPage.newGroupNamePrompt'), o.org_name)?.trim()
                             if (n) renameOrg.mutate({ orgId: o.org_id, name: n })
                           }}
                           className="text-xs font-semibold text-gray-500"
                         >
-                          改名
+                          {t('AdminPage.rename')}
                         </button>
                         <button onClick={() => impersonate(o.org_id)} className="text-xs font-semibold text-brand-pink">
-                          以此身份
+                          {t('AdminPage.impersonate')}
                         </button>
                         <button
                           onClick={() => toggleDisabled.mutate({ orgId: o.org_id, disabled: !o.disabled })}
                           className={`text-xs font-semibold ${o.disabled ? 'text-emerald-500' : 'text-amber-500'}`}
                         >
-                          {o.disabled ? '啟用' : '停用'}
+                          {o.disabled ? t('AdminPage.enable') : t('AdminPage.disable')}
                         </button>
                         <button
                           onClick={async () => {
-                            if (await confirm({ message: `刪除團主「${o.org_name}」?`, confirmText: '刪除', danger: true })) {
+                            if (await confirm({ message: t('AdminPage.deleteHostConfirm', { name: o.org_name }), confirmText: t('AdminPage.delete'), danger: true })) {
                               remove.mutate(o.org_id)
                             }
                           }}
                           className="text-red-300 text-xs"
                         >
-                          刪除
+                          {t('AdminPage.delete')}
                         </button>
                       </div>
                     )}
@@ -290,8 +292,8 @@ export function AdminPage() {
           {tab === 'sessions' && (
             <div className="card space-y-3">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-gray-700">所有開團</span>
-                <span className="text-xs text-gray-400">{shownSessions.length} 筆</span>
+                <span className="font-bold text-gray-700">{t('AdminPage.allSessions')}</span>
+                <span className="text-xs text-gray-400">{t('AdminPage.entryCount', { count: shownSessions.length })}</span>
               </div>
               {/* filters: 團主 + 狀態 + 搜尋 */}
               <div className="flex flex-wrap gap-2">
@@ -300,7 +302,7 @@ export function AdminPage() {
                   onChange={(e) => setSelectedOrg(e.target.value || null)}
                   className="border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm bg-white focus:outline-none focus:border-brand-pink"
                 >
-                  <option value="">全部團主</option>
+                  <option value="">{t('AdminPage.allHostsOption')}</option>
                   {(orgs ?? [])
                     .filter((o) => o.role !== 'superadmin')
                     .map((o) => (
@@ -312,16 +314,16 @@ export function AdminPage() {
                   onChange={(e) => setStatusFilter(e.target.value as 'all' | 'open' | 'closed')}
                   className="border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm bg-white focus:outline-none focus:border-brand-pink"
                 >
-                  <option value="all">全部狀態</option>
-                  <option value="open">進行中</option>
-                  <option value="closed">已結束</option>
+                  <option value="all">{t('AdminPage.allStatuses')}</option>
+                  <option value="open">{t('AdminPage.statusActive')}</option>
+                  <option value="closed">{t('AdminPage.statusEnded')}</option>
                 </select>
                 <select
                   value={citySel}
                   onChange={(e) => { setCitySel(e.target.value); setDistSel('') }}
                   className="border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm bg-white focus:outline-none focus:border-brand-pink"
                 >
-                  <option value="">全部縣市</option>
+                  <option value="">{t('AdminPage.allCities')}</option>
                   {cityOpts.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
                 <select
@@ -330,17 +332,17 @@ export function AdminPage() {
                   disabled={distOpts.length === 0}
                   className="border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm bg-white disabled:opacity-40 focus:outline-none focus:border-brand-pink"
                 >
-                  <option value="">全部區</option>
+                  <option value="">{t('AdminPage.allDistricts')}</option>
                   {distOpts.map((d) => <option key={d} value={d}>{d}</option>)}
                 </select>
                 <input
                   value={sessionSearch}
                   onChange={(e) => setSessionSearch(e.target.value)}
-                  placeholder="🔍 開團名稱 / 團主"
+                  placeholder={t('AdminPage.sessionSearchPlaceholder')}
                   className="flex-1 min-w-[8rem] border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm focus:outline-none focus:border-brand-pink"
                 />
               </div>
-              {shownSessions.length === 0 && <p className="text-sm text-gray-300">沒有符合的開團</p>}
+              {shownSessions.length === 0 && <p className="text-sm text-gray-300">{t('AdminPage.noMatchingSessions')}</p>}
               {shownSessions.map((s) => (
                 <button
                   key={s.session_id}
@@ -349,26 +351,26 @@ export function AdminPage() {
                 >
                   <div className="min-w-0">
                     <p className="font-semibold text-gray-700 truncate">
-                      {s.title || '未命名'}
+                      {s.title || t('AdminPage.untitled')}
                       <span
                         className={`ml-2 text-xs px-2 py-0.5 rounded-full ${
                           s.status === 'open' ? 'bg-brand-mint text-emerald-700' : 'bg-gray-100 text-gray-400'
                         }`}
                       >
-                        {s.status === 'open' ? '進行中' : '已結束'}
+                        {s.status === 'open' ? t('AdminPage.statusActive') : t('AdminPage.statusEnded')}
                       </span>
                       {!!s.playing_courts && (
                         <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-brand-pink/15 text-brand-pink font-semibold">
-                          🏸 開打中 {s.playing_courts}
+                          {t('AdminPage.playingCourts', { count: s.playing_courts })}
                         </span>
                       )}
                     </p>
                     <p className="text-xs text-gray-400 truncate">
                       {orgNameOf(s.org_id)}
-                      {fmtRange(s) && <span> · {fmtRange(s)}</span>} · {s.num_courts} 場
+                      {fmtRange(s) && <span> · {fmtRange(s)}</span>} · {t('AdminPage.courtsCount', { count: s.num_courts })}
                     </p>
                   </div>
-                  <span className="text-brand-pink text-sm font-semibold shrink-0">查看 →</span>
+                  <span className="text-brand-pink text-sm font-semibold shrink-0">{t('AdminPage.view')}</span>
                 </button>
               ))}
             </div>
@@ -378,25 +380,25 @@ export function AdminPage() {
           {tab === 'members' && (
             <div className="card space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-gray-700">所有玩家帳號</span>
+                <span className="font-bold text-gray-700">{t('AdminPage.allPlayerAccounts')}</span>
                 <span className="text-xs text-gray-400">{shownPlayers.length}/{players?.length ?? 0}</span>
               </div>
               <input
                 value={playerSearch}
                 onChange={(e) => setPlayerSearch(e.target.value)}
-                placeholder="🔍 搜尋名字 / email"
+                placeholder={t('AdminPage.playerSearchPlaceholder')}
                 className="w-full border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm focus:outline-none focus:border-brand-pink"
               />
-              <p className="text-[11px] text-gray-400">左:登入時的名字/大頭貼　右:目前使用的名稱/頭像</p>
-              {!players && <p className="text-sm text-gray-300">載入中…</p>}
-              {players && shownPlayers.length === 0 && <p className="text-sm text-gray-300">找不到玩家</p>}
+              <p className="text-[11px] text-gray-400">{t('AdminPage.identityHint')}</p>
+              {!players && <p className="text-sm text-gray-300">{t('AdminPage.loading')}</p>}
+              {players && shownPlayers.length === 0 && <p className="text-sm text-gray-300">{t('AdminPage.noPlayersFound')}</p>}
               {shownPlayers.map((p: AdminPlayer) => (
                 <div key={p.player_id} className="py-2 border-b last:border-0 flex items-center gap-3">
                   {/* login identity */}
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <Swatch url={p.photo_url} fallback={(p.display_name || '?')[0]} />
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-gray-700 truncate">{p.display_name || '(無名)'}</p>
+                      <p className="text-sm font-semibold text-gray-700 truncate">{p.display_name || t('AdminPage.noName')}</p>
                       <p className="text-[11px] text-gray-400 truncate">
                         {p.provider === 'line' ? 'LINE' : 'Google'}
                         {p.email ? ` · ${p.email}` : ''}
@@ -409,10 +411,10 @@ export function AdminPage() {
                     <Swatch url={p.avatar_url} fallback={(p.join_name || p.display_name || '?')[0]} />
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-gray-700 truncate">
-                        {p.join_name || p.display_name || '(無名)'}
+                        {p.join_name || p.display_name || t('AdminPage.noName')}
                       </p>
                       <p className="text-[11px] text-gray-400">
-                        {p.default_level ? `預設 Lv${p.default_level}` : '未設程度'}
+                        {p.default_level ? t('AdminPage.defaultLevel', { level: p.default_level }) : t('AdminPage.noLevelSet')}
                       </p>
                     </div>
                   </div>
@@ -424,8 +426,8 @@ export function AdminPage() {
           {/* === 意見回饋 === */}
           {tab === 'feedback' && (
             <div className="card space-y-2">
-              <span className="font-bold text-gray-700">💬 意見回饋 ({(feedback ?? []).length})</span>
-              {(feedback ?? []).length === 0 && <p className="text-sm text-gray-300">目前沒有任何回饋</p>}
+              <span className="font-bold text-gray-700">{t('AdminPage.feedbackTitle', { count: (feedback ?? []).length })}</span>
+              {(feedback ?? []).length === 0 && <p className="text-sm text-gray-300">{t('AdminPage.noFeedback')}</p>}
               {(feedback ?? []).map((f) => (
                 <div key={f.id} className="py-2 border-b last:border-0 space-y-0.5">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -434,9 +436,9 @@ export function AdminPage() {
                         f.role === 'leader' ? 'bg-brand-yellow text-amber-700' : 'bg-brand-mint text-emerald-700'
                       }`}
                     >
-                      {f.role === 'leader' ? '團主' : '玩家'}
+                      {f.role === 'leader' ? t('AdminPage.roleHost') : t('AdminPage.rolePlayer')}
                     </span>
-                    <span className="font-semibold text-gray-700 text-sm">{f.author_name || '(匿名)'}</span>
+                    <span className="font-semibold text-gray-700 text-sm">{f.author_name || t('AdminPage.anonymous')}</span>
                     {f.email && <span className="text-xs text-gray-400">{f.email}</span>}
                     <span className="text-[11px] text-gray-300 ml-auto">
                       {new Date(f.created_at).toLocaleString('zh-TW', {

@@ -1,0 +1,18 @@
+{
+  "ManageCourtCard": {
+    "courtN": "コート{{n}}",
+    "save": "保存",
+    "empty": "空きコート",
+    "inProgress": "進行中",
+    "minsElapsed": " · 経過{{mins}}分",
+    "gathering": "募集中 {{filled}}/4",
+    "playing": "コート上 ({{filled}}/4)",
+    "none": "なし",
+    "queue": "順番待ち ({{n}}/4)",
+    "swapWithOther": "他コートと交換",
+    "endRotate": "終了して次の組へ",
+    "endGame": "このゲームを終了",
+    "undoEnd": "直前の終了を取り消す(10分以内)",
+    "removeCourt": "このコートを削除"
+  }
+}

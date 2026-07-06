@@ -1,0 +1,8 @@
+{
+  "AuthCallback": {
+    "noCode": "No Google authorization code received",
+    "loginFailed": "Login failed",
+    "backToLogin": "Back to login",
+    "loggingIn": "Logging in..."
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "useApi": {
+    "approveFailed": "核准失敗,請稍後再試",
+    "swapFailed": "交換失敗,請稍後再試"
+  }
+}

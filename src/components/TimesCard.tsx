@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { sessionApi } from '../api/client'
+import i18n from '../i18n'
 
 // ISO → value for <input type="datetime-local"> (local wall-clock, "YYYY-MM-DDTHH:mm")
 function toLocalInput(iso?: string): string {
@@ -18,9 +20,9 @@ function fromLocalInput(v: string): string {
 }
 // "6/29 18:00" for display
 function fmt(iso?: string): string {
-  if (!iso) return '未設定'
+  if (!iso) return i18n.t('TimesCard.notSet')
   const d = new Date(iso)
-  if (isNaN(d.getTime())) return '未設定'
+  if (isNaN(d.getTime())) return i18n.t('TimesCard.notSet')
   const hm = d.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false })
   return `${d.getMonth() + 1}/${d.getDate()} ${hm}`
 }
@@ -35,6 +37,7 @@ interface Props {
 // Leader-only: view + edit the play window and when self-queue opens — same
 // card pattern as the password card.
 export function TimesCard({ sessionId, startAt, endAt, queueOpenAt }: Props) {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [editing, setEditing] = useState(false)
   const [start, setStart] = useState('')
@@ -68,7 +71,7 @@ export function TimesCard({ sessionId, startAt, endAt, queueOpenAt }: Props) {
       setTimeout(() => setSaved(false), 2500)
     } catch (e: unknown) {
       const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
-      setError(msg ?? '更新失敗,請稍後再試')
+      setError(msg ?? t('TimesCard.errUpdateFailed'))
     } finally {
       setSaving(false)
     }
@@ -90,35 +93,35 @@ export function TimesCard({ sessionId, startAt, endAt, queueOpenAt }: Props) {
   return (
     <div className="card space-y-3">
       <div className="flex items-center justify-between">
-        <span className="font-bold text-gray-700">🕒 時間設定</span>
-        {saved && <span className="text-xs font-bold text-emerald-600">✓ 已更新</span>}
+        <span className="font-bold text-gray-700">{t('TimesCard.heading')}</span>
+        {saved && <span className="text-xs font-bold text-emerald-600">{t('TimesCard.updated')}</span>}
       </div>
 
       {!editing ? (
         <div className="flex items-center gap-3">
           <div className="flex-1 text-sm text-gray-600 space-y-0.5">
-            <div>打球:<span className="font-bold">{fmt(startAt)}</span>{endAt ? ` – ${fmt(endAt)}` : ''}</div>
-            <div>排隊開放:<span className="font-bold">{fmt(queueOpenAt)}</span></div>
+            <div>{t('TimesCard.playLabel')}<span className="font-bold">{fmt(startAt)}</span>{endAt ? ` – ${fmt(endAt)}` : ''}</div>
+            <div>{t('TimesCard.queueLabel')}<span className="font-bold">{fmt(queueOpenAt)}</span></div>
           </div>
           <button onClick={startEdit} className="btn-primary px-4 py-2 text-xs shrink-0">
-            修改
+            {t('TimesCard.edit')}
           </button>
         </div>
       ) : (
         <div className="space-y-2">
-          {field('開始打球', start, setStart)}
-          {field('結束時間(結束後 2 小時自動關團)', end, setEnd)}
-          {field('排隊開放時間(此時間前只能看)', queue, setQueue)}
+          {field(t('TimesCard.fieldStart'), start, setStart)}
+          {field(t('TimesCard.fieldEnd'), end, setEnd)}
+          {field(t('TimesCard.fieldQueue'), queue, setQueue)}
           {error && <p className="text-red-400 text-xs">{error}</p>}
           <div className="flex gap-2">
             <button onClick={save} disabled={saving} className="btn-primary flex-1 py-2 text-sm disabled:opacity-50">
-              {saving ? '儲存中…' : '儲存'}
+              {saving ? t('TimesCard.saving') : t('TimesCard.save')}
             </button>
             <button onClick={() => setEditing(false)} className="btn-secondary px-4 py-2 text-sm">
-              取消
+              {t('TimesCard.cancel')}
             </button>
           </div>
-          <p className="text-[11px] text-gray-400">留空表示不設定。改完即時生效。</p>
+          <p className="text-[11px] text-gray-400">{t('TimesCard.note')}</p>
         </div>
       )}
     </div>

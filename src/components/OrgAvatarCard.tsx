@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { sessionApi, type Org } from '../api/client'
 import { AVATAR_EMOJIS, isPhotoUrl } from '../lib/avatar'
 
@@ -7,6 +8,7 @@ export const DEFAULT_ORG_AVATAR = '🐰' // 團主沒設定頭像時的預設
 // One avatar per leader, shared across every team they open. Stored on the org;
 // players see it on the lobby card + session header. Emoji or uploaded photo.
 export function OrgAvatarCard({ org }: { org: Org | null }) {
+  const { t } = useTranslation()
   const [avatar, setAvatar] = useState(org?.avatar_url || '')
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState('')
@@ -22,7 +24,7 @@ export function OrgAvatarCard({ org }: { org: Org | null }) {
 
   async function uploadPhoto(file: File) {
     if (file.size > 3 * 1024 * 1024) {
-      setErr('照片請小於 3MB')
+      setErr(t('OrgAvatarCard.errPhotoSize'))
       return
     }
     setUploading(true)
@@ -35,7 +37,7 @@ export function OrgAvatarCard({ org }: { org: Org | null }) {
       if (!put.ok) throw new Error('upload failed')
       setDraft(public_url)
     } catch {
-      setErr('上傳失敗,請再試一次')
+      setErr(t('OrgAvatarCard.errUpload'))
     } finally {
       setUploading(false)
     }
@@ -52,7 +54,7 @@ export function OrgAvatarCard({ org }: { org: Org | null }) {
       setEditing(false)
     } catch (e: unknown) {
       const m = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
-      setErr(m ?? '更新失敗,請稍後再試')
+      setErr(m ?? t('OrgAvatarCard.errUpdate'))
     } finally {
       setSaving(false)
     }
@@ -64,9 +66,9 @@ export function OrgAvatarCard({ org }: { org: Org | null }) {
   return (
     <div className="card space-y-3">
       <div>
-        <span className="font-bold text-gray-700">🖼️ 團主頭像</span>
+        <span className="font-bold text-gray-700">{t('OrgAvatarCard.title')}</span>
         <p className="text-xs text-gray-400 mt-1">
-          一個團主一個頭像,你開的所有團都會顯示這個。沒設定就用預設 🐰。
+          {t('OrgAvatarCard.desc')}
         </p>
       </div>
 
@@ -80,7 +82,7 @@ export function OrgAvatarCard({ org }: { org: Org | null }) {
         </div>
         {!editing && (
           <button onClick={startEdit} className="btn-primary px-4 py-2 text-sm">
-            修改頭像
+            {t('OrgAvatarCard.editAvatar')}
           </button>
         )}
       </div>
@@ -89,7 +91,7 @@ export function OrgAvatarCard({ org }: { org: Org | null }) {
         <div className="space-y-3">
           <div className="flex flex-wrap gap-2">
             <label className="text-xs font-bold text-brand-pink border-2 border-brand-pink/40 rounded-full px-3 py-1.5 cursor-pointer">
-              {uploading ? '上傳中…' : '上傳照片'}
+              {uploading ? t('OrgAvatarCard.uploading') : t('OrgAvatarCard.uploadPhoto')}
               <input
                 type="file"
                 accept="image/*"
@@ -104,7 +106,7 @@ export function OrgAvatarCard({ org }: { org: Org | null }) {
               onClick={() => setDraft('')}
               className="text-xs font-bold text-gray-500 border-2 border-gray-200 rounded-full px-3 py-1.5"
             >
-              恢復預設 🐰
+              {t('OrgAvatarCard.resetDefault')}
             </button>
           </div>
           <div className="grid grid-cols-8 gap-1.5">
@@ -121,9 +123,9 @@ export function OrgAvatarCard({ org }: { org: Org | null }) {
           {err && <p className="text-red-400 text-xs">{err}</p>}
           <div className="flex gap-2">
             <button onClick={save} disabled={saving} className="btn-primary flex-1 py-2 text-sm disabled:opacity-40">
-              {saving ? '儲存中…' : '儲存'}
+              {saving ? t('OrgAvatarCard.saving') : t('OrgAvatarCard.save')}
             </button>
-            <button onClick={() => setEditing(false)} className="btn-secondary px-4 text-sm">取消</button>
+            <button onClick={() => setEditing(false)} className="btn-secondary px-4 text-sm">{t('OrgAvatarCard.cancel')}</button>
           </div>
         </div>
       )}

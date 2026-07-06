@@ -1,0 +1,6 @@
+{
+  "useApi": {
+    "approveFailed": "Approval failed, please try again later",
+    "swapFailed": "Swap failed, please try again later"
+  }
+}

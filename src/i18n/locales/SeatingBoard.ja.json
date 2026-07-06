@@ -1,0 +1,26 @@
+{
+  "SeatingBoard": {
+    "addToSlot": "この位置に人を追加",
+    "courtN": "コート{{n}}",
+    "empty": "空きコート",
+    "inProgress": "進行中",
+    "mins": " · {{mins}}分",
+    "gathering": "募集中 {{filled}}/4",
+    "queueAdd": "順番待ち +",
+    "queueHint": "「順番待ち +」で追加",
+    "searchName": "🔍 名前を検索",
+    "noPeople": "追加できる人がいません",
+    "games": "{{games}}戦",
+    "notArrived": "未到着",
+    "actionFailed": "操作に失敗しました",
+    "cannotSwapOut": "進行中(4人)のため交代できません — 「終了して交代」を押してください",
+    "seatOnCourt": "「{{name}}」に出す人を選択",
+    "queueIntoCourt": "「{{name}}」の順番待ちに追加",
+    "close": "閉じる",
+    "boardTitle": "現場配置ボード",
+    "landscape": "横向き",
+    "portrait": "縦向き",
+    "hint": "空き位置の ＋ か「順番待ち +」で人を追加 · コート上の人をタップで交代",
+    "noCourts": "このセッションにはまだコートがありません"
+  }
+}

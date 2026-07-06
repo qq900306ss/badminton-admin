@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { sessionApi } from '../api/client'
 import { TW_CITIES } from '../lib/twCities'
@@ -14,6 +15,7 @@ export function LocationCard({
   city?: string
   district?: string
 }) {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [editing, setEditing] = useState(false)
   const [c, setC] = useState('台中市')
@@ -30,7 +32,7 @@ export function LocationCard({
 
   async function save() {
     if (!d.trim()) {
-      setErr('請選擇(或填寫)區')
+      setErr(t('LocationCard.errSelectDistrict'))
       return
     }
     setSaving(true)
@@ -41,7 +43,7 @@ export function LocationCard({
       setEditing(false)
     } catch (e: unknown) {
       const m = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
-      setErr(m ?? '更新失敗,請稍後再試')
+      setErr(m ?? t('LocationCard.errUpdate'))
     } finally {
       setSaving(false)
     }
@@ -49,14 +51,14 @@ export function LocationCard({
 
   return (
     <div className="card space-y-3">
-      <span className="font-bold text-gray-700">📍 縣市 / 區</span>
+      <span className="font-bold text-gray-700">{t('LocationCard.title')}</span>
       {!editing ? (
         <div className="flex items-center gap-2">
           <span className="flex-1 font-bold text-gray-700">
-            {city || '未設定'} {district || ''}
+            {city || t('LocationCard.notSet')} {district || ''}
           </span>
           <button onClick={startEdit} className="btn-primary px-4 py-2 text-xs shrink-0">
-            修改
+            {t('LocationCard.edit')}
           </button>
         </div>
       ) : (
@@ -80,7 +82,7 @@ export function LocationCard({
                 onChange={(e) => setD(e.target.value)}
                 className="flex-1 border-2 border-gray-200 rounded-2xl px-3 py-2 text-sm bg-white focus:outline-none focus:border-brand-pink"
               >
-                <option value="">選擇區</option>
+                <option value="">{t('LocationCard.selectDistrict')}</option>
                 {TW_DISTRICTS[c].map((dist) => (
                   <option key={dist} value={dist}>{dist}</option>
                 ))}
@@ -89,7 +91,7 @@ export function LocationCard({
               <input
                 value={d}
                 onChange={(e) => setD(e.target.value)}
-                placeholder="例如 竹北市"
+                placeholder={t('LocationCard.districtPlaceholder')}
                 className="flex-1 border-2 border-gray-200 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:border-brand-pink"
               />
             )}
@@ -97,9 +99,9 @@ export function LocationCard({
           {err && <p className="text-red-400 text-xs">{err}</p>}
           <div className="flex gap-2">
             <button onClick={save} disabled={saving} className="btn-primary flex-1 py-2 text-sm disabled:opacity-40">
-              {saving ? '儲存中…' : '儲存'}
+              {saving ? t('LocationCard.saving') : t('LocationCard.save')}
             </button>
-            <button onClick={() => setEditing(false)} className="btn-secondary px-4 text-sm">取消</button>
+            <button onClick={() => setEditing(false)} className="btn-secondary px-4 text-sm">{t('LocationCard.cancel')}</button>
           </div>
         </div>
       )}

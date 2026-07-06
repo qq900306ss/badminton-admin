@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { FeedbackButton } from '../components/FeedbackButton'
@@ -45,6 +46,7 @@ function fmtRange(s: { start_at?: string; end_at?: string }): string {
 }
 
 export function DashboardPage() {
+  const { t } = useTranslation()
   const nav = useNavigate()
   const qc = useQueryClient()
   const confirm = useConfirm()
@@ -89,33 +91,33 @@ export function DashboardPage() {
 
   async function openSession() {
     if (!password.trim()) {
-      setError('請設定場地密碼')
+      setError(t('DashboardPage.courtPasswordRequired'))
       return
     }
     if (!district.trim()) {
-      setError('請選擇(或填寫)區')
+      setError(t('DashboardPage.districtRequired'))
       return
     }
     const contact = contactUrl.trim()
     if (contact && !/^https?:\/\//.test(contact)) {
-      setError('聯繫連結需以 http:// 或 https:// 開頭')
+      setError(t('DashboardPage.contactUrlInvalid'))
       return
     }
     const desc = description.trim()
     if ([...desc].length > 300) {
-      setError('簡介最多 300 字')
+      setError(t('DashboardPage.descTooLong'))
       return
     }
     const quota = signupQuota.trim() === '' ? 0 : Number(signupQuota)
     if (!Number.isInteger(quota) || quota < 0 || quota > 200) {
-      setError('名額請填 1~200 的整數(留空=不限)')
+      setError(t('DashboardPage.quotaInvalid'))
       return
     }
     setCreating(true)
     setError('')
     try {
       const res = await sessionApi.create({
-        title: title.trim() || org?.org_name || '羽球團',
+        title: title.trim() || org?.org_name || t('DashboardPage.defaultTeamName'),
         city,
         district: district.trim(),
         password,
@@ -132,7 +134,7 @@ export function DashboardPage() {
       nav(`/session/${res.data.data.session_id}`)
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error
-      setError(msg ?? '開團失敗')
+      setError(msg ?? t('DashboardPage.createFailed'))
     } finally {
       setCreating(false)
     }
@@ -153,27 +155,27 @@ export function DashboardPage() {
       {showOnboard && <OnboardingCards onClose={() => setShowOnboard(false)} />}
       {impersonating && (
         <div className="bg-amber-100 text-amber-800 text-sm font-semibold px-4 py-2 flex items-center justify-between">
-          <span>👁️ 正在以「{org?.org_name}」身份操作</span>
-          <button onClick={stopImpersonating} className="underline font-bold">返回管理員</button>
+          <span>{t('DashboardPage.impersonatingAs', { name: org?.org_name })}</span>
+          <button onClick={stopImpersonating} className="underline font-bold">{t('DashboardPage.backToAdmin')}</button>
         </div>
       )}
       <header className="bg-white shadow-sm px-4 py-3 flex items-center justify-between gap-2 sticky top-0 z-10">
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-2xl shrink-0">🏸</span>
-          <span className="font-extrabold text-gray-800 truncate">團主後台</span>
+          <span className="font-extrabold text-gray-800 truncate">{t('DashboardPage.dashboardTitle')}</span>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           {org?.role === 'superadmin' && (
             <button onClick={() => nav('/admin')} className="text-sm font-semibold text-brand-pink whitespace-nowrap">
-              管理員
+              {t('DashboardPage.admin')}
             </button>
           )}
           <button
             onClick={() => setSettingsOpen(true)}
             className="text-sm text-gray-500 hover:text-brand-pink whitespace-nowrap"
-            title="設定"
+            title={t('DashboardPage.settings')}
           >
-            ⚙️ 設定
+            {t('DashboardPage.settingsButton')}
           </button>
           <button
             onClick={() => {
@@ -182,7 +184,7 @@ export function DashboardPage() {
             }}
             className="text-sm text-gray-400 whitespace-nowrap"
           >
-            登出
+            {t('DashboardPage.logout')}
           </button>
         </div>
       </header>
@@ -198,7 +200,7 @@ export function DashboardPage() {
                 onClick={() => setSettingsOpen(false)}
                 className="text-white font-bold text-sm bg-black/30 rounded-full px-3 py-1"
               >
-                ✕ 關閉
+                {t('DashboardPage.close')}
               </button>
             </div>
             <OrgAvatarCard org={org} />
@@ -208,16 +210,16 @@ export function DashboardPage() {
                 onClick={() => { setSettingsOpen(false); setShowOnboard(true) }}
                 className="btn-secondary text-sm col-span-2"
               >
-                📖 使用教學(重看導覽)
+                {t('DashboardPage.tutorial')}
               </button>
               <ChangelogButton className="btn-secondary text-sm" />
               <FeedbackButton className="btn-secondary text-sm" />
               <button
                 onClick={() => forceUpdate()}
                 className="btn-secondary text-sm col-span-2"
-                title="清除快取、更新到最新版"
+                title={t('DashboardPage.updateHint')}
               >
-                🔄 更新到最新版
+                {t('DashboardPage.updateToLatest')}
               </button>
             </div>
           </div>
@@ -228,7 +230,7 @@ export function DashboardPage() {
         {/* my ongoing sessions */}
         {openSessions.length > 0 && (
           <div className="card space-y-2">
-            <span className="font-bold text-gray-700">進行中的開團 🏸</span>
+            <span className="font-bold text-gray-700">{t('DashboardPage.ongoingSessions')}</span>
             {openSessions.map((s) => (
               <button
                 key={s.session_id}
@@ -238,23 +240,23 @@ export function DashboardPage() {
               >
                 <div className="min-w-0">
                   <p className="font-bold text-gray-700 flex items-center gap-2 flex-wrap">
-                    {s.title || '未命名'}
+                    {s.title || t('DashboardPage.untitled')}
                     {!!s.playing_courts && (
                       <span className="text-xs px-2 py-0.5 rounded-full bg-brand-pink/15 text-brand-pink font-semibold">
-                        🏸 開打中 {s.playing_courts}
+                        {t('DashboardPage.playingCourts', { n: s.playing_courts })}
                       </span>
                     )}
                     {!!s.pending_signups && (
                       <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-semibold">
-                        🙋 報名 {s.pending_signups}
+                        {t('DashboardPage.pendingSignups', { n: s.pending_signups })}
                       </span>
                     )}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {fmtRange(s)} · {s.num_courts} 場
+                    {fmtRange(s)} · {t('DashboardPage.courtsCount', { n: s.num_courts })}
                   </p>
                 </div>
-                <span className="text-brand-pink font-semibold text-sm shrink-0">管理 →</span>
+                <span className="text-brand-pink font-semibold text-sm shrink-0">{t('DashboardPage.manage')}</span>
               </button>
             ))}
           </div>
@@ -264,7 +266,7 @@ export function DashboardPage() {
         {pastSessions.length > 0 && (
           <details className="card">
             <summary className="cursor-pointer font-bold text-gray-700">
-              歷史開團 ({pastSessions.length})
+              {t('DashboardPage.history', { count: pastSessions.length })}
             </summary>
             <div className="mt-3 space-y-1">
               {pastSessions.map((s) => (
@@ -276,15 +278,17 @@ export function DashboardPage() {
                     onClick={() => nav(`/session/${s.session_id}`)}
                     className="flex-1 text-left flex items-center justify-between gap-2 min-w-0"
                   >
-                    <span className="text-gray-600 truncate">{s.title || '未命名'}</span>
+                    <span className="text-gray-600 truncate">{s.title || t('DashboardPage.untitled')}</span>
                     <span className="text-xs text-gray-400 shrink-0">{fmtRange(s)}</span>
                   </button>
                   <button
                     onClick={async () => {
                       if (
                         await confirm({
-                          message: `從歷史清單移除「${s.title || '未命名'}」?資料仍會保留一段時間,只是不再顯示在這裡。`,
-                          confirmText: '移除',
+                          message: t('DashboardPage.removeConfirm', {
+                            name: s.title || t('DashboardPage.untitled'),
+                          }),
+                          confirmText: t('DashboardPage.remove'),
                           danger: true,
                         })
                       ) {
@@ -293,7 +297,7 @@ export function DashboardPage() {
                     }}
                     disabled={hide.isPending}
                     className="text-gray-300 hover:text-red-400 text-lg shrink-0 px-1 disabled:opacity-40"
-                    aria-label="移除"
+                    aria-label={t('DashboardPage.remove')}
                   >
                     ×
                   </button>
@@ -303,25 +307,25 @@ export function DashboardPage() {
           </details>
         )}
 
-        <h2 className="text-xl font-extrabold text-gray-800">開新的一團 🎉</h2>
+        <h2 className="text-xl font-extrabold text-gray-800">{t('DashboardPage.newSession')}</h2>
 
         {/* settings */}
         <div className="card space-y-4">
           <label className="block">
-            <span className="text-sm font-bold text-gray-600">這場的名稱</span>
+            <span className="text-sm font-bold text-gray-600">{t('DashboardPage.sessionNameLabel')}</span>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="例如 週六晚雙打團"
+              placeholder={t('DashboardPage.sessionNamePlaceholder')}
               maxLength={20}
               className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-4 py-2.5
                 focus:outline-none focus:border-brand-pink"
             />
-            <span className="text-xs text-gray-400">最多 20 字</span>
+            <span className="text-xs text-gray-400">{t('DashboardPage.max20')}</span>
           </label>
           <div className="flex gap-2">
             <label className="block flex-1">
-              <span className="text-sm font-bold text-gray-600">縣市</span>
+              <span className="text-sm font-bold text-gray-600">{t('DashboardPage.cityLabel')}</span>
               <select
                 value={city}
                 onChange={(e) => {
@@ -337,7 +341,7 @@ export function DashboardPage() {
               </select>
             </label>
             <label className="block flex-1">
-              <span className="text-sm font-bold text-gray-600">區</span>
+              <span className="text-sm font-bold text-gray-600">{t('DashboardPage.districtLabel')}</span>
               {TW_DISTRICTS[city] ? (
                 <select
                   value={district}
@@ -345,7 +349,7 @@ export function DashboardPage() {
                   className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-3 py-2.5 bg-white
                     focus:outline-none focus:border-brand-pink"
                 >
-                  <option value="">選擇區</option>
+                  <option value="">{t('DashboardPage.selectDistrict')}</option>
                   {TW_DISTRICTS[city].map((d) => (
                     <option key={d} value={d}>{d}</option>
                   ))}
@@ -354,7 +358,7 @@ export function DashboardPage() {
                 <input
                   value={district}
                   onChange={(e) => setDistrict(e.target.value)}
-                  placeholder="例如 竹北市"
+                  placeholder={t('DashboardPage.districtPlaceholder')}
                   className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-3 py-2.5
                     focus:outline-none focus:border-brand-pink"
                 />
@@ -362,11 +366,11 @@ export function DashboardPage() {
             </label>
           </div>
           <label className="block">
-            <span className="text-sm font-bold text-gray-600">場地密碼(臨打人進場用)</span>
+            <span className="text-sm font-bold text-gray-600">{t('DashboardPage.passwordLabel')}</span>
             <input
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="例如 1234"
+              placeholder={t('DashboardPage.passwordPlaceholder')}
               className="mt-1 w-full border-2 border-gray-200 rounded-2xl px-4 py-2.5
                 focus:outline-none focus:border-brand-pink"
             />
@@ -374,7 +378,7 @@ export function DashboardPage() {
 
           {/* schedule */}
           <label className="block">
-            <span className="text-sm font-bold text-gray-600">日期</span>
+            <span className="text-sm font-bold text-gray-600">{t('DashboardPage.dateLabel')}</span>
             <input
               type="date"
               value={date}
@@ -384,20 +388,20 @@ export function DashboardPage() {
             />
           </label>
           <div>
-            <span className="text-sm font-bold text-gray-600">開打時間</span>
+            <span className="text-sm font-bold text-gray-600">{t('DashboardPage.startTimeLabel')}</span>
             <TimeSelect value={startTime} onChange={setStartTime} />
           </div>
           <div>
-            <span className="text-sm font-bold text-gray-600">結束時間</span>
+            <span className="text-sm font-bold text-gray-600">{t('DashboardPage.endTimeLabel')}</span>
             <TimeSelect value={endTime} onChange={setEndTime} />
           </div>
           <div>
-            <span className="text-sm font-bold text-gray-600">排隊開放時間</span>
+            <span className="text-sm font-bold text-gray-600">{t('DashboardPage.queueTimeLabel')}</span>
             <TimeSelect value={queueTime} onChange={setQueueTime} />
-            <span className="text-xs text-gray-400">這時間之前,臨打人能進場看,但還不能自己排上場</span>
+            <span className="text-xs text-gray-400">{t('DashboardPage.queueTimeHint')}</span>
           </div>
           <label className="block">
-            <span className="text-sm font-bold text-gray-600">球場數量</span>
+            <span className="text-sm font-bold text-gray-600">{t('DashboardPage.numCourtsLabel')}</span>
             <div className="flex gap-2 mt-1">
               {[1, 2, 3, 4, 5, 6].map((n) => (
                 <button
@@ -413,7 +417,7 @@ export function DashboardPage() {
             </div>
             {/* custom count for big halls (7+) */}
             <div className="flex items-center gap-2 mt-2">
-              <span className="text-xs text-gray-400">或自訂</span>
+              <span className="text-xs text-gray-400">{t('DashboardPage.custom')}</span>
               <button
                 onClick={() => setNumCourts(Math.max(1, numCourts - 1))}
                 className="w-9 h-9 rounded-full bg-gray-100 text-gray-500 font-bold active:scale-90"
@@ -438,18 +442,18 @@ export function DashboardPage() {
               >
                 ＋
               </button>
-              <span className="text-xs text-gray-400">場(最多 30)</span>
+              <span className="text-xs text-gray-400">{t('DashboardPage.courtsUnitMax')}</span>
             </div>
           </label>
         </div>
 
         {/* 公開資訊:簡介 + 聯繫連結(同一張卡,臨打人都看得到) */}
         <div className="card space-y-2">
-          <span className="font-bold text-gray-700">📣 團簡介與聯繫方式(選填)</span>
+          <span className="font-bold text-gray-700">{t('DashboardPage.introTitle')}</span>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="介紹一下你的團:程度、費用、注意事項…(例:進階團 4~6 級,一場 150,自備球拍)"
+            placeholder={t('DashboardPage.descPlaceholder')}
             rows={3}
             maxLength={300}
             className="w-full border-2 border-gray-200 rounded-2xl px-3 py-2 text-sm resize-none
@@ -458,18 +462,18 @@ export function DashboardPage() {
           <input
             value={contactUrl}
             onChange={(e) => setContactUrl(e.target.value)}
-            placeholder="聯繫連結 https://line.me/..."
+            placeholder={t('DashboardPage.contactPlaceholder')}
             inputMode="url"
             className="w-full border-2 border-gray-200 rounded-2xl px-3 py-2 text-sm
               focus:outline-none focus:border-brand-pink"
           />
-          <span className="text-xs text-gray-400">臨打人在首頁會看到簡介和「聯繫團主」按鈕(可放 LINE 群、報名表等),開團後也能在「⚙️ 設定」改。</span>
+          <span className="text-xs text-gray-400">{t('DashboardPage.contactHint')}</span>
         </div>
 
         {/* 前台報名(預設關,不影響密碼加入) */}
         <div className="card space-y-2">
           <label className="flex items-center justify-between">
-            <span className="font-bold text-gray-700">🙋 開放前台報名</span>
+            <span className="font-bold text-gray-700">{t('DashboardPage.signupToggle')}</span>
             <input
               type="checkbox"
               checked={signupOpen}
@@ -479,20 +483,20 @@ export function DashboardPage() {
           </label>
           {signupOpen && (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">收人名額</span>
+              <span className="text-sm text-gray-500">{t('DashboardPage.quotaLabel')}</span>
               <input
                 value={signupQuota}
                 onChange={(e) => setSignupQuota(e.target.value)}
-                placeholder="不限"
+                placeholder={t('DashboardPage.unlimited')}
                 inputMode="numeric"
                 className="w-20 border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm text-center
                   focus:outline-none focus:border-brand-pink"
               />
-              <span className="text-xs text-gray-400">人(留空=不限;滿了還是可以報名,由你決定收誰)</span>
+              <span className="text-xs text-gray-400">{t('DashboardPage.quotaHint')}</span>
             </div>
           )}
           <span className="text-xs text-gray-400">
-            臨打人可以直接在首頁報名、留言給你,你核准後才加入;知道密碼的人照樣直接進,不用審核。
+            {t('DashboardPage.signupHint')}
           </span>
         </div>
 
@@ -500,7 +504,7 @@ export function DashboardPage() {
 
         {atOpenLimit && (
           <p className="text-amber-600 text-sm text-center bg-amber-50 rounded-2xl py-2 px-3">
-            已達同時開團上限({MAX_OPEN} 個),請先結束或關閉舊的團再開新的。
+            {t('DashboardPage.atOpenLimit', { max: MAX_OPEN })}
           </p>
         )}
 
@@ -509,11 +513,11 @@ export function DashboardPage() {
           disabled={creating || atOpenLimit}
           className="btn-primary w-full text-lg py-4 disabled:opacity-40"
         >
-          {creating ? '開團中...' : '🏸 開團'}
+          {creating ? t('DashboardPage.creating') : t('DashboardPage.openButton')}
         </button>
 
         <div className="pt-2">
-          <InstallButton label="📲 安裝後台到桌面" />
+          <InstallButton label={t('DashboardPage.installLabel')} />
         </div>
       </div>
     </div>

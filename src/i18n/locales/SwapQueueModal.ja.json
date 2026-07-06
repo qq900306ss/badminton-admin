@@ -1,0 +1,20 @@
+{
+  "SwapQueueModal": {
+    "courtN": "コート{{n}}",
+    "overItem": "{{name}}(→{{n}}人)",
+    "sep": "、",
+    "pickCourt": "交換するコートを選択",
+    "pickPlayers": "交換する人を選択",
+    "bringOver": "⇄ こちらへ移す",
+    "moveAway": "⇄ あちらへ移す",
+    "confirmSwap": "⇄ 交換を確認",
+    "title": "順番待ちを交換",
+    "intro": "両側で複数選択も、片側だけの選択も可能(人を移すだけ)。交換後、各コートの順番待ちは最大{{cap}}人です。",
+    "sourceLabel": "— 交換に出す人(順番待ち {{n}}/{{cap}})",
+    "noQueueSource": "順番待ちなし(他コートから人を移すことは可能)",
+    "whichCourt": "どのコートと交換?",
+    "queueCount": "順番待ち {{n}}/{{cap}}",
+    "overWarning": "この交換だと {{courts}} の順番待ちが上限{{cap}}人を超えます。両側の人数を調整してください",
+    "afterPrefix": "交換後:"
+  }
+}

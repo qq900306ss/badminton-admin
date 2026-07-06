@@ -1,50 +1,27 @@
 // User-facing changelog shown in the「更新資訊」modal. Newest first. Keep entries
 // short and in plain language (團主 audience).
-export const CHANGELOG: { date: string; items: string[] }[] = [
-  {
-    date: '2026/07/06',
-    items: [
-      '邀請區新增「↗ 分享到 LINE 群 / 社群」:一鍵把加入連結配好文字發出去,不用自己複製貼上',
-    ],
-  },
-  {
-    date: '2026/07/05',
-    items: [
-      '⚡ 全面提速:管理操作更即時、成員多時打字不卡、頁面開啟更快;多人同時搶同一位置也不會打架',
-      '📱 螢幕關掉再打開,管理頁立刻更新成最新狀態(以前可能要等一分鐘或手動刷新)',
-    ],
-  },
-  {
-    date: '2026/07/03',
-    items: [
-      '新功能「前台報名」:開團時打開後,臨打人不用密碼就能直接報名、留言給你;管理頁有獨立的「🙋 臨打報名審核」區,核准才加入(知道密碼的照樣直接進)',
-      '報名可以帶家人:審核區會標「👨‍👩‍👧 XX 帶的」,一個個核准,跟家人共用手機機制相同',
-      '可設定「收人名額」:滿了還是可以報名,由你決定收誰;首頁進行中的團會顯示「🙋 報名 N」提醒',
-      '開團時可填「團簡介」(程度、費用、注意事項…),跟聯繫連結一起顯示在臨打人首頁,開團後也能在「⚙️ 設定」改',
-      '場地卡「排隊」列新增「⇄ 跟別場交換」:兩邊可各選多人、可不等量(也能單純把人移過去/換過來),交換後每場排隊最多 4 人,超過會提醒',
-    ],
-  },
-  {
-    date: '2026/06/30',
-    items: [
-      '新增進階「公平讓分」(⚙️ 設定內):可擋住打太多的人、讓打少的人有得打,隨時開關、參數可調、有預設值',
-      '後台「進行中的開團」會顯示「🏸 開打中 N」,一眼看出哪場正在打',
-    ],
-  },
-  {
-    date: '2026/06/29',
-    items: [
-      '可在「⚙️ 設定」設定團主頭像(一個團主一個,所有團共用,沒設用預設 🐰)',
-      '同時最多開 7 個團(達上限請先結束舊團),避免誤開太多',
-      '開團時可直接選填「聯繫團主連結」;開團表單拿掉臨時加入(改成進場後再加)',
-      '可在「⚙️ 設定」放「聯繫團主連結」(LINE 群、報名表等),臨打人首頁就能一鍵聯繫',
-      '球場狀態改成即時同步,操作更省流量',
-      '密碼 / 時間 / 改團名 收進「⚙️ 設定」',
-      '可投票結束場地;結束與還原可同時操作',
-      '臨打費標記 + 「只看沒繳錢」過濾',
-      '家人帶人需團主核准、成員管理可看頭像',
-      '縣市選好會出現對應的「區」下拉',
-      '有新版本會自動提醒更新',
-    ],
-  },
+import i18n from '../i18n'
+
+export interface ChangelogEntry {
+  date: string
+  items: string[]
+}
+
+// Release dates + how many bullet items each release has. The item text lives
+// in the changelog locale fragments (keys `changelog.r<release>.i<item>`) and is
+// read at call time so it follows the current language.
+const RELEASES: { date: string; count: number }[] = [
+  { date: '2026/07/06', count: 1 },
+  { date: '2026/07/05', count: 2 },
+  { date: '2026/07/03', count: 5 },
+  { date: '2026/06/30', count: 2 },
+  { date: '2026/06/29', count: 11 },
 ]
+
+// Localized changelog. Call inside a render so it re-reads on language change.
+export function getChangelog(): ChangelogEntry[] {
+  return RELEASES.map((r, ri) => ({
+    date: r.date,
+    items: Array.from({ length: r.count }, (_, ii) => i18n.t(`changelog.r${ri}.i${ii}`)),
+  }))
+}

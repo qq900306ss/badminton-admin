@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { sessionApi, type SessionPlayer } from '../api/client'
 
@@ -6,6 +7,7 @@ const hm = (iso: string) =>
   new Date(iso).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false })
 
 export function StatsPanel({ sessionId, players }: { sessionId: string; players: SessionPlayer[] }) {
+  const { t } = useTranslation()
   const [sortBy, setSortBy] = useState<'games' | 'minutes'>('games')
 
   const { data: games } = useQuery({
@@ -28,10 +30,10 @@ export function StatsPanel({ sessionId, players }: { sessionId: string; players:
   return (
     <div className="card space-y-4">
       <div className="flex items-center justify-between">
-        <span className="font-bold text-gray-700">📊 數據統計</span>
+        <span className="font-bold text-gray-700">{t('StatsPanel.title')}</span>
         <div className="flex gap-1">
-          <button onClick={() => setSortBy('games')} className={tab(sortBy === 'games')}>場數</button>
-          <button onClick={() => setSortBy('minutes')} className={tab(sortBy === 'minutes')}>時數</button>
+          <button onClick={() => setSortBy('games')} className={tab(sortBy === 'games')}>{t('StatsPanel.games')}</button>
+          <button onClick={() => setSortBy('minutes')} className={tab(sortBy === 'minutes')}>{t('StatsPanel.minutes')}</button>
         </div>
       </div>
 
@@ -48,34 +50,34 @@ export function StatsPanel({ sessionId, players }: { sessionId: string; players:
                 <div className="h-full bg-brand-pink rounded-full transition-all" style={{ width: `${pct}%` }} />
               </div>
               <span className="w-12 text-right text-xs text-gray-500">
-                {sortBy === 'games' ? `${p.games} 場` : `${p.total_minutes} 分`}
+                {sortBy === 'games' ? t('StatsPanel.gamesCount', { n: p.games }) : t('StatsPanel.minutesCount', { n: p.total_minutes })}
               </span>
             </div>
           )
         })}
-        {ranked.length === 0 && <p className="text-sm text-gray-300">還沒有人</p>}
+        {ranked.length === 0 && <p className="text-sm text-gray-300">{t('StatsPanel.empty')}</p>}
       </div>
 
       {/* per-game history */}
       <details>
         <summary className="cursor-pointer text-sm font-bold text-gray-600">
-          每場歷史 ({games?.length ?? 0})
+          {t('StatsPanel.history', { count: games?.length ?? 0 })}
         </summary>
         <div className="mt-2 space-y-2 max-h-60 overflow-y-auto">
           {(games ?? []).map((g) => (
             <div key={g.ended_at_id} className="text-sm border-b last:border-0 pb-2">
               <div className="flex justify-between text-gray-400 text-xs">
                 <span>
-                  場地 {g.court_num} · {g.started_at ? `${hm(g.started_at)}–` : ''}
+                  {t('StatsPanel.court', { n: g.court_num })} · {g.started_at ? `${hm(g.started_at)}–` : ''}
                   {hm(g.ended_at)}
                 </span>
-                <span className="font-semibold text-gray-600">{g.minutes} 分</span>
+                <span className="font-semibold text-gray-600">{t('StatsPanel.minutesCount', { n: g.minutes })}</span>
               </div>
               <div className="text-gray-700">{g.player_names.join('、') || '—'}</div>
             </div>
           ))}
           {(games ?? []).length === 0 && (
-            <p className="text-sm text-gray-300">還沒有結束過的場次</p>
+            <p className="text-sm text-gray-300">{t('StatsPanel.noHistory')}</p>
           )}
         </div>
       </details>

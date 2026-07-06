@@ -1,0 +1,19 @@
+{
+  "ContactCard": {
+    "errUrlScheme": "Link must start with http:// or https://",
+    "errDescMax": "Intro can be at most 300 characters",
+    "errUpdateFailed": "Update failed, please try again later",
+    "heading": "📣 Meetup intro & contact",
+    "hint": "Optional. The intro and the “Contact host” button both show on the drop-in players' home page (add level, fees, LINE group, etc.).",
+    "noDesc": "No intro set",
+    "noLink": "No link set",
+    "edit": "Edit",
+    "add": "Add",
+    "descPlaceholder": "Tell players about your meetup: level, fees, things to note…",
+    "urlPlaceholder": "Contact link https://line.me/...",
+    "saving": "Saving…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "removeHint": "Leave the fields blank and save to remove them."
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "SeatingBoard": {
+    "addToSlot": "加人到這個位置",
+    "courtN": "場地 {{n}}",
+    "empty": "空場",
+    "inProgress": "進行中",
+    "mins": " · {{mins}} 分",
+    "gathering": "湊人中 {{filled}}/4",
+    "queueAdd": "排隊 +",
+    "queueHint": "點「排隊 +」加人",
+    "searchName": "🔍 搜尋名字",
+    "noPeople": "沒有可加入的人",
+    "games": "{{games}} 場",
+    "notArrived": "未到",
+    "actionFailed": "操作失敗",
+    "cannotSwapOut": "進行中(滿 4 人),不能換下 — 請按「結束換場」",
+    "seatOnCourt": "選人上「{{name}}」",
+    "queueIntoCourt": "排進「{{name}}」排隊",
+    "close": "關閉",
+    "boardTitle": "現場排點板",
+    "landscape": "橫向",
+    "portrait": "直版",
+    "hint": "點空位 ＋ 或「排隊 +」挑人加入 · 點場上的人可換下",
+    "noCourts": "這場還沒有球場"
+  }
+}

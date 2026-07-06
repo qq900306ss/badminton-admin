@@ -1,0 +1,13 @@
+{
+  "StatsPanel": {
+    "title": "📊 統計",
+    "games": "試合数",
+    "minutes": "時間",
+    "gamesCount": "{{n}}試合",
+    "minutesCount": "{{n}}分",
+    "empty": "まだ誰もいません",
+    "history": "試合履歴 ({{count}})",
+    "court": "コート{{n}}",
+    "noHistory": "終了した試合はまだありません"
+  }
+}

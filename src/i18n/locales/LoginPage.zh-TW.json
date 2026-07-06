@@ -1,0 +1,12 @@
+{
+  "LoginPage": {
+    "title": "羽球場地管理",
+    "subtitle": "團主後台",
+    "inAppTitle": "⚠️ 請用瀏覽器開啟才能登入",
+    "inAppBody": "你現在是從 App 內建瀏覽器(Threads/IG/LINE…)開啟的,Google 登入會被擋。請點右上「⋯」或分享鍵 → 選「在瀏覽器開啟 / 用 Safari 開啟」後再登入。",
+    "copyUrl": "📋 複製網址(貼到瀏覽器開)",
+    "loginWithGoogle": "使用 Google 登入",
+    "authorizedOnly": "只有被授權的團主與管理員能登入",
+    "installLabel": "📲 安裝後台到桌面"
+  }
+}

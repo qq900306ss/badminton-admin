@@ -1,0 +1,18 @@
+{
+  "TimesCard": {
+    "notSet": "Not set",
+    "errUpdateFailed": "Update failed, please try again later",
+    "heading": "🕒 Time settings",
+    "updated": "✓ Updated",
+    "playLabel": "Play: ",
+    "queueLabel": "Queue opens: ",
+    "edit": "Edit",
+    "fieldStart": "Play starts",
+    "fieldEnd": "End time (auto-closes 2 hours after)",
+    "fieldQueue": "Queue opens at (view-only before this)",
+    "saving": "Saving…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "note": "Leave blank to unset. Changes take effect immediately."
+  }
+}

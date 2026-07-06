@@ -1,0 +1,20 @@
+{
+  "SessionSummary": {
+    "defaultTitle": "羽球揪團",
+    "shareTitle": "🏸 {{title}} 散場總結",
+    "shareTotals": "打了 {{games}} 場、共 {{min}} 分鐘",
+    "shareRow": "{{medal}} {{name}} {{games}} 場 / {{min}} 分",
+    "wrapUp": "散場總結",
+    "statTotalGames": "總場次",
+    "statTotalMinutes": "總時數(分)",
+    "statPlayers": "人數",
+    "topToday": "🏆 今日最猛 ",
+    "topGames": " · {{n}} 場",
+    "ranking": "排行(依場數)",
+    "rowStat": "{{games}} 場 · {{min}} 分",
+    "noGames": "這場還沒有完成的場次",
+    "copied": "✓ 已複製",
+    "share": "📤 分享到 LINE / 群組",
+    "close": "關閉"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "OnboardingCards": {
+    "openGroupTitle": "Start a meetup",
+    "openGroupLines": [
+      "Enter a name, location, time, and password — start a meetup in 30 seconds.",
+      "Once created, share the QR code / link to your LINE group or FB community and players can scan to join. Your meetup intro and contact link show up in the lobby."
+    ],
+    "collectTitle": "Collect players",
+    "collectLines": [
+      "Anyone with the password joins directly, no approval needed.",
+      "Turn on “Public sign-up” and people without the password can register too (they can leave a note and bring family). You approve them one by one in the “Drop-in sign-up review” area. You can set a slot limit — even when it's full, sign-ups keep coming and you pick who's in."
+    ],
+    "onsiteTitle": "On-court queuing",
+    "onsiteLines": [
+      "Each court card shows who's playing and who's in the queue. You can queue people for them, remove someone, or swap queued players between courts.",
+      "Turn on “Fair Play” to automatically hold back people who've played too much so those who've played less get a turn. Ended a game by mistake? You can undo within 10 minutes."
+    ],
+    "feesTitle": "Fees & stats",
+    "feesLines": [
+      "Mark members as “drop-in fee paid,” then filter who still hasn't paid with one tap.",
+      "Games and minutes per person are tallied automatically. Every action you take is logged, and the history stays after the meetup ends."
+    ],
+    "skip": "Skip ✕",
+    "prev": "Back",
+    "next": "Next →",
+    "finish": "Start a meetup 🏸"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "changelog": {
+    "r0": {
+      "i0": "The invite area now has \"↗ Share to LINE group / social\": send the join link with ready-made text in one tap-no more copy-pasting"
+    },
+    "r1": {
+      "i0": "⚡ Faster all around: admin actions respond instantly, typing stays smooth with lots of members, pages open quicker; simultaneous grabs for the same spot no longer clash",
+      "i1": "📱 Turn the screen off and back on and the admin page updates to the latest state right away (before, it could take a minute or need a manual refresh)"
+    },
+    "r2": {
+      "i0": "New \"Public sign-up\" feature: turn it on when hosting and drop-in players can register and message you without a password; the admin page has a dedicated \"🙋 Drop-in sign-up review\" area where you approve them to join (people who know the password still enter directly)",
+      "i1": "Sign-ups can bring family: the review area labels them \"👨‍👩‍👧 Brought by XX\" and you approve them one by one, same as the shared-phone family mechanism",
+      "i2": "You can set a \"sign-up quota\": people can still register once it's full and you decide who to accept; ongoing meetups on the home page show a \"🙋 N signed up\" reminder",
+      "i3": "When hosting you can fill in a \"meetup intro\" (level, fees, notes…), shown together with the contact link on the drop-in players' home page; you can also edit it later in \"⚙️ Settings\"",
+      "i4": "The court card's \"Queue\" row adds \"⇄ Swap with another court\": each side can pick several players and the counts need not match (you can also just move players over/across); after swapping, each court queues at most 4, and you're warned if it exceeds that"
+    },
+    "r3": {
+      "i0": "Added advanced \"Fair Play\" (in ⚙️ Settings): hold back players who've played too much so those who've played less get a turn; toggle anytime, adjustable parameters, with sensible defaults",
+      "i1": "The admin \"Ongoing meetups\" list shows \"🏸 N playing\" so you can see at a glance which sessions are in play"
+    },
+    "r4": {
+      "i0": "You can set the host avatar in \"⚙️ Settings\" (one per host, shared across all meetups; defaults to 🐰 if unset)",
+      "i1": "Up to 7 meetups open at once (end an old one first when you hit the limit) to avoid opening too many by mistake",
+      "i2": "When hosting you can optionally add a \"contact host link\"; the hosting form drops \"temporary join\" (add players after entering instead)",
+      "i3": "You can put a \"contact host link\" (LINE group, sign-up form, etc.) in \"⚙️ Settings\" so drop-in players can reach you in one tap from their home page",
+      "i4": "Court status now syncs in real time and uses less data",
+      "i5": "Password / time / rename meetup are now tucked into \"⚙️ Settings\"",
+      "i6": "You can vote to end a court; ending and undoing can be done at the same time",
+      "i7": "Drop-in fee marking + a \"show only unpaid\" filter",
+      "i8": "Family guests need host approval, and member management shows avatars",
+      "i9": "Picking a city/county reveals the matching \"district\" dropdown",
+      "i10": "You're automatically prompted to update when a new version is available"
+    }
+  }
+}

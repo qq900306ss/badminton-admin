@@ -1,0 +1,18 @@
+{
+  "ManageCourtCard": {
+    "courtN": "場地 {{n}}",
+    "save": "存",
+    "empty": "空場",
+    "inProgress": "進行中",
+    "minsElapsed": " · 已 {{mins}} 分",
+    "gathering": "湊人中 {{filled}}/4",
+    "playing": "場上 ({{filled}}/4)",
+    "none": "無",
+    "queue": "排隊 ({{n}}/4)",
+    "swapWithOther": "跟別場交換",
+    "endRotate": "結束這場 → 換下一組",
+    "endGame": "結束這場",
+    "undoEnd": "復原剛剛的結束(10 分鐘內)",
+    "removeCourt": "刪除這個場地"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "ManageCourtCard": {
+    "courtN": "Court {{n}}",
+    "save": "Save",
+    "empty": "Empty",
+    "inProgress": "In progress",
+    "minsElapsed": " · {{mins}} min",
+    "gathering": "Gathering {{filled}}/4",
+    "playing": "On court ({{filled}}/4)",
+    "none": "None",
+    "queue": "Queue ({{n}}/4)",
+    "swapWithOther": "Swap with another",
+    "endRotate": "End game → next group",
+    "endGame": "End game",
+    "undoEnd": "Undo last end (within 10 min)",
+    "removeCourt": "Delete this court"
+  }
+}

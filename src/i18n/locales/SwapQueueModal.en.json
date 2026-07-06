@@ -1,0 +1,20 @@
+{
+  "SwapQueueModal": {
+    "courtN": "Court {{n}}",
+    "overItem": "{{name}} (would become {{n}})",
+    "sep": ", ",
+    "pickCourt": "Pick a court to swap with",
+    "pickPlayers": "Pick players to swap",
+    "bringOver": "⇄ Bring players over",
+    "moveAway": "⇄ Move players over",
+    "confirmSwap": "⇄ Confirm swap",
+    "title": "Swap queues",
+    "intro": "Pick multiple on each side, or just one side (to simply move people over). After swapping, each court's queue holds at most {{cap}}.",
+    "sourceLabel": "— players to swap out (queue {{n}}/{{cap}})",
+    "noQueueSource": "No one in queue (you can still bring players from another court)",
+    "whichCourt": "Swap with which court?",
+    "queueCount": "Queue {{n}}/{{cap}}",
+    "overWarning": "This swap would push {{courts}} over the {{cap}}-person queue limit — adjust the numbers on both sides",
+    "afterPrefix": "After: "
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "LocationCard": {
+    "title": "📍 縣市 / 區",
+    "notSet": "未設定",
+    "edit": "修改",
+    "selectDistrict": "選擇區",
+    "districtPlaceholder": "例如 竹北市",
+    "saving": "儲存中…",
+    "save": "儲存",
+    "cancel": "取消",
+    "errSelectDistrict": "請選擇(或填寫)區",
+    "errUpdate": "更新失敗,請稍後再試"
+  }
+}

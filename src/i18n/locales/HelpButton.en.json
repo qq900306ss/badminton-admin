@@ -1,0 +1,22 @@
+{
+  "HelpButton": {
+    "button": "❓ Guide",
+    "title": "🧑‍🏫 Host guide",
+    "step1Title": "Open a meetup",
+    "step1Body": "On the home page fill in: meetup name, city/district, entry code, date and time, number of courts, then tap “Open”.",
+    "step2Title": "Invite players",
+    "step2Body": "On the session page there's a QR code and “Copy link” at the top to share with everyone; “Poster mode” can be placed at the door for people to scan.",
+    "step3Title": "Players today",
+    "step3Body": "See who's checked in (● arrived). Tap anyone to rename, change level, mark “💰drop-in fee”, or disconnect them.",
+    "step4Title": "Line up to play",
+    "step4Body": "Use “Add manually” on a court card to line players up on court / in the queue; for anyone without a phone, use the “On-site board” to line them up. While a game is in progress (4 players) you can't swap—end it first with “End this game”.",
+    "step5Title": "End / Undo",
+    "step5Body": "When a game finishes, tap “End this game” to bring on the next group; if you tapped by mistake, you can “Undo” within 10 minutes.",
+    "step6Title": "Approve family",
+    "step6Body": "When a drop-in brings family, a “Pending approval” tag appears; tap them and “Approve” before they can be lined up to play.",
+    "step7Title": "Rename meetup",
+    "step7Body": "Tap the title (✏️) at the top of the session page to rename it; the name drop-ins see updates instantly.",
+    "step8Title": "Wrap-up summary",
+    "step8Body": "Tap “Summary” at the top right to see how many games and minutes each person played; “Close meetup” wraps it up."
+  }
+}
