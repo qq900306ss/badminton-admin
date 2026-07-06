@@ -23,6 +23,7 @@ import { CourtSkeleton } from '../components/Skeleton'
 import { TIERS, tierOf } from '../lib/levels'
 import { isPhotoUrl } from '../lib/avatar'
 import { connectSessionWS } from '../lib/realtime'
+import { shareContent } from '../lib/share'
 
 const BOOKING_URL = import.meta.env.VITE_BOOKING_URL || 'http://localhost:5174'
 
@@ -273,7 +274,20 @@ export function SessionManagePage() {
                   複製
                 </button>
               </div>
-              <button onClick={() => setPoster(true)} className="btn-primary w-full text-sm">
+              <button
+                onClick={async () => {
+                  const r = await shareContent({
+                    title: session?.title || '羽球團',
+                    text: `🏸 ${session?.title || '羽球團'} 開團了!點連結加入(報名/密碼進場都在裡面)`,
+                    url: joinUrl,
+                  })
+                  if (r === 'copied') alert('已複製邀請文字和連結,貼到群組吧!')
+                }}
+                className="btn-primary w-full text-sm"
+              >
+                ↗ 分享到 LINE 群 / 社群
+              </button>
+              <button onClick={() => setPoster(true)} className="btn-secondary w-full text-sm">
                 🖥 海報模式(全螢幕大 QR)
               </button>
             </div>

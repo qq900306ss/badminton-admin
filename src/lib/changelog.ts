@@ -2,6 +2,12 @@
 // short and in plain language (團主 audience).
 export const CHANGELOG: { date: string; items: string[] }[] = [
   {
+    date: '2026/07/06',
+    items: [
+      '邀請區新增「↗ 分享到 LINE 群 / 社群」:一鍵把加入連結配好文字發出去,不用自己複製貼上',
+    ],
+  },
+  {
     date: '2026/07/05',
     items: [
       '⚡ 全面提速:管理操作更即時、成員多時打字不卡、頁面開啟更快;多人同時搶同一位置也不會打架',
