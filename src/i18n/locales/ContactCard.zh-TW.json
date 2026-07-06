@@ -1,0 +1,19 @@
+{
+  "ContactCard": {
+    "errUrlScheme": "連結需以 http:// 或 https:// 開頭",
+    "errDescMax": "簡介最多 300 字",
+    "errUpdateFailed": "更新失敗,請稍後再試",
+    "heading": "📣 團簡介與聯繫方式",
+    "hint": "選填。簡介和「聯繫團主」按鈕都會顯示在臨打人首頁(可放程度、費用、LINE 群等)。",
+    "noDesc": "簡介未設定",
+    "noLink": "連結未設定",
+    "edit": "修改",
+    "add": "新增",
+    "descPlaceholder": "介紹一下你的團:程度、費用、注意事項…",
+    "urlPlaceholder": "聯繫連結 https://line.me/...",
+    "saving": "儲存中…",
+    "save": "儲存",
+    "cancel": "取消",
+    "removeHint": "欄位留空白並儲存即可移除。"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "AuthCallback": {
+    "noCode": "Google認証コードを受け取れませんでした",
+    "loginFailed": "ログインに失敗しました",
+    "backToLogin": "ログイン画面に戻る",
+    "loggingIn": "ログイン中..."
+  }
+}

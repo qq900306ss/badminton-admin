@@ -1,4 +1,5 @@
 import { createContext, useContext, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface ConfirmOptions {
@@ -13,6 +14,7 @@ const ConfirmCtx = createContext<(o: ConfirmOptions | string) => Promise<boolean
 export const useConfirm = () => useContext(ConfirmCtx)
 
 export function ConfirmProvider({ children }: { children: ReactNode }) {
+  const { t } = useTranslation()
   const [opts, setOpts] = useState<ConfirmOptions | null>(null)
   const resolver = useRef<(v: boolean) => void>(() => {})
 
@@ -64,7 +66,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
               <p className="text-4xl">{opts.danger ? '⚠️' : '🏸'}</p>
               <p className="font-bold text-gray-700">{opts.message}</p>
               <div className="flex gap-2">
-                <button onClick={() => done(false)} className="btn-secondary flex-1">取消</button>
+                <button onClick={() => done(false)} className="btn-secondary flex-1">{t('Confirm.cancel')}</button>
                 <button
                   onClick={() => armed && done(true)}
                   disabled={opts.danger && !armed}
@@ -72,7 +74,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                     opts.danger ? 'bg-red-400' : 'bg-brand-pink'
                   } ${opts.danger && !armed ? 'opacity-40 cursor-not-allowed' : ''}`}
                 >
-                  {opts.danger && !armed ? '請稍候…' : opts.confirmText || '確定'}
+                  {opts.danger && !armed ? t('Confirm.pleaseWait') : opts.confirmText || t('Confirm.confirm')}
                 </button>
               </div>
             </motion.div>

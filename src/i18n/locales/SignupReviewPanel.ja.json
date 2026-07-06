@@ -1,0 +1,12 @@
+{
+  "SignupReviewPanel": {
+    "companionDefault": "同行者",
+    "title": "🙋 参加申し込みの確認 ({{count}})",
+    "joined": "{{n}}人 参加",
+    "broughtBy": "👨‍👩‍👧 {{name}}さんの同行",
+    "level": "レベル{{level}}",
+    "approve": "✅ 承認",
+    "reject": "辞退",
+    "overQuota": "定員が埋まっています——それでも承認できます。受け入れるかはあなた次第です。"
+  }
+}

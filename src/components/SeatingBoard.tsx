@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { CourtView, PlayerSlot, SessionPlayer } from '../api/client'
 import { useSessionView, useSessionPlayers, useSeatActions } from '../hooks/useApi'
 import { tierOf } from '../lib/levels'
@@ -59,13 +60,14 @@ function Avatar({ slot, onClick, locked }: { slot: PlayerSlot; onClick?: () => v
 }
 
 function EmptySlot({ onClick }: { onClick: () => void }) {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-col items-center gap-1">
       <button
         onClick={onClick}
         className="w-11 h-11 rounded-full border-2 border-dashed border-brand-pink/60 text-brand-pink flex items-center justify-center
           text-xl font-bold bg-white/50 hover:bg-brand-pink hover:text-white active:scale-90 transition-all"
-        aria-label="加人到這個位置"
+        aria-label={t('SeatingBoard.addToSlot')}
       >
         +
       </button>
@@ -83,6 +85,7 @@ interface CourtProps {
 }
 
 function BoardCourt({ court, onEmptySlot, onQueueZone, onFilledPlayer, onQueuedPlayer }: CourtProps) {
+  const { t } = useTranslation()
   const slots = court.playing
   const filled = slots.filter((s) => s.player_id).length
   const full = filled === 4
@@ -92,13 +95,13 @@ function BoardCourt({ court, onEmptySlot, onQueueZone, onFilledPlayer, onQueuedP
   return (
     <div className="card !p-3">
       <div className="flex items-center justify-between mb-2">
-        <span className="font-extrabold text-gray-700 text-sm">{court.name?.trim() ? court.name : `場地 ${court.court_num}`}</span>
+        <span className="font-extrabold text-gray-700 text-sm">{court.name?.trim() ? court.name : t('SeatingBoard.courtN', { n: court.court_num })}</span>
         {filled === 0 ? (
-          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">空場</span>
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">{t('SeatingBoard.empty')}</span>
         ) : full ? (
-          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-brand-mint text-emerald-700">進行中{mins !== null ? ` · ${mins} 分` : ''}</span>
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-brand-mint text-emerald-700">{t('SeatingBoard.inProgress')}{mins !== null ? t('SeatingBoard.mins', { mins }) : ''}</span>
         ) : (
-          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-brand-yellow text-amber-700">湊人中 {filled}/4</span>
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-brand-yellow text-amber-700">{t('SeatingBoard.gathering', { filled })}</span>
         )}
       </div>
 
@@ -127,12 +130,12 @@ function BoardCourt({ court, onEmptySlot, onQueueZone, onFilledPlayer, onQueuedP
             disabled={!queueRoom}
             className="text-[11px] font-bold px-2 py-1 rounded-full bg-brand-yellow text-amber-700 disabled:opacity-30 active:scale-90 transition-transform"
           >
-            排隊 +
+            {t('SeatingBoard.queueAdd')}
           </button>
           {court.queue.map((p) => (
             <Avatar key={p.player_id} slot={p} onClick={() => onQueuedPlayer(p.player_id)} />
           ))}
-          {court.queue.length === 0 && <span className="text-[11px] text-gray-300">點「排隊 +」加人</span>}
+          {court.queue.length === 0 && <span className="text-[11px] text-gray-300">{t('SeatingBoard.queueHint')}</span>}
         </div>
       </div>
     </div>
@@ -146,6 +149,7 @@ function PickerModal({ title, people, onPick, onClose }: {
   onPick: (playerId: string) => void
   onClose: () => void
 }) {
+  const { t } = useTranslation()
   const [q, setQ] = useState('')
   const list = people.filter((p) => p.display_name.includes(q.trim()))
   return (
@@ -160,13 +164,13 @@ function PickerModal({ title, people, onPick, onClose }: {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             autoFocus
-            placeholder="🔍 搜尋名字"
+            placeholder={t('SeatingBoard.searchName')}
             className="mt-2 w-full border-2 border-gray-200 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:border-brand-pink"
           />
         </div>
         <div className="overflow-y-auto p-3 space-y-1.5">
           {list.length === 0 ? (
-            <p className="text-center text-sm text-gray-300 py-6">沒有可加入的人</p>
+            <p className="text-center text-sm text-gray-300 py-6">{t('SeatingBoard.noPeople')}</p>
           ) : (
             list.map((p) => {
               const tier = tierOf(p.level)
@@ -179,7 +183,7 @@ function PickerModal({ title, people, onPick, onClose }: {
                   <span className="font-semibold text-gray-700 truncate">{p.display_name}</span>
                   <span className="flex items-center gap-2 shrink-0">
                     {p.level > 0 && tier && <span className={`text-[10px] px-2 py-0.5 rounded-full ${tier.chip}`}>{tier.name} {p.level}</span>}
-                    <span className="text-[11px] text-gray-400 tabular-nums">{p.claimed ? `${p.games} 場` : '未到'}</span>
+                    <span className="text-[11px] text-gray-400 tabular-nums">{p.claimed ? t('SeatingBoard.games', { games: p.games }) : t('SeatingBoard.notArrived')}</span>
                   </span>
                 </button>
               )
@@ -192,6 +196,7 @@ function PickerModal({ title, people, onPick, onClose }: {
 }
 
 export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClose: () => void }) {
+  const { t } = useTranslation()
   const { data: session } = useSessionView(sessionId)
   const { data: players } = useSessionPlayers(sessionId)
   const { seatPlaying, seatQueue, unseatPlaying, unseatQueue } = useSeatActions(sessionId)
@@ -210,7 +215,7 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
 
   const onErr = (e: unknown) => {
     const m = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
-    setMsg(m ?? '操作失敗')
+    setMsg(m ?? t('SeatingBoard.actionFailed'))
   }
 
   const courts = session?.courts ?? []
@@ -238,7 +243,7 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
     setPicker(null)
   }
   function tapFilledPlayer(courtId: string, playerId: string, removable: boolean) {
-    if (!removable) { setMsg('進行中(滿 4 人),不能換下 — 請按「結束換場」'); return }
+    if (!removable) { setMsg(t('SeatingBoard.cannotSwapOut')); return }
     if (busy) return
     unseatPlaying.mutate({ courtId, playerId }, { onError: onErr })
   }
@@ -248,18 +253,18 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
   }
 
   const pickerCourt = picker ? courts.find((c) => c.court_id === picker.courtId) : null
-  const pickerCourtName = pickerCourt ? (pickerCourt.name?.trim() ? pickerCourt.name : `場地 ${pickerCourt.court_num}`) : ''
-  const pickerTitle = picker ? (picker.position != null ? `選人上「${pickerCourtName}」` : `排進「${pickerCourtName}」排隊`) : ''
+  const pickerCourtName = pickerCourt ? (pickerCourt.name?.trim() ? pickerCourt.name : t('SeatingBoard.courtN', { n: pickerCourt.court_num })) : ''
+  const pickerTitle = picker ? (picker.position != null ? t('SeatingBoard.seatOnCourt', { name: pickerCourtName }) : t('SeatingBoard.queueIntoCourt', { name: pickerCourtName })) : ''
 
   return (
     <div className="fixed inset-0 z-50 bg-brand-bg flex flex-col">
       {/* header — close is on the LEFT so a stray double-tap can't reach 結束開團 */}
       <div className="bg-white shadow-sm px-4 py-2.5 flex items-center gap-2 shrink-0">
-        <button onClick={onClose} className="text-sm font-bold text-gray-500 bg-gray-100 rounded-full px-3 py-1.5 active:scale-95">✕ 關閉</button>
-        <span className="font-extrabold text-gray-800 flex-1 text-center">🏸 現場排點板</span>
+        <button onClick={onClose} className="text-sm font-bold text-gray-500 bg-gray-100 rounded-full px-3 py-1.5 active:scale-95">✕ {t('SeatingBoard.close')}</button>
+        <span className="font-extrabold text-gray-800 flex-1 text-center">🏸 {t('SeatingBoard.boardTitle')}</span>
         <div className="flex rounded-full bg-gray-100 p-0.5 text-xs font-bold">
-          <button onClick={() => setOrient('landscape')} className={`px-3 py-1 rounded-full ${orient === 'landscape' ? 'bg-brand-pink text-white' : 'text-gray-500'}`}>橫向</button>
-          <button onClick={() => setOrient('portrait')} className={`px-3 py-1 rounded-full ${orient === 'portrait' ? 'bg-brand-pink text-white' : 'text-gray-500'}`}>直版</button>
+          <button onClick={() => setOrient('landscape')} className={`px-3 py-1 rounded-full ${orient === 'landscape' ? 'bg-brand-pink text-white' : 'text-gray-500'}`}>{t('SeatingBoard.landscape')}</button>
+          <button onClick={() => setOrient('portrait')} className={`px-3 py-1 rounded-full ${orient === 'portrait' ? 'bg-brand-pink text-white' : 'text-gray-500'}`}>{t('SeatingBoard.portrait')}</button>
         </div>
       </div>
 
@@ -268,14 +273,14 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
         {msg ? (
           <span className="inline-block bg-red-100 text-red-500 text-sm font-bold rounded-full px-4 py-1">{msg}</span>
         ) : (
-          <span className="text-sm font-semibold text-gray-400">點空位 ＋ 或「排隊 +」挑人加入 · 點場上的人可換下</span>
+          <span className="text-sm font-semibold text-gray-400">{t('SeatingBoard.hint')}</span>
         )}
       </div>
 
       {/* courts fill the screen — picking happens in a popup, no bottom bench to scroll to */}
       <div className="flex-1 overflow-y-auto px-4 pb-4">
         {courts.length === 0 ? (
-          <p className="text-center text-gray-300 mt-10">這場還沒有球場</p>
+          <p className="text-center text-gray-300 mt-10">{t('SeatingBoard.noCourts')}</p>
         ) : (
           <div
             className="grid gap-3"

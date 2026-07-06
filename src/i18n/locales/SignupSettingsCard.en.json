@@ -1,0 +1,15 @@
+{
+  "SignupSettingsCard": {
+    "errUpdateFailed": "Update failed, please try again later",
+    "errQuota": "Enter a whole number from 1 to 200 for the limit (blank = unlimited)",
+    "heading": "🙋 Open public sign-up",
+    "hint": "Drop-in players can sign up right on the home page and leave you a note; they join only after approval. Anyone with the password still joins directly, no approval needed.",
+    "quotaLabel": "Sign-up limit",
+    "quotaPeople": "{{n}} people",
+    "unlimited": "Unlimited",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "quotaNote": "Even when full, people can still sign up — you decide who's in"
+  }
+}

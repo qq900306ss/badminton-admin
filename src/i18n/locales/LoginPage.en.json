@@ -1,0 +1,12 @@
+{
+  "LoginPage": {
+    "title": "Badminton Court Manager",
+    "subtitle": "Host Dashboard",
+    "inAppTitle": "⚠️ Open in a browser to log in",
+    "inAppBody": "You're viewing this in an in-app browser (Threads/IG/LINE…), which blocks Google login. Tap the \"⋯\" menu or share button in the top right → choose \"Open in browser / Open in Safari\", then log in.",
+    "copyUrl": "📋 Copy URL (paste into a browser)",
+    "loginWithGoogle": "Log in with Google",
+    "authorizedOnly": "Only authorized hosts and admins can log in",
+    "installLabel": "📲 Install dashboard to home screen"
+  }
+}

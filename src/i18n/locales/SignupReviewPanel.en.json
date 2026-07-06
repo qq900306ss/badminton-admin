@@ -1,0 +1,12 @@
+{
+  "SignupReviewPanel": {
+    "companionDefault": "Companion",
+    "title": "🙋 Sign-up review ({{count}})",
+    "joined": "{{n}} joined",
+    "broughtBy": "👨‍👩‍👧 with {{name}}",
+    "level": "Level {{level}}",
+    "approve": "✅ Approve",
+    "reject": "Decline",
+    "overQuota": "The session is full—you can still approve; it's up to you whether to take them."
+  }
+}

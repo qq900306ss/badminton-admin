@@ -1,0 +1,16 @@
+{
+  "OrgAvatarCard": {
+    "title": "🖼️ 團主頭像",
+    "desc": "一個團主一個頭像,你開的所有團都會顯示這個。沒設定就用預設 🐰。",
+    "editAvatar": "修改頭像",
+    "uploading": "上傳中…",
+    "uploadPhoto": "上傳照片",
+    "resetDefault": "恢復預設 🐰",
+    "saving": "儲存中…",
+    "save": "儲存",
+    "cancel": "取消",
+    "errPhotoSize": "照片請小於 3MB",
+    "errUpload": "上傳失敗,請再試一次",
+    "errUpdate": "更新失敗,請稍後再試"
+  }
+}

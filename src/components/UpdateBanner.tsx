@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { isUpdateAvailable, forceUpdate } from '../lib/appUpdate'
 
 // Polls /version.json and, when a newer build is deployed, pops a centered modal
 // so the user clearly sees there's an update and can apply it. Checks on mount,
 // every 2 min, and whenever the tab regains focus (PWA resumed from background).
 export function UpdateBanner() {
+  const { t } = useTranslation()
   const [show, setShow] = useState(false)
   const dismissed = useRef(false) // "稍後" suppresses re-nagging for this session
 
@@ -34,11 +36,11 @@ export function UpdateBanner() {
           ✨
         </div>
         <div className="space-y-1">
-          <p className="text-lg font-extrabold text-gray-800">有新版本囉!</p>
-          <p className="text-sm text-gray-500">更新一下就能用到最新功能與修正 🎉</p>
+          <p className="text-lg font-extrabold text-gray-800">{t('UpdateBanner.title')}</p>
+          <p className="text-sm text-gray-500">{t('UpdateBanner.desc')}</p>
         </div>
         <button onClick={() => forceUpdate()} className="btn-primary w-full">
-          🔄 立即更新
+          {t('UpdateBanner.update')}
         </button>
         <button
           onClick={() => {
@@ -47,7 +49,7 @@ export function UpdateBanner() {
           }}
           className="text-xs text-gray-400"
         >
-          稍後再說
+          {t('UpdateBanner.later')}
         </button>
       </div>
     </div>

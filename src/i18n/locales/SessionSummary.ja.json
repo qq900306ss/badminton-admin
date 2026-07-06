@@ -1,0 +1,20 @@
+{
+  "SessionSummary": {
+    "defaultTitle": "バドミントン募集",
+    "shareTitle": "🏸 {{title}} まとめ",
+    "shareTotals": "{{games}}試合、合計{{min}}分",
+    "shareRow": "{{medal}} {{name}} {{games}}試合 / {{min}}分",
+    "wrapUp": "まとめ",
+    "statTotalGames": "総試合数",
+    "statTotalMinutes": "合計時間(分)",
+    "statPlayers": "人数",
+    "topToday": "🏆 本日のMVP ",
+    "topGames": " · {{n}}試合",
+    "ranking": "ランキング(試合数順)",
+    "rowStat": "{{games}}試合 · {{min}}分",
+    "noGames": "まだ完了した試合がありません",
+    "copied": "✓ コピーしました",
+    "share": "📤 LINE / グループにシェア",
+    "close": "閉じる"
+  }
+}

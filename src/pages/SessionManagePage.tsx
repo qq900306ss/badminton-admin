@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { QRCodeSVG } from 'qrcode.react'
@@ -20,7 +21,7 @@ import { SignupSettingsCard } from '../components/SignupSettingsCard'
 import { SignupReviewPanel } from '../components/SignupReviewPanel'
 import { useConfirm } from '../components/Confirm'
 import { CourtSkeleton } from '../components/Skeleton'
-import { TIERS, tierOf } from '../lib/levels'
+import { getTiers, tierOf } from '../lib/levels'
 import { isPhotoUrl } from '../lib/avatar'
 import { connectSessionWS } from '../lib/realtime'
 import { shareContent } from '../lib/share'
@@ -57,6 +58,7 @@ function dupOrdinals(players: SessionPlayer[]): Record<string, number> {
 }
 
 export function SessionManagePage() {
+  const { t } = useTranslation()
   const { sessionId } = useParams<{ sessionId: string }>()
   const nav = useNavigate()
   const sid = sessionId ?? ''
@@ -169,7 +171,7 @@ export function SessionManagePage() {
   const joinUrl = `${BOOKING_URL}/?s=${sid}`
 
   async function closeSession() {
-    if (!(await confirm({ message: '確定要結束這次開團嗎?', confirmText: '結束開團', danger: true }))) return
+    if (!(await confirm({ message: t('SessionManagePage.confirmCloseMessage'), confirmText: t('SessionManagePage.endSession'), danger: true }))) return
     await sessionApi.close(sid)
     setSummary(true) // 結束後直接看散場總結
   }
@@ -185,16 +187,16 @@ export function SessionManagePage() {
   const targetPlayer = (players ?? []).find((p) => p.player_id === levelTarget)
   // owner_id → display name, so family members can show "(○○ 的家人)"
   const ownerLabel = (p: SessionPlayer) =>
-    p.owner_id ? `${nameById.get(p.owner_id) ?? '某人'} 的家人` : ''
+    p.owner_id ? t('SessionManagePage.familyOf', { name: nameById.get(p.owner_id) ?? t('SessionManagePage.someone') }) : ''
 
   return (
     <div className="min-h-screen bg-brand-bg pb-10">
       <header className="bg-white shadow-sm px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-        <button onClick={() => nav('/')} className="text-sm text-gray-400">← 返回</button>
-        <span className="font-extrabold text-gray-800">場中管理</span>
+        <button onClick={() => nav('/')} className="text-sm text-gray-400">← {t('SessionManagePage.back')}</button>
+        <span className="font-extrabold text-gray-800">{t('SessionManagePage.onCourtManage')}</span>
         <div className="flex items-center gap-3">
-          <button onClick={() => setSummary(true)} className="text-sm font-semibold text-brand-pink">總結</button>
-          <button onClick={closeSession} className="text-sm font-semibold text-red-400">結束開團</button>
+          <button onClick={() => setSummary(true)} className="text-sm font-semibold text-brand-pink">{t('SessionManagePage.summary')}</button>
+          <button onClick={closeSession} className="text-sm font-semibold text-red-400">{t('SessionManagePage.endSession')}</button>
         </div>
       </header>
 
@@ -227,9 +229,9 @@ export function SessionManagePage() {
                 focus:outline-none"
             />
             <button onClick={saveTitle} disabled={!titleInput.trim() || savingTitle} className="btn-primary px-4 text-sm disabled:opacity-40">
-              {savingTitle ? '…' : '儲存'}
+              {savingTitle ? '…' : t('SessionManagePage.save')}
             </button>
-            <button onClick={() => setEditTitle(false)} className="btn-secondary px-3 text-sm">取消</button>
+            <button onClick={() => setEditTitle(false)} className="btn-secondary px-3 text-sm">{t('SessionManagePage.cancel')}</button>
           </div>
         ) : (
           <button
@@ -238,10 +240,10 @@ export function SessionManagePage() {
               setEditTitle(true)
             }}
             className="flex items-center gap-2 text-left group"
-            title="點一下改開團名稱"
+            title={t('SessionManagePage.renameTitleHint')}
           >
             <span className="text-xl font-extrabold text-gray-800">
-              {session?.title?.trim() ? session.title : '未命名開團'}
+              {session?.title?.trim() ? session.title : t('SessionManagePage.untitledSession')}
             </span>
             <span className="text-gray-300 group-hover:text-brand-pink text-base">✏️</span>
           </button>
@@ -253,8 +255,8 @@ export function SessionManagePage() {
             onClick={() => setShowQR(!showQR)}
             className="w-full flex items-center justify-between font-bold text-gray-700"
           >
-            <span>📲 邀請臨打人(掃碼進場)</span>
-            <span className="text-gray-300">{showQR ? '收起' : '展開'}</span>
+            <span>{t('SessionManagePage.inviteDropins')}</span>
+            <span className="text-gray-300">{showQR ? t('SessionManagePage.collapse') : t('SessionManagePage.expand')}</span>
           </button>
           {showQR && (
             <div className="flex flex-col items-center mt-4 space-y-3">
@@ -271,24 +273,24 @@ export function SessionManagePage() {
                   onClick={() => navigator.clipboard.writeText(joinUrl)}
                   className="btn-secondary px-3 py-2 text-xs"
                 >
-                  複製
+                  {t('SessionManagePage.copy')}
                 </button>
               </div>
               <button
                 onClick={async () => {
                   const r = await shareContent({
-                    title: session?.title || '羽球團',
-                    text: `🏸 ${session?.title || '羽球團'} 開團了!點連結加入(報名/密碼進場都在裡面)`,
+                    title: session?.title || t('SessionManagePage.defaultGroupName'),
+                    text: t('SessionManagePage.shareText', { title: session?.title || t('SessionManagePage.defaultGroupName') }),
                     url: joinUrl,
                   })
-                  if (r === 'copied') alert('已複製邀請文字和連結,貼到群組吧!')
+                  if (r === 'copied') alert(t('SessionManagePage.copiedInvite'))
                 }}
                 className="btn-primary w-full text-sm"
               >
-                ↗ 分享到 LINE 群 / 社群
+                {t('SessionManagePage.shareToLine')}
               </button>
               <button onClick={() => setPoster(true)} className="btn-secondary w-full text-sm">
-                🖥 海報模式(全螢幕大 QR)
+                {t('SessionManagePage.posterMode')}
               </button>
             </div>
           )}
@@ -302,13 +304,13 @@ export function SessionManagePage() {
           >
             <div className="text-5xl mb-4">🏸</div>
             <p className="text-2xl font-extrabold text-gray-800">
-              {session?.title?.trim() ? session.title : '羽球揪團'}
+              {session?.title?.trim() ? session.title : t('SessionManagePage.posterTitle')}
             </p>
-            <p className="text-gray-400 mb-6">掃我加入,選位置上場</p>
+            <p className="text-gray-400 mb-6">{t('SessionManagePage.posterSubtitle')}</p>
             <div className="bg-white p-4 rounded-3xl shadow-xl border">
               <QRCodeSVG value={joinUrl} size={Math.min(360, window.innerWidth - 80)} />
             </div>
-            <p className="text-gray-300 text-sm mt-8">點任一處關閉</p>
+            <p className="text-gray-300 text-sm mt-8">{t('SessionManagePage.posterClose')}</p>
           </div>
         )}
 
@@ -317,13 +319,13 @@ export function SessionManagePage() {
           onClick={() => setBoard(true)}
           className="w-full btn-primary py-3 text-base"
         >
-          🏸 現場排點板(代排上下場)
+          {t('SessionManagePage.seatingBoard')}
         </button>
         {board && <SeatingBoard sessionId={sid} onClose={() => setBoard(false)} />}
 
         {/* per-session settings (location / contact link / gate code / times) in a modal */}
         <button onClick={() => setSettingsOpen(true)} className="btn-secondary w-full text-sm">
-          ⚙️ 這場設定(地點 / 連結 / 密碼 / 時間)
+          {t('SessionManagePage.sessionSettings')}
         </button>
         {settingsOpen && (
           <div
@@ -339,7 +341,7 @@ export function SessionManagePage() {
                   onClick={() => setSettingsOpen(false)}
                   className="text-white font-bold text-sm bg-black/30 rounded-full px-3 py-1"
                 >
-                  ✕ 關閉
+                  {t('SessionManagePage.close')}
                 </button>
               </div>
               <LocationCard sessionId={sid} city={session?.city} district={session?.district} />
@@ -364,15 +366,15 @@ export function SessionManagePage() {
           busy={approveFamily.isPending || removePlayer.isPending}
           onApprove={async (p, overQuota) => {
             if (overQuota && !(await confirm({
-              message: `名額已滿,確定還要核准「${p.display_name}」嗎?`,
-              confirmText: '核准',
+              message: t('SessionManagePage.confirmApproveOverQuota', { name: p.display_name }),
+              confirmText: t('SessionManagePage.approve'),
             }))) return
             approveFamily.mutate(p.player_id)
           }}
           onReject={async (p) => {
             if (await confirm({
-              message: `婉拒「${p.display_name}」的報名?對方不會收到通知,之後還是可以再報名。`,
-              confirmText: '婉拒',
+              message: t('SessionManagePage.confirmReject', { name: p.display_name }),
+              confirmText: t('SessionManagePage.reject'),
               danger: true,
             })) removePlayer.mutate(p.player_id)
           }}
@@ -381,12 +383,12 @@ export function SessionManagePage() {
         {/* people in this session — 報名中(等核准)的人在上面的審核區,不列進成員 */}
         <div className="card space-y-3">
           <div className="flex items-center justify-between">
-            <span className="font-bold text-gray-700">本場人員</span>
+            <span className="font-bold text-gray-700">{t('SessionManagePage.sessionPeople')}</span>
             <span className="text-xs text-gray-400">
-              已到 <span className="font-bold text-emerald-600">
+              {t('SessionManagePage.arrived')} <span className="font-bold text-emerald-600">
                 {roster.filter((p) => p.claimed).length}
-              </span> / 共 {roster.length} 人
-              　💰 已收臨打費 <span className="font-bold text-amber-500">
+              </span> {t('SessionManagePage.ofTotal', { total: roster.length })}
+              {' · '}💰 {t('SessionManagePage.paidCollected')} <span className="font-bold text-amber-500">
                 {roster.filter((p) => p.paid).length}
               </span>
             </span>
@@ -398,7 +400,7 @@ export function SessionManagePage() {
               <input
                 value={memberFilter}
                 onChange={(e) => setMemberFilter(e.target.value)}
-                placeholder="🔍 搜尋名字"
+                placeholder={t('SessionManagePage.searchName')}
                 className="flex-1 border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm
                   focus:outline-none focus:border-brand-pink"
               />
@@ -408,7 +410,7 @@ export function SessionManagePage() {
                   onlyUnclaimed ? 'bg-brand-pink text-white' : 'bg-gray-100 text-gray-500'
                 }`}
               >
-                只看未到
+                {t('SessionManagePage.onlyUnarrived')}
               </button>
               <button
                 onClick={() => setOnlyUnpaid(!onlyUnpaid)}
@@ -416,7 +418,7 @@ export function SessionManagePage() {
                   onlyUnpaid ? 'bg-amber-400 text-white' : 'bg-gray-100 text-gray-500'
                 }`}
               >
-                只看沒繳錢
+                {t('SessionManagePage.onlyUnpaid')}
               </button>
             </div>
           )}
@@ -450,20 +452,20 @@ export function SessionManagePage() {
                   <span className="bg-white/70 text-gray-700 rounded-full px-1.5 text-xs">
                     {p.level > 0 ? `Lv${p.level}` : '?'}
                   </span>
-                  {p.paid && <span className="text-[11px]" title="已收臨打費">💰</span>}
+                  {p.paid && <span className="text-[11px]" title={t('SessionManagePage.paidCollected')}>💰</span>}
                   {p.owner_id && (
                     <span className="text-[10px] text-violet-500" title={ownerLabel(p)}>👪</span>
                   )}
                   {p.is_temp && !p.owner_id && (
-                    <span className="text-[10px] text-sky-500" title="團主現場加入(無手機)">🏸現場</span>
+                    <span className="text-[10px] text-sky-500" title={t('SessionManagePage.onSiteAddTooltip')}>{t('SessionManagePage.onSite')}</span>
                   )}
-                  {p.pending && <span className="text-[10px] font-bold text-orange-500">待核准</span>}
-                  {!p.claimed && <span className="text-[10px] text-gray-400">未到</span>}
+                  {p.pending && <span className="text-[10px] font-bold text-orange-500">{t('SessionManagePage.pendingApproval')}</span>}
+                  {!p.claimed && <span className="text-[10px] text-gray-400">{t('SessionManagePage.notArrived')}</span>}
                 </button>
               )
             })}
             {(players ?? []).length === 0 && (
-              <span className="text-sm text-gray-300">還沒有人,從下面加入</span>
+              <span className="text-sm text-gray-300">{t('SessionManagePage.noOneYet')}</span>
             )}
           </div>
 
@@ -471,7 +473,7 @@ export function SessionManagePage() {
           {levelTarget && (
             <div className="border-t pt-3 space-y-2">
               <div className="flex items-center gap-1.5 text-xs text-gray-500 font-semibold">
-                設定
+                {t('SessionManagePage.configure')}
                 {targetPlayer && <MiniAvatar slot={targetPlayer} />}
                 「{targetPlayer?.display_name}
                 {targetPlayer && dup[targetPlayer.player_id] ? ` #${dup[targetPlayer.player_id]}` : ''}」
@@ -479,7 +481,7 @@ export function SessionManagePage() {
                   <span className="text-[11px] text-violet-500">👪 {ownerLabel(targetPlayer)}</span>
                 )}
                 {targetPlayer?.is_temp && !targetPlayer?.owner_id && (
-                  <span className="text-[11px] text-sky-500">🏸 現場加入</span>
+                  <span className="text-[11px] text-sky-500">{t('SessionManagePage.onSiteAdd')}</span>
                 )}
               </div>
               {/* 家人待核准 → 核准鈕 */}
@@ -489,7 +491,7 @@ export function SessionManagePage() {
                   disabled={approveFamily.isPending}
                   className="w-full rounded-2xl py-2 text-sm font-bold bg-emerald-500 text-white disabled:opacity-40"
                 >
-                  ✅ 核准這位家人(核准後才能上場/排隊)
+                  {t('SessionManagePage.approveFamilyBtn')}
                 </button>
               )}
               {/* 改本場名稱 */}
@@ -501,7 +503,7 @@ export function SessionManagePage() {
                     const n = renameInput.trim()
                     if (e.key === 'Enter' && n) setPlayerName.mutate({ playerId: levelTarget, name: n })
                   }}
-                  placeholder="改名字"
+                  placeholder={t('SessionManagePage.renamePlaceholder')}
                   className="flex-1 border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm
                     focus:outline-none focus:border-brand-pink"
                 />
@@ -513,7 +515,7 @@ export function SessionManagePage() {
                   disabled={!renameInput.trim() || setPlayerName.isPending}
                   className="px-3 rounded-2xl text-sm font-bold bg-brand-pink text-white disabled:opacity-40"
                 >
-                  改名
+                  {t('SessionManagePage.rename')}
                 </button>
               </div>
               {/* 臨打費 */}
@@ -529,13 +531,13 @@ export function SessionManagePage() {
                         : 'bg-gray-50 border-gray-200 text-gray-400'
                     }`}
                   >
-                    {paid ? '💰 已收臨打費(點一下取消)' : '尚未收臨打費(點一下標記已收)'}
+                    {paid ? t('SessionManagePage.paidToggleOn') : t('SessionManagePage.paidToggleOff')}
                   </button>
                 )
               })()}
-              <p className="text-xs text-gray-400 font-semibold pt-1">程度</p>
+              <p className="text-xs text-gray-400 font-semibold pt-1">{t('SessionManagePage.level')}</p>
               <div className="flex flex-wrap gap-1.5">
-                {TIERS.flatMap((t) =>
+                {getTiers().flatMap((t) =>
                   Array.from({ length: t.max - t.min + 1 }, (_, i) => t.min + i).map((lv) => (
                     <button
                       key={lv}
@@ -556,20 +558,20 @@ export function SessionManagePage() {
                   }}
                   className="px-3 h-8 rounded-lg text-xs font-bold bg-gray-100 text-gray-500"
                 >
-                  清除等級
+                  {t('SessionManagePage.clearLevel')}
                 </button>
               </div>
               <button
                 onClick={async () => {
                   const name = (players ?? []).find((p) => p.player_id === levelTarget)?.display_name
-                  if (await confirm({ message: `斷開「${name}」?他會被移出本場、無法再操作(可重新加入)。`, confirmText: '斷開', danger: true })) {
+                  if (await confirm({ message: t('SessionManagePage.confirmDisconnect', { name }), confirmText: t('SessionManagePage.disconnect'), danger: true })) {
                     removePlayer.mutate(levelTarget)
                     setLevelTarget(null)
                   }
                 }}
                 className="w-full text-xs font-bold text-red-400 border-2 border-red-200 rounded-2xl py-2"
               >
-                🚫 斷開此人(移出本場)
+                {t('SessionManagePage.disconnectButton')}
               </button>
             </div>
           )}
@@ -585,7 +587,7 @@ export function SessionManagePage() {
                   setNewName('')
                 }
               }}
-              placeholder="臨時加一個新名字"
+              placeholder={t('SessionManagePage.newNamePlaceholder')}
               className="flex-1 border-2 border-gray-200 rounded-2xl px-3 py-2 text-sm
                 focus:outline-none focus:border-brand-pink"
             />
@@ -599,7 +601,7 @@ export function SessionManagePage() {
               disabled={addPlayer.isPending}
               className="btn-primary px-4 py-2 text-sm disabled:opacity-40"
             >
-              加入
+              {t('SessionManagePage.add')}
             </button>
           </div>
         </div>
@@ -607,7 +609,7 @@ export function SessionManagePage() {
         {/* add court */}
         <div className="flex justify-end">
           <button onClick={() => addCourt.mutate()} className="btn-secondary text-sm py-2">
-            ＋ 臨時加一個球場
+            {t('SessionManagePage.addCourt')}
           </button>
         </div>
 
@@ -633,9 +635,9 @@ export function SessionManagePage() {
                 onRemove={async () => {
                   const hasPlaying = court.playing.some((p) => p.player_id)
                   const msg = hasPlaying
-                    ? '刪除這個場地?場上的人會計入統計(視同結束),排隊的人會被取消排隊。'
-                    : '刪除這個場地?'
-                  if (await confirm({ message: msg, confirmText: '刪除', danger: true })) {
+                    ? t('SessionManagePage.confirmRemoveCourtPlaying')
+                    : t('SessionManagePage.confirmRemoveCourt')
+                  if (await confirm({ message: msg, confirmText: t('SessionManagePage.delete'), danger: true })) {
                     removeCourt.mutate(court.court_id)
                   }
                 }}
@@ -644,7 +646,7 @@ export function SessionManagePage() {
                 onClick={() => setAddTarget(addTarget === court.court_id ? null : court.court_id)}
                 className="w-full text-xs text-brand-pink font-semibold py-1"
               >
-                {addTarget === court.court_id ? '收起' : '＋ 手動加人(上場 / 排隊)'}
+                {addTarget === court.court_id ? t('SessionManagePage.collapse') : t('SessionManagePage.manualAdd')}
               </button>
               {addTarget === court.court_id && (() => {
                 const playingFull = court.playing.filter((x) => x.player_id).length >= 4
@@ -679,11 +681,11 @@ export function SessionManagePage() {
                     <input
                       value={addFilter}
                       onChange={(e) => setAddFilter(e.target.value)}
-                      placeholder="🔍 搜尋名字"
+                      placeholder={t('SessionManagePage.searchName')}
                       className="w-full border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm
                         focus:outline-none focus:border-brand-pink"
                     />
-                    <p className="text-[11px] text-gray-400">⚖️ 依公平排序:打最少場的排在最前面</p>
+                    <p className="text-[11px] text-gray-400">{t('SessionManagePage.fairSortHint')}</p>
                     <div className="max-h-60 overflow-y-auto space-y-1.5">
                       {candidates.map((p) => {
                         const sug = suggest(p)
@@ -701,12 +703,12 @@ export function SessionManagePage() {
                             )}
                             {sug && (
                               <span className="shrink-0 text-[10px] font-bold text-emerald-700
-                                bg-white rounded-full px-1.5 py-0.5">⭐ 建議</span>
+                                bg-white rounded-full px-1.5 py-0.5">{t('SessionManagePage.suggested')}</span>
                             )}
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             <span className="text-[11px] text-gray-400 tabular-nums">
-                              {p.claimed ? `${p.games} 場` : '未到'}
+                              {p.claimed ? t('SessionManagePage.gamesCount', { n: p.games }) : t('SessionManagePage.notArrived')}
                             </span>
                             <div className="flex gap-1">
                             <button
@@ -714,14 +716,14 @@ export function SessionManagePage() {
                               onClick={() => { addPlaying.mutate({ courtId: court.court_id, playerId: p.player_id }); setAddTarget(null); setAddFilter('') }}
                               className="px-2.5 py-1 rounded-full text-xs font-bold bg-brand-mint text-emerald-700 disabled:opacity-30"
                             >
-                              上場
+                              {t('SessionManagePage.goOnCourt')}
                             </button>
                             <button
                               disabled={queueFull}
                               onClick={() => { addQueue.mutate({ courtId: court.court_id, playerId: p.player_id }); setAddTarget(null); setAddFilter('') }}
                               className="px-2.5 py-1 rounded-full text-xs font-bold bg-brand-yellow text-amber-700 disabled:opacity-30"
                             >
-                              排隊
+                              {t('SessionManagePage.queue')}
                             </button>
                             </div>
                           </div>
@@ -729,7 +731,7 @@ export function SessionManagePage() {
                         )
                       })}
                       {candidates.length === 0 && (
-                        <span className="text-sm text-gray-300">沒有可加入的人</span>
+                        <span className="text-sm text-gray-300">{t('SessionManagePage.noOneToAdd')}</span>
                       )}
                     </div>
                   </div>
@@ -758,7 +760,7 @@ export function SessionManagePage() {
         {/* 團主操作紀錄 */}
         <ActionLogPanel sessionId={sid} />
 
-        <p className="text-center text-xs text-gray-300">⚡ 即時同步 · 已報到 {players?.length ?? 0} 人</p>
+        <p className="text-center text-xs text-gray-300">{t('SessionManagePage.liveSync', { n: players?.length ?? 0 })}</p>
       </div>
     </div>
   )

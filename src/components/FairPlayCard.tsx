@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { sessionApi, type SessionView } from '../api/client'
 
 // 進階開團功能:公平讓分 + 顯示場數。開團期間可即時調整。
 // 預設值幫團主填好(N=4、X=2),不用從 0 開始;團主可微調。
 export function FairPlayCard({ sessionId, view }: { sessionId: string; view?: SessionView }) {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   // 模式每次開啟設定都用伺服器最新值初始化(modal 條件渲染 → 每次重新 mount)
   const [fair, setFair] = useState(!!view?.fair_play)
@@ -27,9 +29,9 @@ export function FairPlayCard({ sessionId, view }: { sessionId: string; view?: Se
         fair_threshold: thr,
       })
       qc.invalidateQueries({ queryKey: ['session', sessionId] })
-      setMsg('已儲存 ✓')
+      setMsg(t('FairPlayCard.saved'))
     } catch {
-      setMsg('儲存失敗,請再試一次')
+      setMsg(t('FairPlayCard.saveFailed'))
     } finally {
       setSaving(false)
     }
@@ -49,26 +51,26 @@ export function FairPlayCard({ sessionId, view }: { sessionId: string; view?: Se
 
   return (
     <div className="card space-y-3">
-      <span className="font-bold text-gray-700">⚖️ 進階:公平讓分</span>
+      <span className="font-bold text-gray-700">⚖️ {t('FairPlayCard.title')}</span>
 
       {/* 目前平均(永遠顯示,讓團主決定門檻前先看到) */}
       <div className="text-sm bg-brand-mint/30 rounded-2xl px-3 py-2">
         {view?.fair_active ? (
-          <>目前大家平均 <b className="text-brand-pink">{view.fair_avg?.toFixed(1)}</b> 場(在輪 {view.fair_active} 人)
+          <>{t('FairPlayCard.avgPrefix')} <b className="text-brand-pink">{view.fair_avg?.toFixed(1)}</b> {t('FairPlayCard.avgSuffix', { active: view.fair_active })}
             {fair && view?.fair_enforced && (
-              <span className="block text-xs text-gray-500 mt-0.5">→ 打超過 <b>{view.fair_limit?.toFixed(0)}</b> 場的人現在會被擋</span>
+              <span className="block text-xs text-gray-500 mt-0.5">{t('FairPlayCard.enforcedPrefix')} <b>{view.fair_limit?.toFixed(0)}</b> {t('FairPlayCard.enforcedSuffix')}</span>
             )}
           </>
         ) : (
-          <span className="text-gray-400">還沒有人開始打,暫時沒有平均</span>
+          <span className="text-gray-400">{t('FairPlayCard.noAvg')}</span>
         )}
       </div>
 
       {/* 公平讓分主開關 */}
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-semibold text-gray-700 text-sm">公平讓分</p>
-          <p className="text-xs text-gray-400">擋住打太多的人,讓打少的人有得打</p>
+          <p className="font-semibold text-gray-700 text-sm">{t('FairPlayCard.fairLabel')}</p>
+          <p className="text-xs text-gray-400">{t('FairPlayCard.fairDesc')}</p>
         </div>
         <Toggle on={fair} onClick={() => setFair((v) => !v)} />
       </div>
@@ -77,8 +79,8 @@ export function FairPlayCard({ sessionId, view }: { sessionId: string; view?: Se
         <div className="space-y-3 pl-1 border-l-2 border-brand-pink/30">
           <div className="flex items-center gap-2 pl-3">
             <label className="text-xs font-bold text-gray-600 flex-1">
-              寬限場數
-              <span className="block font-normal text-gray-400">打滿這場數前不受限</span>
+              {t('FairPlayCard.graceLabel')}
+              <span className="block font-normal text-gray-400">{t('FairPlayCard.graceHint')}</span>
             </label>
             <input
               type="number" min={0} max={50} value={grace}
@@ -88,8 +90,8 @@ export function FairPlayCard({ sessionId, view }: { sessionId: string; view?: Se
           </div>
           <div className="flex items-center gap-2 pl-3">
             <label className="text-xs font-bold text-gray-600 flex-1">
-              高於平均幾場才擋
-              <span className="block font-normal text-gray-400">越小越嚴格</span>
+              {t('FairPlayCard.thresholdLabel')}
+              <span className="block font-normal text-gray-400">{t('FairPlayCard.thresholdHint')}</span>
             </label>
             <input
               type="number" min={0} max={50} value={thr}
@@ -101,40 +103,40 @@ export function FairPlayCard({ sessionId, view }: { sessionId: string; view?: Se
           {/* 即時狀態(平均已顯示在卡片上方) */}
           <div className="pl-3 text-xs text-gray-500">
             {!view?.fair_enforced && (
-              <p className="text-amber-600">目前在輪人數不足(需 ≥ 5 人)或剛存檔,暫時不會擋任何人,人多了才生效。</p>
+              <p className="text-amber-600">{t('FairPlayCard.notEnforcedHint')}</p>
             )}
-            <p className="text-gray-400 mt-1">數字會隨大家場數上升自動調整,被擋的人等別人追上就自動恢復。</p>
+            <p className="text-gray-400 mt-1">{t('FairPlayCard.autoAdjustHint')}</p>
           </div>
 
-          <p className="pl-3 text-xs text-amber-600">已自動開啟「顯示場數」(公平讓分需要讓大家看到場數才公平)。</p>
+          <p className="pl-3 text-xs text-amber-600">{t('FairPlayCard.autoShowGames')}</p>
         </div>
       )}
 
       {/* 顯示場數(獨立開關;公平讓分開時鎖定為開) */}
       <div className="flex items-center justify-between gap-3 border-t pt-3">
         <div className="min-w-0">
-          <p className="font-semibold text-gray-700 text-sm">顯示場數給臨打人</p>
-          <p className="text-xs text-gray-400">前台會看到每個人打了幾場</p>
+          <p className="font-semibold text-gray-700 text-sm">{t('FairPlayCard.showGamesLabel')}</p>
+          <p className="text-xs text-gray-400">{t('FairPlayCard.showGamesDesc')}</p>
         </div>
         <Toggle on={effShowGames} onClick={() => setShowGames((v) => !v)} disabled={fair} />
       </div>
 
       {/* 白話規則說明 */}
       <details className="text-xs text-gray-500 bg-gray-50 rounded-2xl p-3">
-        <summary className="font-bold text-gray-600 cursor-pointer">📖 這功能怎麼運作?(點開看)</summary>
+        <summary className="font-bold text-gray-600 cursor-pointer">📖 {t('FairPlayCard.howItWorks')}</summary>
         <div className="mt-2 space-y-1.5 leading-relaxed">
-          <p>• 開啟後,系統自動算出「打最多的那群人」的平均場數。</p>
-          <p>• 當有人打超過「<b>平均 + 你設的場數</b>」時,他就<b>暫時不能上場、也不能排候補</b>,要讓打比較少的人先打。</p>
-          <p>• 等大家追上、他不再超標,就<b>自動恢復</b>,不用你手動解除。</p>
-          <p>• 還沒打滿「寬限場數」的人完全不受限(前面憑實力先搶 OK)。</p>
-          <p>• 在輪人數少於 5 人時不啟用,避免場地空著沒人打。</p>
-          <p>• 適合「最後一段時間想讓大家比較平均」時開啟,平常可關著。</p>
+          <p>• {t('FairPlayCard.rule1')}</p>
+          <p>• {t('FairPlayCard.rule2a')}<b>{t('FairPlayCard.rule2b')}</b>{t('FairPlayCard.rule2c')}<b>{t('FairPlayCard.rule2d')}</b>{t('FairPlayCard.rule2e')}</p>
+          <p>• {t('FairPlayCard.rule3a')}<b>{t('FairPlayCard.rule3b')}</b>{t('FairPlayCard.rule3c')}</p>
+          <p>• {t('FairPlayCard.rule4')}</p>
+          <p>• {t('FairPlayCard.rule5')}</p>
+          <p>• {t('FairPlayCard.rule6')}</p>
         </div>
       </details>
 
       <div className="flex items-center gap-2">
         <button onClick={save} disabled={saving} className="btn-primary flex-1 py-2 text-sm disabled:opacity-40">
-          {saving ? '儲存中…' : '儲存設定'}
+          {saving ? t('FairPlayCard.saving') : t('FairPlayCard.saveBtn')}
         </button>
         {msg && <span className="text-xs text-gray-500">{msg}</span>}
       </div>

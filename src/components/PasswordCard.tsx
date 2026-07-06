@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSessionPassword, useSetPassword } from '../hooks/useApi'
 
 // Leader-only: view the current gate code and change it. Sessions created before
 // plaintext storage return "" — we can't show the old code, only set a new one.
 export function PasswordCard({ sessionId }: { sessionId: string }) {
+  const { t } = useTranslation()
   const { data: password, isLoading } = useSessionPassword(sessionId)
   const setPassword = useSetPassword(sessionId)
 
@@ -25,7 +27,7 @@ export function PasswordCard({ sessionId }: { sessionId: string }) {
   async function save() {
     const pw = value.trim()
     if (!pw) {
-      setError('密碼不能空白')
+      setError(t('PasswordCard.errBlank'))
       return
     }
     try {
@@ -35,24 +37,24 @@ export function PasswordCard({ sessionId }: { sessionId: string }) {
       setTimeout(() => setSaved(false), 2500)
     } catch (e: unknown) {
       const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
-      setError(msg ?? '更新失敗,請稍後再試')
+      setError(msg ?? t('PasswordCard.errUpdate'))
     }
   }
 
   return (
     <div className="card space-y-3">
       <div className="flex items-center justify-between">
-        <span className="font-bold text-gray-700">🔒 進場密碼</span>
-        {saved && <span className="text-xs font-bold text-emerald-600">✓ 已更新</span>}
+        <span className="font-bold text-gray-700">{t('PasswordCard.title')}</span>
+        {saved && <span className="text-xs font-bold text-emerald-600">{t('PasswordCard.updated')}</span>}
       </div>
 
       {!editing ? (
         <div className="flex items-center gap-2">
           {isLoading ? (
-            <span className="text-sm text-gray-300">讀取中…</span>
+            <span className="text-sm text-gray-300">{t('PasswordCard.loading')}</span>
           ) : legacy ? (
             <span className="text-sm text-gray-400 flex-1">
-              舊場次未保存明文,點「修改」設定一組新密碼即可顯示
+              {t('PasswordCard.legacyHint')}
             </span>
           ) : (
             <>
@@ -63,18 +65,18 @@ export function PasswordCard({ sessionId }: { sessionId: string }) {
                 onClick={() => setReveal((r) => !r)}
                 className="btn-secondary px-3 py-2 text-xs shrink-0"
               >
-                {reveal ? '隱藏' : '顯示'}
+                {reveal ? t('PasswordCard.hide') : t('PasswordCard.show')}
               </button>
               <button
                 onClick={() => navigator.clipboard.writeText(password ?? '')}
                 className="btn-secondary px-3 py-2 text-xs shrink-0"
               >
-                複製
+                {t('PasswordCard.copy')}
               </button>
             </>
           )}
           <button onClick={startEdit} className="btn-primary px-4 py-2 text-xs shrink-0">
-            修改
+            {t('PasswordCard.edit')}
           </button>
         </div>
       ) : (
@@ -85,7 +87,7 @@ export function PasswordCard({ sessionId }: { sessionId: string }) {
             onKeyDown={(e) => {
               if (e.key === 'Enter') save()
             }}
-            placeholder="輸入新的進場密碼"
+            placeholder={t('PasswordCard.newPwPlaceholder')}
             autoFocus
             className="w-full border-2 border-gray-200 rounded-2xl px-4 py-2.5 text-lg font-bold
               focus:outline-none focus:border-brand-pink"
@@ -97,7 +99,7 @@ export function PasswordCard({ sessionId }: { sessionId: string }) {
               disabled={setPassword.isPending}
               className="btn-primary flex-1 py-2 text-sm disabled:opacity-50"
             >
-              {setPassword.isPending ? '儲存中…' : '儲存新密碼'}
+              {setPassword.isPending ? t('PasswordCard.saving') : t('PasswordCard.saveNew')}
             </button>
             <button
               onClick={() => {
@@ -106,11 +108,11 @@ export function PasswordCard({ sessionId }: { sessionId: string }) {
               }}
               className="btn-secondary px-4 py-2 text-sm"
             >
-              取消
+              {t('PasswordCard.cancel')}
             </button>
           </div>
           <p className="text-[11px] text-gray-400">
-            改完之後,還沒進場的人要用新密碼;已經在場上的人不受影響。
+            {t('PasswordCard.note')}
           </p>
         </div>
       )}

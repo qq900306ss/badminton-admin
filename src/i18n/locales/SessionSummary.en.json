@@ -1,0 +1,20 @@
+{
+  "SessionSummary": {
+    "defaultTitle": "Badminton meetup",
+    "shareTitle": "🏸 {{title}} wrap-up",
+    "shareTotals": "{{games}} games, {{min}} minutes total",
+    "shareRow": "{{medal}} {{name}} {{games}} games / {{min}} min",
+    "wrapUp": "Wrap-up",
+    "statTotalGames": "Total games",
+    "statTotalMinutes": "Total time (min)",
+    "statPlayers": "Players",
+    "topToday": "🏆 Top player today ",
+    "topGames": " · {{n}} games",
+    "ranking": "Ranking (by games)",
+    "rowStat": "{{games}} games · {{min}} min",
+    "noGames": "No completed games yet",
+    "copied": "✓ Copied",
+    "share": "📤 Share to LINE / group",
+    "close": "Close"
+  }
+}

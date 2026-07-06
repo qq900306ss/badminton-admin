@@ -1,0 +1,9 @@
+{
+  "TimeSelect": {
+    "periodDawn": "凌晨",
+    "periodMorning": "上午",
+    "periodAfternoon": "下午",
+    "periodEvening": "晚上",
+    "oClock": "點"
+  }
+}

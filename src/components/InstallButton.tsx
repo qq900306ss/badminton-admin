@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 
 type BIPEvent = Event & {
@@ -15,7 +16,8 @@ function isStandalone() {
 
 type Help = null | 'ios' | 'inapp' | 'generic'
 
-export function InstallButton({ label = '📲 安裝到手機桌面' }: { label?: string }) {
+export function InstallButton({ label }: { label?: string }) {
+  const { t } = useTranslation()
   const [deferred, setDeferred] = useState<BIPEvent | null>(null)
   const [help, setHelp] = useState<Help>(null)
   const [installed, setInstalled] = useState(false)
@@ -69,7 +71,7 @@ export function InstallButton({ label = '📲 安裝到手機桌面' }: { label?
         className="w-full bg-white border-2 border-brand-pink text-brand-pink font-bold
           py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform"
       >
-        {label}
+        {label ?? t('InstallButton.installLabel')}
       </button>
 
       <AnimatePresence>
@@ -90,44 +92,43 @@ export function InstallButton({ label = '📲 安裝到手機桌面' }: { label?
             >
               {help === 'inapp' && (
                 <>
-                  <p className="font-extrabold text-gray-800 text-lg">先用瀏覽器打開 🏸</p>
+                  <p className="font-extrabold text-gray-800 text-lg">{t('InstallButton.inappTitle')}</p>
                   <p className="text-gray-600 text-sm">
-                    你現在是用 App(FB / Messenger / IG / LINE)的內建瀏覽器,**沒辦法安裝**。
-                    請改用 <b>Chrome</b> 或 <b>Safari</b> 開啟:
+                    {t('InstallButton.inappBody1')}<b>Chrome</b>{t('InstallButton.inappBodyOr')}<b>Safari</b>{t('InstallButton.inappBody2')}
                   </p>
                   <ol className="text-gray-600 text-sm space-y-1.5 list-decimal list-inside">
-                    <li>點畫面右上角的 <b>⋯</b>(或選單)</li>
-                    <li>選<b>「用外部瀏覽器開啟」/「在 Chrome 開啟」</b></li>
-                    <li>在那邊再點一次「安裝到桌面」</li>
+                    <li>{t('InstallButton.inappStep1a')}<b>⋯</b>{t('InstallButton.inappStep1b')}</li>
+                    <li>{t('InstallButton.inappStep2a')}<b>{t('InstallButton.inappStep2b')}</b>{t('InstallButton.inappStep2c')}</li>
+                    <li>{t('InstallButton.inappStep3')}</li>
                   </ol>
                   <button onClick={copyLink} className="btn-secondary w-full text-sm">
-                    {copied ? '✓ 已複製網址' : '複製網址(去瀏覽器貼上)'}
+                    {copied ? t('InstallButton.copied') : t('InstallButton.copyLink')}
                   </button>
                 </>
               )}
 
               {help === 'ios' && (
                 <>
-                  <p className="font-extrabold text-gray-800 text-lg">在 iPhone 安裝 🏸</p>
+                  <p className="font-extrabold text-gray-800 text-lg">{t('InstallButton.iosTitle')}</p>
                   <ol className="text-gray-600 text-sm space-y-2 list-decimal list-inside">
-                    <li>用 <b>Safari</b> 開這個網站</li>
-                    <li>點底部中間的<b>「分享」</b>鈕(方框加向上箭頭)</li>
-                    <li>往下滑,點<b>「加入主畫面」</b></li>
-                    <li>右上角點<b>「新增」</b></li>
+                    <li>{t('InstallButton.iosStep1a')}<b>Safari</b>{t('InstallButton.iosStep1b')}</li>
+                    <li>{t('InstallButton.iosStep2a')}<b>{t('InstallButton.iosStep2b')}</b>{t('InstallButton.iosStep2c')}</li>
+                    <li>{t('InstallButton.iosStep3a')}<b>{t('InstallButton.iosStep3b')}</b>{t('InstallButton.iosStep3c')}</li>
+                    <li>{t('InstallButton.iosStep4a')}<b>{t('InstallButton.iosStep4b')}</b>{t('InstallButton.iosStep4c')}</li>
                   </ol>
                 </>
               )}
 
               {help === 'generic' && (
                 <>
-                  <p className="font-extrabold text-gray-800 text-lg">安裝到桌面 🏸</p>
+                  <p className="font-extrabold text-gray-800 text-lg">{t('InstallButton.genericTitle')}</p>
                   <p className="text-gray-600 text-sm">
-                    在瀏覽器選單(<b>⋮</b> 或分享鈕)找<b>「安裝應用程式」</b>或<b>「加到主畫面」</b>即可。
+                    {t('InstallButton.genericA')}<b>⋮</b>{t('InstallButton.genericB')}<b>{t('InstallButton.genericInstallApp')}</b>{t('InstallButton.genericOr')}<b>{t('InstallButton.genericAddHome')}</b>{t('InstallButton.genericEnd')}
                   </p>
                 </>
               )}
 
-              <button onClick={() => setHelp(null)} className="btn-primary w-full">知道了</button>
+              <button onClick={() => setHelp(null)} className="btn-primary w-full">{t('InstallButton.gotIt')}</button>
             </motion.div>
           </motion.div>
         )}

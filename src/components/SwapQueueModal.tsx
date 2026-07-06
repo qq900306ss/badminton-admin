@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { CourtView, PlayerSlot } from '../api/client'
 import { isPhotoUrl } from '../lib/avatar'
 
@@ -14,10 +15,6 @@ interface Props {
   pending: boolean
   onConfirm: (pick: { courtA: string; playersA: string[]; courtB: string; playersB: string[] }) => void
   onClose: () => void
-}
-
-function courtTitle(c: CourtView) {
-  return c.name?.trim() ? c.name : `場地 ${c.court_num}`
 }
 
 function QueueChip({ slot, selected, dimmed, onClick }: {
@@ -52,6 +49,8 @@ function toggle(set: Set<string>, id: string): Set<string> {
 }
 
 export function SwapQueueModal({ courts, sourceCourtId, pending, onConfirm, onClose }: Props) {
+  const { t } = useTranslation()
+  const courtTitle = (c: CourtView) => (c.name?.trim() ? c.name : t('SwapQueueModal.courtN', { n: c.court_num }))
   const [picksA, setPicksA] = useState<Set<string>>(new Set())
   const [targetId, setTargetId] = useState<string | null>(null)
   const [picksB, setPicksB] = useState<Set<string>>(new Set())
@@ -91,8 +90,8 @@ export function SwapQueueModal({ courts, sourceCourtId, pending, onConfirm, onCl
   const srcAfter = source.queue.length - picksA.size + picksB.size
   const tgtAfter = target ? target.queue.length - picksB.size + picksA.size : 0
   const overCourts: string[] = []
-  if (srcAfter > QUEUE_CAP) overCourts.push(`${courtTitle(source)}(會變 ${srcAfter} 人)`)
-  if (target && tgtAfter > QUEUE_CAP) overCourts.push(`${courtTitle(target)}(會變 ${tgtAfter} 人)`)
+  if (srcAfter > QUEUE_CAP) overCourts.push(t('SwapQueueModal.overItem', { name: courtTitle(source), n: srcAfter }))
+  if (target && tgtAfter > QUEUE_CAP) overCourts.push(t('SwapQueueModal.overItem', { name: courtTitle(target), n: tgtAfter }))
   const ready = target !== null && totalPicked > 0 && overCourts.length === 0
 
   function pickTarget(courtId: string) {
@@ -103,14 +102,14 @@ export function SwapQueueModal({ courts, sourceCourtId, pending, onConfirm, onCl
   }
 
   const confirmLabel = !target
-    ? '選一個要交換的場地'
+    ? t('SwapQueueModal.pickCourt')
     : totalPicked === 0
-      ? '選要交換的人'
+      ? t('SwapQueueModal.pickPlayers')
       : picksA.size === 0
-        ? '⇄ 把人換過來'
+        ? t('SwapQueueModal.bringOver')
         : picksB.size === 0
-          ? '⇄ 把人移過去'
-          : '⇄ 確認交換'
+          ? t('SwapQueueModal.moveAway')
+          : t('SwapQueueModal.confirmSwap')
 
   return (
     <div className="fixed inset-0 z-[60] bg-black/40 flex items-center justify-center p-6" onClick={onClose}>
@@ -119,19 +118,19 @@ export function SwapQueueModal({ courts, sourceCourtId, pending, onConfirm, onCl
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <span className="font-extrabold text-gray-800">⇄ 交換排隊</span>
+          <span className="font-extrabold text-gray-800">⇄ {t('SwapQueueModal.title')}</span>
           <button onClick={onClose} className="text-gray-400 font-bold">✕</button>
         </div>
         <p className="text-xs text-gray-400">
-          兩邊可各選多人、也可只選一邊(單純把人移過去/換過來),交換後每場排隊最多 {QUEUE_CAP} 人。
+          {t('SwapQueueModal.intro', { cap: QUEUE_CAP })}
         </p>
 
         <div className="space-y-1.5">
           <p className="text-xs font-bold text-gray-400">
-            {courtTitle(source)} — 要換出去的人(排隊 {source.queue.length}/{QUEUE_CAP})
+            {courtTitle(source)} {t('SwapQueueModal.sourceLabel', { n: source.queue.length, cap: QUEUE_CAP })}
           </p>
           {source.queue.length === 0 ? (
-            <p className="text-sm text-gray-300">沒人排隊(還是可以把別場的人換過來)</p>
+            <p className="text-sm text-gray-300">{t('SwapQueueModal.noQueueSource')}</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {source.queue.map((p) => (
@@ -148,7 +147,7 @@ export function SwapQueueModal({ courts, sourceCourtId, pending, onConfirm, onCl
         </div>
 
         <div className="space-y-3">
-          <p className="text-xs font-bold text-gray-400">跟哪個場地換?</p>
+          <p className="text-xs font-bold text-gray-400">{t('SwapQueueModal.whichCourt')}</p>
           {others.map((c) => {
             const isTarget = targetId === c.court_id
             return (
@@ -168,7 +167,7 @@ export function SwapQueueModal({ courts, sourceCourtId, pending, onConfirm, onCl
                   <span className={`text-sm font-bold ${isTarget ? 'text-brand-pink' : 'text-gray-600'}`}>
                     {courtTitle(c)}
                   </span>
-                  <span className="text-[11px] text-gray-400">排隊 {c.queue.length}/{QUEUE_CAP}</span>
+                  <span className="text-[11px] text-gray-400">{t('SwapQueueModal.queueCount', { n: c.queue.length, cap: QUEUE_CAP })}</span>
                 </button>
                 {c.queue.length > 0 && (
                   <div className="flex flex-wrap gap-2">
@@ -197,12 +196,12 @@ export function SwapQueueModal({ courts, sourceCourtId, pending, onConfirm, onCl
 
         {overCourts.length > 0 && (
           <p className="text-xs font-bold text-red-500">
-            ⚠️ 這樣換的話 {overCourts.join('、')} 排隊會超過 {QUEUE_CAP} 人上限,請調整兩邊人數
+            ⚠️ {t('SwapQueueModal.overWarning', { courts: overCourts.join(t('SwapQueueModal.sep')), cap: QUEUE_CAP })}
           </p>
         )}
         {ready && target && (
           <p className="text-xs text-gray-400">
-            交換後:{courtTitle(source)} 排隊 {srcAfter}/{QUEUE_CAP} · {courtTitle(target)} 排隊 {tgtAfter}/{QUEUE_CAP}
+            {t('SwapQueueModal.afterPrefix')}{courtTitle(source)} {t('SwapQueueModal.queueCount', { n: srcAfter, cap: QUEUE_CAP })} · {courtTitle(target)} {t('SwapQueueModal.queueCount', { n: tgtAfter, cap: QUEUE_CAP })}
           </p>
         )}
 

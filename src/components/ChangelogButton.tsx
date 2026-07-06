@@ -1,14 +1,16 @@
 import { useState } from 'react'
-import { CHANGELOG } from '../lib/changelog'
+import { useTranslation } from 'react-i18next'
+import { getChangelog } from '../lib/changelog'
 
 // A button that opens a「更新資訊」modal listing recent changes, so users can see
 // what's new whenever they want.
 export function ChangelogButton({ className = '' }: { className?: string }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   return (
     <>
       <button onClick={() => setOpen(true)} className={className || 'text-xs text-gray-400'}>
-        📋 更新資訊
+        {t('ChangelogButton.button')}
       </button>
       {open && (
         <div
@@ -20,12 +22,12 @@ export function ChangelogButton({ className = '' }: { className?: string }) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <span className="font-extrabold text-gray-800">📋 更新資訊</span>
+              <span className="font-extrabold text-gray-800">{t('ChangelogButton.title')}</span>
               <button onClick={() => setOpen(false)} className="text-gray-400 font-bold">
                 ✕
               </button>
             </div>
-            {CHANGELOG.map((entry) => (
+            {getChangelog().map((entry) => (
               <div key={entry.date} className="space-y-1.5">
                 <p className="text-xs font-bold text-brand-pink">{entry.date}</p>
                 <ul className="space-y-1">

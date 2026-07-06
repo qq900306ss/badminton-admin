@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { SessionPlayer, SessionView } from '../api/client'
 import { isPhotoUrl } from '../lib/avatar'
 import { tierOf } from '../lib/levels'
@@ -26,6 +27,7 @@ interface Props {
 }
 
 export function SignupReviewPanel({ view, players, busy, onApprove, onReject }: Props) {
+  const { t } = useTranslation()
   const pending = players.filter((p) => p.pending && p.is_signup)
   // 家人跟著帶他來的本人排在一起(本人在前),孤兒家人(理論上不會有)墊後
   const mains = pending.filter((p) => !p.owner_id)
@@ -35,7 +37,7 @@ export function SignupReviewPanel({ view, players, busy, onApprove, onReject }: 
     ...companions.filter((f) => !mains.some((m) => m.player_id === f.owner_id)),
   ]
   const ownerName = (id?: string) =>
-    players.find((x) => x.player_id === id)?.display_name ?? '同行者'
+    players.find((x) => x.player_id === id)?.display_name ?? t('SignupReviewPanel.companionDefault')
   if (signups.length === 0) return null
 
   const quota = view?.signup_quota ?? 0
@@ -45,9 +47,9 @@ export function SignupReviewPanel({ view, players, busy, onApprove, onReject }: 
   return (
     <div className="card space-y-3 border-2 border-brand-pink/40">
       <div className="flex items-center justify-between">
-        <span className="font-bold text-gray-700">🙋 臨打報名審核 ({signups.length})</span>
+        <span className="font-bold text-gray-700">{t('SignupReviewPanel.title', { count: signups.length })}</span>
         <span className={`text-xs font-bold ${overQuota ? 'text-red-500' : 'text-gray-400'}`}>
-          已加入 {joined}{quota > 0 ? `/${quota}` : ''} 人
+          {t('SignupReviewPanel.joined', { n: `${joined}${quota > 0 ? `/${quota}` : ''}` })}
         </span>
       </div>
       <div className="space-y-2">
@@ -60,11 +62,11 @@ export function SignupReviewPanel({ view, players, busy, onApprove, onReject }: 
                   {p.display_name}
                   {p.owner_id && (
                     <span className="ml-1.5 text-[10px] font-semibold text-amber-600 bg-amber-100 rounded-full px-1.5 py-0.5">
-                      👨‍👩‍👧 {ownerName(p.owner_id)} 帶的
+                      {t('SignupReviewPanel.broughtBy', { name: ownerName(p.owner_id) })}
                     </span>
                   )}
                 </p>
-                {p.level > 0 && <p className="text-[11px] text-gray-400">程度 {p.level} 級</p>}
+                {p.level > 0 && <p className="text-[11px] text-gray-400">{t('SignupReviewPanel.level', { level: p.level })}</p>}
               </div>
               <div className="flex gap-1.5 shrink-0">
                 <button
@@ -72,14 +74,14 @@ export function SignupReviewPanel({ view, players, busy, onApprove, onReject }: 
                   disabled={busy}
                   className="px-3 py-1.5 rounded-full text-xs font-bold bg-brand-mint text-emerald-700 disabled:opacity-40"
                 >
-                  ✅ 核准
+                  {t('SignupReviewPanel.approve')}
                 </button>
                 <button
                   onClick={() => onReject(p)}
                   disabled={busy}
                   className="px-3 py-1.5 rounded-full text-xs font-bold bg-gray-200 text-gray-500 disabled:opacity-40"
                 >
-                  婉拒
+                  {t('SignupReviewPanel.reject')}
                 </button>
               </div>
             </div>
@@ -92,7 +94,7 @@ export function SignupReviewPanel({ view, players, busy, onApprove, onReject }: 
         ))}
       </div>
       {overQuota && (
-        <p className="text-[11px] text-red-400">名額已滿——還是可以核准,收不收由你決定。</p>
+        <p className="text-[11px] text-red-400">{t('SignupReviewPanel.overQuota')}</p>
       )}
     </div>
   )

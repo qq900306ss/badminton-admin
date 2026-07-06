@@ -1,0 +1,12 @@
+{
+  "ActionLogPanel": {
+    "title": "📋 Action log",
+    "collapse": "Collapse ▲",
+    "expand": "Expand ▼",
+    "retention": "Latest 200 entries, kept for 90 days",
+    "refreshing": "Updating…",
+    "refresh": "🔄 Refresh",
+    "loading": "Loading…",
+    "empty": "No action log yet"
+  }
+}

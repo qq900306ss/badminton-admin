@@ -1,0 +1,13 @@
+{
+  "StatsPanel": {
+    "title": "📊 數據統計",
+    "games": "場數",
+    "minutes": "時數",
+    "gamesCount": "{{n}} 場",
+    "minutesCount": "{{n}} 分",
+    "empty": "還沒有人",
+    "history": "每場歷史 ({{count}})",
+    "court": "場地 {{n}}",
+    "noHistory": "還沒有結束過的場次"
+  }
+}

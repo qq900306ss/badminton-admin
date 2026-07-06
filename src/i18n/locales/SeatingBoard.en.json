@@ -1,0 +1,26 @@
+{
+  "SeatingBoard": {
+    "addToSlot": "Add someone to this spot",
+    "courtN": "Court {{n}}",
+    "empty": "Empty",
+    "inProgress": "In progress",
+    "mins": " · {{mins}} min",
+    "gathering": "Gathering {{filled}}/4",
+    "queueAdd": "Queue +",
+    "queueHint": "Tap \"Queue +\" to add",
+    "searchName": "🔍 Search name",
+    "noPeople": "No one available to add",
+    "games": "{{games}} games",
+    "notArrived": "Not here",
+    "actionFailed": "Action failed",
+    "cannotSwapOut": "In progress (4 players) — can't sub out; tap \"End & rotate\"",
+    "seatOnCourt": "Pick someone for \"{{name}}\"",
+    "queueIntoCourt": "Add to \"{{name}}\" queue",
+    "close": "Close",
+    "boardTitle": "On-site seating board",
+    "landscape": "Landscape",
+    "portrait": "Portrait",
+    "hint": "Tap an empty spot ＋ or \"Queue +\" to add someone · tap a player on court to sub out",
+    "noCourts": "No courts in this session yet"
+  }
+}

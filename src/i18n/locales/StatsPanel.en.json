@@ -1,0 +1,13 @@
+{
+  "StatsPanel": {
+    "title": "📊 Stats",
+    "games": "Games",
+    "minutes": "Minutes",
+    "gamesCount": "{{n}} games",
+    "minutesCount": "{{n}} min",
+    "empty": "No one yet",
+    "history": "Game history ({{count}})",
+    "court": "Court {{n}}",
+    "noHistory": "No finished games yet"
+  }
+}

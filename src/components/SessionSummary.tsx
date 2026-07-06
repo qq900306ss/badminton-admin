@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { sessionApi, type SessionPlayer } from '../api/client'
 
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function SessionSummary({ sessionId, title, players, onClose }: Props) {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
 
   const { data: games } = useQuery({
@@ -26,9 +28,16 @@ export function SessionSummary({ sessionId, title, players, onClose }: Props) {
 
   function shareText() {
     const lines = [
-      `🏸 ${title || '羽球揪團'} 散場總結`,
-      `打了 ${totalGames} 場、共 ${totalMin} 分鐘`,
-      ...ranked.slice(0, 5).map((p, i) => `${['🥇', '🥈', '🥉', '4️⃣', '5️⃣'][i]} ${p.display_name} ${p.games} 場 / ${p.total_minutes} 分`),
+      t('SessionSummary.shareTitle', { title: title || t('SessionSummary.defaultTitle') }),
+      t('SessionSummary.shareTotals', { games: totalGames, min: totalMin }),
+      ...ranked.slice(0, 5).map((p, i) =>
+        t('SessionSummary.shareRow', {
+          medal: ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'][i],
+          name: p.display_name,
+          games: p.games,
+          min: p.total_minutes,
+        }),
+      ),
     ]
     return lines.join('\n')
   }
@@ -53,14 +62,14 @@ export function SessionSummary({ sessionId, title, players, onClose }: Props) {
       <div className="bg-white w-full sm:max-w-md max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl p-6 space-y-4">
         <div className="text-center">
           <div className="text-4xl mb-1">🎉</div>
-          <h2 className="text-xl font-extrabold text-gray-800">{title || '羽球揪團'} · 散場總結</h2>
+          <h2 className="text-xl font-extrabold text-gray-800">{title || t('SessionSummary.defaultTitle')} · {t('SessionSummary.wrapUp')}</h2>
         </div>
 
         <div className="grid grid-cols-3 gap-3 text-center">
           {[
-            { label: '總場次', value: totalGames, emoji: '🏸' },
-            { label: '總時數(分)', value: totalMin, emoji: '⏱' },
-            { label: '人數', value: players.length, emoji: '🧑‍🤝‍🧑' },
+            { label: t('SessionSummary.statTotalGames'), value: totalGames, emoji: '🏸' },
+            { label: t('SessionSummary.statTotalMinutes'), value: totalMin, emoji: '⏱' },
+            { label: t('SessionSummary.statPlayers'), value: players.length, emoji: '🧑‍🤝‍🧑' },
           ].map((s) => (
             <div key={s.label} className="bg-brand-bg rounded-2xl py-3">
               <div className="text-xl">{s.emoji}</div>
@@ -72,31 +81,31 @@ export function SessionSummary({ sessionId, title, players, onClose }: Props) {
 
         {top && (
           <div className="bg-brand-yellow/40 rounded-2xl py-3 text-center">
-            <span className="text-sm text-amber-700 font-semibold">🏆 今日最猛 </span>
+            <span className="text-sm text-amber-700 font-semibold">{t('SessionSummary.topToday')}</span>
             <span className="font-extrabold text-gray-800">{top.display_name}</span>
-            <span className="text-sm text-amber-700"> · {top.games} 場</span>
+            <span className="text-sm text-amber-700">{t('SessionSummary.topGames', { n: top.games })}</span>
           </div>
         )}
 
         <div className="space-y-1.5">
-          <p className="text-sm font-bold text-gray-600">排行(依場數)</p>
+          <p className="text-sm font-bold text-gray-600">{t('SessionSummary.ranking')}</p>
           {ranked.map((p, i) => (
             <div key={p.player_id} className="flex items-center justify-between text-sm">
               <span className="text-gray-700">
                 <span className="text-gray-400 mr-1">{i + 1}.</span>
                 {p.display_name}
               </span>
-              <span className="text-gray-500">{p.games} 場 · {p.total_minutes} 分</span>
+              <span className="text-gray-500">{t('SessionSummary.rowStat', { games: p.games, min: p.total_minutes })}</span>
             </div>
           ))}
-          {ranked.length === 0 && <p className="text-sm text-gray-300">這場還沒有完成的場次</p>}
+          {ranked.length === 0 && <p className="text-sm text-gray-300">{t('SessionSummary.noGames')}</p>}
         </div>
 
         <div className="flex gap-2 pt-1">
           <button onClick={share} className="btn-primary flex-1">
-            {copied ? '✓ 已複製' : '📤 分享到 LINE / 群組'}
+            {copied ? t('SessionSummary.copied') : t('SessionSummary.share')}
           </button>
-          <button onClick={onClose} className="btn-secondary px-5">關閉</button>
+          <button onClick={onClose} className="btn-secondary px-5">{t('SessionSummary.close')}</button>
         </div>
       </div>
     </div>

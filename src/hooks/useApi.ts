@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { sessionApi, seatApi } from '../api/client'
+import i18n from '../i18n'
 
 // 推送求快、輪詢對帳:WS 活著時資料由伺服器主動推,輪詢降到 60 秒只做
 // 「對帳」(萬一推播漏了,最多慢一分鐘追平);WS 斷線時回到 30 秒。
@@ -109,7 +110,7 @@ export function useManageActions(sessionId: string) {
     },
     onError: (e: unknown) => {
       const m = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
-      alert(m ?? '核准失敗,請稍後再試')
+      alert(m ?? i18n.t('useApi.approveFailed'))
     },
   })
   const removePlayer = useMutation({
@@ -169,7 +170,7 @@ export function useManageActions(sessionId: string) {
     onSuccess: invalidate,
     onError: (e: unknown) => {
       const m = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
-      alert(m ?? '交換失敗,請稍後再試')
+      alert(m ?? i18n.t('useApi.swapFailed'))
     },
   })
   return { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, approveFamily, renameCourt, removeCourt, addQueue, swapQueue, removePlayer }

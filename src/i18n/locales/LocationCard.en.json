@@ -1,0 +1,14 @@
+{
+  "LocationCard": {
+    "title": "📍 City / District",
+    "notSet": "Not set",
+    "edit": "Edit",
+    "selectDistrict": "Select district",
+    "districtPlaceholder": "e.g. Zhubei City",
+    "saving": "Saving…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "errSelectDistrict": "Please select or enter a district",
+    "errUpdate": "Update failed, please try again later"
+  }
+}

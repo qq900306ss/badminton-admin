@@ -1,0 +1,14 @@
+{
+  "LocationCard": {
+    "title": "📍 市 / 区",
+    "notSet": "未設定",
+    "edit": "編集",
+    "selectDistrict": "区を選択",
+    "districtPlaceholder": "例:竹北市",
+    "saving": "保存中…",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "errSelectDistrict": "区を選択(または入力)してください",
+    "errUpdate": "更新に失敗しました。後でもう一度お試しください"
+  }
+}

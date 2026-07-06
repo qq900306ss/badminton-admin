@@ -1,0 +1,8 @@
+{
+  "AuthCallback": {
+    "noCode": "沒有收到 Google 授權碼",
+    "loginFailed": "登入失敗",
+    "backToLogin": "回登入頁",
+    "loggingIn": "登入中..."
+  }
+}

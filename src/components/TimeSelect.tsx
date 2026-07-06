@@ -1,5 +1,8 @@
+import { useTranslation } from 'react-i18next'
+
 // 24-hour time picker that looks the same on every device (no OS 12h/24h surprise)
 export function TimeSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { t } = useTranslation()
   const [h = '18', m = '00'] = (value || '18:00').split(':')
   const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
   const mins = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0'))
@@ -23,7 +26,7 @@ export function TimeSelect({ value, onChange }: { value: string; onChange: (v: s
         ))}
       </select>
       <span className="text-sm text-gray-400">
-        {hh < 6 ? '凌晨' : hh < 12 ? '上午' : hh < 18 ? '下午' : '晚上'} {hh % 12 === 0 ? 12 : hh % 12} 點
+        {hh < 6 ? t('TimeSelect.periodDawn') : hh < 12 ? t('TimeSelect.periodMorning') : hh < 18 ? t('TimeSelect.periodAfternoon') : t('TimeSelect.periodEvening')} {hh % 12 === 0 ? 12 : hh % 12} {t('TimeSelect.oClock')}
       </span>
     </div>
   )

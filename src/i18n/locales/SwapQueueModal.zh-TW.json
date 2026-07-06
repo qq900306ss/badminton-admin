@@ -1,0 +1,20 @@
+{
+  "SwapQueueModal": {
+    "courtN": "場地 {{n}}",
+    "overItem": "{{name}}(會變 {{n}} 人)",
+    "sep": "、",
+    "pickCourt": "選一個要交換的場地",
+    "pickPlayers": "選要交換的人",
+    "bringOver": "⇄ 把人換過來",
+    "moveAway": "⇄ 把人移過去",
+    "confirmSwap": "⇄ 確認交換",
+    "title": "交換排隊",
+    "intro": "兩邊可各選多人、也可只選一邊(單純把人移過去/換過來),交換後每場排隊最多 {{cap}} 人。",
+    "sourceLabel": "— 要換出去的人(排隊 {{n}}/{{cap}})",
+    "noQueueSource": "沒人排隊(還是可以把別場的人換過來)",
+    "whichCourt": "跟哪個場地換?",
+    "queueCount": "排隊 {{n}}/{{cap}}",
+    "overWarning": "這樣換的話 {{courts}} 排隊會超過 {{cap}} 人上限,請調整兩邊人數",
+    "afterPrefix": "交換後:"
+  }
+}

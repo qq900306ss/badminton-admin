@@ -1,0 +1,12 @@
+{
+  "FeedbackButton": {
+    "button": "💬 Feedback",
+    "title": "💬 Feedback",
+    "hint": "Tell us any questions or suggestions 🙏",
+    "placeholder": "What's on your mind…",
+    "sent": "✓ Sent, thank you!",
+    "sending": "Sending…",
+    "send": "Send",
+    "errSend": "Failed to send, please try again later"
+  }
+}

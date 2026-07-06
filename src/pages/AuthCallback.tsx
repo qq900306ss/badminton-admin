@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { authApi } from '../api/client'
 
 export function AuthCallback() {
+  const { t } = useTranslation()
   const nav = useNavigate()
   const [error, setError] = useState('')
   const ran = useRef(false)
@@ -14,7 +16,7 @@ export function AuthCallback() {
 
     const code = new URLSearchParams(location.search).get('code')
     if (!code) {
-      setError('沒有收到 Google 授權碼')
+      setError(t('AuthCallback.noCode'))
       return
     }
     authApi
@@ -25,10 +27,10 @@ export function AuthCallback() {
         nav('/', { replace: true })
       })
       .catch((err) => {
-        const msg = err?.response?.data?.error ?? '登入失敗'
+        const msg = err?.response?.data?.error ?? t('AuthCallback.loginFailed')
         setError(msg)
       })
-  }, [nav])
+  }, [nav, t])
 
   return (
     <div className="min-h-screen bg-brand-bg flex items-center justify-center p-6">
@@ -37,13 +39,13 @@ export function AuthCallback() {
           <div className="text-4xl">😕</div>
           <p className="font-bold text-gray-700">{error}</p>
           <button onClick={() => nav('/login', { replace: true })} className="btn-primary">
-            回登入頁
+            {t('AuthCallback.backToLogin')}
           </button>
         </div>
       ) : (
         <div className="text-center">
           <div className="text-4xl animate-bounce mb-2">🏸</div>
-          <p className="text-gray-400">登入中...</p>
+          <p className="text-gray-400">{t('AuthCallback.loggingIn')}</p>
         </div>
       )}
     </div>

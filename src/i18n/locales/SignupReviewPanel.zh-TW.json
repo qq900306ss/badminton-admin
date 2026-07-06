@@ -1,0 +1,12 @@
+{
+  "SignupReviewPanel": {
+    "companionDefault": "同行者",
+    "title": "🙋 臨打報名審核 ({{count}})",
+    "joined": "已加入 {{n}} 人",
+    "broughtBy": "👨‍👩‍👧 {{name}} 帶的",
+    "level": "程度 {{level}} 級",
+    "approve": "✅ 核准",
+    "reject": "婉拒",
+    "overQuota": "名額已滿——還是可以核准,收不收由你決定。"
+  }
+}

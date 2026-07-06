@@ -1,0 +1,16 @@
+{
+  "OrgAvatarCard": {
+    "title": "🖼️ Host avatar",
+    "desc": "One avatar per host—it shows on every meetup you open. Uses the default 🐰 if you don't set one.",
+    "editAvatar": "Change avatar",
+    "uploading": "Uploading…",
+    "uploadPhoto": "Upload photo",
+    "resetDefault": "Reset to default 🐰",
+    "saving": "Saving…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "errPhotoSize": "Photo must be under 3MB",
+    "errUpload": "Upload failed, please try again",
+    "errUpdate": "Update failed, please try again later"
+  }
+}

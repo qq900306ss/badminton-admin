@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { sessionApi } from '../api/client'
 
@@ -15,6 +16,7 @@ export function ContactCard({
   contactUrl?: string
   description?: string
 }) {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [editing, setEditing] = useState(false)
   const [url, setUrl] = useState('')
@@ -32,12 +34,12 @@ export function ContactCard({
   async function save() {
     const v = url.trim()
     if (v && !/^https?:\/\//.test(v)) {
-      setErr('連結需以 http:// 或 https:// 開頭')
+      setErr(t('ContactCard.errUrlScheme'))
       return
     }
     const d = desc.trim()
     if ([...d].length > 300) {
-      setErr('簡介最多 300 字')
+      setErr(t('ContactCard.errDescMax'))
       return
     }
     setSaving(true)
@@ -50,7 +52,7 @@ export function ContactCard({
       setEditing(false)
     } catch (e: unknown) {
       const m = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
-      setErr(m ?? '更新失敗,請稍後再試')
+      setErr(m ?? t('ContactCard.errUpdateFailed'))
     } finally {
       setSaving(false)
     }
@@ -59,9 +61,9 @@ export function ContactCard({
   return (
     <div className="card space-y-3">
       <div>
-        <span className="font-bold text-gray-700">📣 團簡介與聯繫方式</span>
+        <span className="font-bold text-gray-700">{t('ContactCard.heading')}</span>
         <p className="text-xs text-gray-400 mt-1">
-          選填。簡介和「聯繫團主」按鈕都會顯示在臨打人首頁(可放程度、費用、LINE 群等)。
+          {t('ContactCard.hint')}
         </p>
       </div>
       {!editing ? (
@@ -69,14 +71,14 @@ export function ContactCard({
           {description ? (
             <p className="text-sm text-gray-600 whitespace-pre-wrap">{description}</p>
           ) : (
-            <p className="text-sm text-gray-400">簡介未設定</p>
+            <p className="text-sm text-gray-400">{t('ContactCard.noDesc')}</p>
           )}
           <div className="flex items-center gap-2">
             <span className="flex-1 text-sm text-gray-600 break-all">
-              {contactUrl || <span className="text-gray-400">連結未設定</span>}
+              {contactUrl || <span className="text-gray-400">{t('ContactCard.noLink')}</span>}
             </span>
             <button onClick={startEdit} className="btn-primary px-4 py-2 text-xs shrink-0">
-              {description || contactUrl ? '修改' : '新增'}
+              {description || contactUrl ? t('ContactCard.edit') : t('ContactCard.add')}
             </button>
           </div>
         </div>
@@ -85,7 +87,7 @@ export function ContactCard({
           <textarea
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
-            placeholder="介紹一下你的團:程度、費用、注意事項…"
+            placeholder={t('ContactCard.descPlaceholder')}
             rows={4}
             maxLength={300}
             className="w-full border-2 border-gray-200 rounded-2xl px-3 py-2 text-sm resize-none focus:outline-none focus:border-brand-pink"
@@ -93,18 +95,18 @@ export function ContactCard({
           <input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="聯繫連結 https://line.me/..."
+            placeholder={t('ContactCard.urlPlaceholder')}
             inputMode="url"
             className="w-full border-2 border-gray-200 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:border-brand-pink"
           />
           {err && <p className="text-red-400 text-xs">{err}</p>}
           <div className="flex gap-2">
             <button onClick={save} disabled={saving} className="btn-primary flex-1 py-2 text-sm disabled:opacity-40">
-              {saving ? '儲存中…' : '儲存'}
+              {saving ? t('ContactCard.saving') : t('ContactCard.save')}
             </button>
-            <button onClick={() => setEditing(false)} className="btn-secondary px-4 text-sm">取消</button>
+            <button onClick={() => setEditing(false)} className="btn-secondary px-4 text-sm">{t('ContactCard.cancel')}</button>
           </div>
-          <p className="text-[11px] text-gray-400">欄位留空白並儲存即可移除。</p>
+          <p className="text-[11px] text-gray-400">{t('ContactCard.removeHint')}</p>
         </div>
       )}
     </div>

@@ -1,0 +1,12 @@
+{
+  "FeedbackButton": {
+    "button": "💬 意見回饋",
+    "title": "💬 意見回饋",
+    "hint": "有任何問題或建議都可以告訴我們 🙏",
+    "placeholder": "想說什麼…",
+    "sent": "✓ 已送出,謝謝!",
+    "sending": "送出中…",
+    "send": "送出",
+    "errSend": "送出失敗,請稍後再試"
+  }
+}

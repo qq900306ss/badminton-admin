@@ -13,6 +13,7 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { ConnectionBanner } from './components/ConnectionBanner'
 import { UpdateBanner } from './components/UpdateBanner'
 import { ConfirmProvider } from './components/Confirm'
+import { LanguageSwitcher } from './components/LanguageSwitcher'
 
 // real-time comes from the WebSocket; these defaults stop redundant refetch
 // storms (every query re-firing on each tab focus) so we don't hammer the API.
@@ -36,6 +37,7 @@ export default function App() {
     <QueryClientProvider client={qc}>
       <ErrorBoundary>
       <ConfirmProvider>
+      <LanguageSwitcher />
       <ConnectionBanner />
       <UpdateBanner />
       <BrowserRouter>
