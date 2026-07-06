@@ -19,7 +19,10 @@ export function OnboardingCards({ onClose }: { onClose: () => void }) {
   const [dir, setDir] = useState(1)
   const last = idx === CARDS.length - 1
   const card = CARDS[idx]
-  const lines = t(`OnboardingCards.${card.key}Lines`, { returnObjects: true }) as string[]
+  // guard: if the translation is missing t() returns the key string — never
+  // let that crash the whole app with .map-is-not-a-function
+  const linesRaw = t(`OnboardingCards.${card.key}Lines`, { returnObjects: true })
+  const lines = Array.isArray(linesRaw) ? (linesRaw as string[]) : []
 
   function go(next: number) {
     setDir(next > idx ? 1 : -1)
