@@ -36,24 +36,49 @@ export function primeOnFirstGesture() {
   return () => window.removeEventListener('pointerdown', prime)
 }
 
-// 登登登:C5→E5→G5 三聲上行,仿賣場/車站廣播提示音。回傳 Promise 好讓語音接在後面
+function tone(c: AudioContext, freq: number, at: number, dur: number, vol: number) {
+  const osc = c.createOscillator()
+  const gain = c.createGain()
+  osc.type = 'sine'
+  osc.frequency.value = freq
+  gain.gain.setValueAtTime(0, at)
+  gain.gain.linearRampToValueAtTime(vol, at + 0.015)
+  gain.gain.exponentialRampToValueAtTime(0.001, at + dur)
+  osc.connect(gain).connect(c.destination)
+  osc.start(at)
+  osc.stop(at + dur)
+}
+
+// 一下「登」= 基音 + 八度泛音 + 微失諧高泛音(敲擊感),仿顫音琴/車站鐘
+function strike(c: AudioContext, freq: number, at: number, dur = 1.1) {
+  tone(c, freq, at, dur, 0.45)
+  tone(c, freq * 2, at, dur * 0.5, 0.12)
+  tone(c, freq * 2.99, at, dur * 0.27, 0.05)
+}
+
+// 登登登:C5→E5→G5 三聲上行,仿賣場/車站廣播提示音。回傳 Promise 好讓語音接在
+// 後面(尾音還在響時就開始講,跟真的廣播一樣,不用等到全靜)
 function chime(): Promise<void> {
   const c = getCtx()
   const t0 = c.currentTime + 0.05
-  ;[523.25, 659.25, 783.99].forEach((freq, i) => {
-    const at = t0 + i * 0.24
-    const osc = c.createOscillator()
-    const gain = c.createGain()
-    osc.type = 'sine'
-    osc.frequency.value = freq
-    gain.gain.setValueAtTime(0, at)
-    gain.gain.linearRampToValueAtTime(0.5, at + 0.02)
-    gain.gain.exponentialRampToValueAtTime(0.001, at + 0.55)
-    osc.connect(gain).connect(c.destination)
-    osc.start(at)
-    osc.stop(at + 0.6)
-  })
-  return new Promise((r) => setTimeout(r, 1000))
+  strike(c, 523.25, t0)
+  strike(c, 659.25, t0 + 0.28)
+  strike(c, 783.99, t0 + 0.56, 1.6) // 最後一聲拉長收尾
+  return new Promise((r) => setTimeout(r, 1300))
+}
+
+// 同一支裝置常同時裝著好幾個品質差很多的語音(Windows 的舊 SAPI vs Google/
+// 微軟 Natural 線上語音),別拿到第一個就用 — 照品質特徵打分挑最好的
+function pickVoice(lang: string): SpeechSynthesisVoice | undefined {
+  const voices = window.speechSynthesis?.getVoices() ?? []
+  const norm = (l: string) => l.replace('_', '-').toLowerCase()
+  const cands = voices.filter((v) => norm(v.lang).startsWith(lang.slice(0, 2).toLowerCase()))
+  const score = (v: SpeechSynthesisVoice) =>
+    (/natural|online/i.test(v.name) ? 8 : 0) + // 微軟 Natural 系,雲端神經語音
+    (/google/i.test(v.name) ? 4 : 0) + // Chrome 的 Google 語音,比系統舊語音好
+    (/premium|enhanced|siri/i.test(v.name) ? 3 : 0) + // iOS/macOS 高品質語音
+    (norm(v.lang) === lang.toLowerCase() ? 2 : 0) // 完全對上地區(zh-TW ≠ zh-CN)
+  return cands.sort((a, b) => score(b) - score(a))[0]
 }
 
 function speak(text: string) {
@@ -64,12 +89,9 @@ function speak(text: string) {
   const lang =
     ({ 'zh-TW': 'zh-TW', en: 'en-US', ja: 'ja-JP' } as Record<string, string>)[i18n.language] ?? 'zh-TW'
   u.lang = lang
-  const voices = synth.getVoices()
-  const v =
-    voices.find((v) => v.lang.replace('_', '-') === lang) ??
-    voices.find((v) => v.lang.replace('_', '-').startsWith(lang.slice(0, 2)))
+  const v = pickVoice(lang)
   if (v) u.voice = v
-  u.rate = 1
+  u.rate = 0.95 // 稍慢一點點,吵雜球場裡人名聽得更清楚
   synth.speak(u)
 }
 

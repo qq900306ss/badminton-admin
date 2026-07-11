@@ -1,24 +1,28 @@
 {
   "changelog": {
     "r0": {
-      "i0": "The invite area now has \"↗ Share to LINE group / social\": send the join link with ready-made text in one tap-no more copy-pasting"
+      "i0": "🔊 New \"Voice announcements\": when a game ends (your button, or a successful on-court vote), your phone plays a ding-dong-ding chime and announces \"Court N finished. ○○, ○○, you're up — please come on court\"; hook up a Bluetooth speaker and the whole venue hears it",
+      "i1": "How to use: tap 🔊 at the top right of the in-session admin page to turn it on (it speaks a test line so you can check the volume; the setting is remembered). Announcements follow the interface language, and custom court names are spoken"
     },
     "r1": {
+      "i0": "The invite area now has \"↗ Share to LINE group / social\": send the join link with ready-made text in one tap-no more copy-pasting"
+    },
+    "r2": {
       "i0": "⚡ Faster all around: admin actions respond instantly, typing stays smooth with lots of members, pages open quicker; simultaneous grabs for the same spot no longer clash",
       "i1": "📱 Turn the screen off and back on and the admin page updates to the latest state right away (before, it could take a minute or need a manual refresh)"
     },
-    "r2": {
+    "r3": {
       "i0": "New \"Public sign-up\" feature: turn it on when hosting and drop-in players can register and message you without a password; the admin page has a dedicated \"🙋 Drop-in sign-up review\" area where you approve them to join (people who know the password still enter directly)",
       "i1": "Sign-ups can bring family: the review area labels them \"👨‍👩‍👧 Brought by XX\" and you approve them one by one, same as the shared-phone family mechanism",
       "i2": "You can set a \"sign-up quota\": people can still register once it's full and you decide who to accept; ongoing meetups on the home page show a \"🙋 N signed up\" reminder",
       "i3": "When hosting you can fill in a \"meetup intro\" (level, fees, notes…), shown together with the contact link on the drop-in players' home page; you can also edit it later in \"⚙️ Settings\"",
       "i4": "The court card's \"Queue\" row adds \"⇄ Swap with another court\": each side can pick several players and the counts need not match (you can also just move players over/across); after swapping, each court queues at most 4, and you're warned if it exceeds that"
     },
-    "r3": {
+    "r4": {
       "i0": "Added advanced \"Fair Play\" (in ⚙️ Settings): hold back players who've played too much so those who've played less get a turn; toggle anytime, adjustable parameters, with sensible defaults",
       "i1": "The admin \"Ongoing meetups\" list shows \"🏸 N playing\" so you can see at a glance which sessions are in play"
     },
-    "r4": {
+    "r5": {
       "i0": "You can set the host avatar in \"⚙️ Settings\" (one per host, shared across all meetups; defaults to 🐰 if unset)",
       "i1": "Up to 7 meetups open at once (end an old one first when you hit the limit) to avoid opening too many by mistake",
       "i2": "When hosting you can optionally add a \"contact host link\"; the hosting form drops \"temporary join\" (add players after entering instead)",
