@@ -139,6 +139,9 @@ function primeSpeech() {
   synth.getVoices() // 觸發 voices 非同步載入
   const u = new SpeechSynthesisUtterance(' ')
   u.volume = 0
+  holding.add(u) // 防 GC(見 holding 註解)
+  u.onend = () => holding.delete(u)
+  u.onerror = () => holding.delete(u)
   synth.speak(u)
   speechPrimed = true
 }
@@ -220,6 +223,10 @@ function speakableLng(): string {
   return i18n.language
 }
 
+// 經典 WebKit/Blink 雷:utterance 物件沒人引用時會被 GC,話講到一半
+// 斷掉、onend 永遠不來。唸完前把它抓在這裡別放手。
+const holding = new Set<SpeechSynthesisUtterance>()
+
 // 唸一句,唸完(或引擎死掉)才 resolve — 佇列靠這個逐一前進
 function speakOnce(text: string, lng: string): Promise<void> {
   return new Promise((resolve) => {
@@ -230,6 +237,7 @@ function speakOnce(text: string, lng: string): Promise<void> {
     if (synth.speaking || synth.pending) synth.cancel()
     synth.resume() // iOS 偶爾卡在 paused 狀態,speak 會默默排隊不出聲 — 先喚醒
     const u = new SpeechSynthesisUtterance(text)
+    holding.add(u)
     const lang = LANG_TAG[lng] ?? 'zh-TW'
     u.lang = lang
     const v = pickVoice(lang)
@@ -239,6 +247,7 @@ function speakOnce(text: string, lng: string): Promise<void> {
     const finish = () => {
       if (!done) {
         done = true
+        holding.delete(u)
         resolve()
       }
     }

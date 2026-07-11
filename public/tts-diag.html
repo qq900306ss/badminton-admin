@@ -155,6 +155,7 @@
     { id: 3, name: '只延遲講(完全不解鎖)', desc: '對照組,iOS 上預期失敗' },
     { id: 4, name: '只鐘聲(Web Audio)', desc: '你已確認會響,對照用' },
     { id: 5, name: '空字串解鎖+1.5秒後講', desc: '另一種解鎖寫法' },
+    { id: 6, name: '完整新流程:保活音軌+解鎖+唸兩次', desc: '1:1 重演 app 目前的播報流程' },
   ]
   const board = $('#board')
   const chips = {}
@@ -163,7 +164,7 @@
     row.className = 'row'
     const name = document.createElement('span')
     name.className = 'name'
-    name.textContent = '①②③④⑤'[t.id - 1] + ' ' + t.name
+    name.textContent = '①②③④⑤⑥'[t.id - 1] + ' ' + t.name
     const chip = document.createElement('span')
     chip.className = 'chip'
     chip.textContent = '未測'
@@ -196,7 +197,7 @@
     const u = new SpeechSynthesisUtterance(text)
     u.lang = 'zh-TW'
     if (opts.volume !== undefined) u.volume = opts.volume
-    const tag = '①②③④⑤'[testId - 1] + (opts.tag ? '(' + opts.tag + ')' : '')
+    const tag = '①②③④⑤⑥'[testId - 1] + (opts.tag ? '(' + opts.tag + ')' : '')
     let settled = false
     u.onstart = () => { settled = true; log(tag + ' onstart:開始唸「' + text + '」', 'ok'); if (!opts.silent) setChip(testId, '有講(onstart)', 'ok') }
     u.onend = () => log(tag + ' onend:唸完')
@@ -229,12 +230,69 @@
       setChip(5, '測試中…')
       setTimeout(() => speak(5, '測試五,空字串解鎖後延遲講話'), 1500)
     },
+    // 1:1 重演 app 的完整播報流程,重點觀察「無聲解鎖句」有沒有正常結束、
+    // 正式句子前有沒有觸發 cancel(iOS 的 cancel→speak 會吞句子)
+    6: () => {
+      const synth = window.speechSynthesis
+      if (!synth) { setChip(6, '不支援', 'err'); return }
+      setChip(6, '測試中…')
+      // (a) 保活音軌(近無聲 wav 循環,跟 app 相同)
+      try {
+        if (!window.__ka) {
+          const rate = 8000, n = rate
+          const buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf)
+          const str = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)) }
+          str(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); str(8, 'WAVE'); str(12, 'fmt ')
+          v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true)
+          v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true)
+          str(36, 'data'); v.setUint32(40, n * 2, true)
+          for (let i = 0; i < n; i++) v.setInt16(44 + i * 2, 1, true)
+          window.__ka = new Audio(URL.createObjectURL(new Blob([buf], { type: 'audio/wav' })))
+          window.__ka.loop = true
+        }
+        window.__ka.play().then(() => log('⑥ 保活音軌播放中')).catch((e) => log('⑥ 保活音軌 play 失敗: ' + e, 'err'))
+      } catch (e) { log('⑥ 保活音軌例外: ' + e, 'err') }
+      // (b) 無聲解鎖句(volume 0 的空白),完整記錄它的生死
+      const p = new SpeechSynthesisUtterance(' ')
+      p.volume = 0
+      p.onstart = () => log('⑥ 解鎖句 onstart', 'ok')
+      p.onend = () => log('⑥ 解鎖句 onend', 'ok')
+      p.onerror = (e) => log('⑥ 解鎖句 onerror: ' + e.error, 'err')
+      window.__p6 = p // 防 GC
+      synth.resume()
+      synth.speak(p)
+      setTimeout(() => log('⑥ 0.8秒後引擎狀態: speaking=' + synth.speaking + ' pending=' + synth.pending), 800)
+      // (c) 鐘聲
+      chime()
+      // (d) 佇列唸兩次(1.5 秒後開始,同 app)
+      let starts = 0
+      const say = (i) => {
+        if (synth.speaking || synth.pending) {
+          log('⑥ 第' + i + '句前觸發 cancel(speaking=' + synth.speaking + ' pending=' + synth.pending + ') ← 這行有出現就是關鍵線索', 'err')
+          synth.cancel()
+        }
+        synth.resume()
+        const u = new SpeechSynthesisUtterance('測試六,第' + (i === 1 ? '一' : '二') + '次播報')
+        u.lang = 'zh-TW'
+        window['__u6_' + i] = u // 防 GC
+        u.onstart = () => { starts++; log('⑥ 第' + i + '句 onstart', 'ok') }
+        u.onend = () => {
+          log('⑥ 第' + i + '句 onend')
+          if (i === 1) setTimeout(() => say(2), 500)
+          else setChip(6, starts === 2 ? '兩句都有講' : '只講了 ' + starts + ' 句', starts === 2 ? 'ok' : 'warn')
+        }
+        u.onerror = (e) => { log('⑥ 第' + i + '句 onerror: ' + e.error, 'err'); setChip(6, '被擋:' + e.error, 'err') }
+        synth.speak(u)
+      }
+      setTimeout(() => say(1), 1500)
+      setTimeout(() => { if (starts === 0) { setChip(6, '沒動靜', 'warn'); log('⑥ 7 秒了一句都沒 onstart', 'err') } }, 7000)
+    },
   }
   const testsEl = $('#tests')
   for (const t of TESTS) {
     const b = document.createElement('button')
     b.className = 'test'
-    b.innerHTML = '<span class="num">' + '①②③④⑤'[t.id - 1] + '</span>' + t.name + '<small>' + t.desc + '</small>'
+    b.innerHTML = '<span class="num">' + '①②③④⑤⑥'[t.id - 1] + '</span>' + t.name + '<small>' + t.desc + '</small>'
     b.addEventListener('click', () => {
       b.disabled = true
       setTimeout(() => { b.disabled = false }, 5200)
