@@ -25,7 +25,7 @@ import { getTiers, tierOf } from '../lib/levels'
 import { isPhotoUrl } from '../lib/avatar'
 import { connectSessionWS } from '../lib/realtime'
 import { shareContent } from '../lib/share'
-import { isAnnounceOn, setAnnounceOn, unlockAndTest, primeOnFirstGesture, announceCourtEnd, announceRotations, startBackgroundKeepAlive, stopBackgroundKeepAlive } from '../lib/announcer'
+import { isAnnounceOn, setAnnounceOn, unlockAndTest, primeOnFirstGesture, announceCourtEnd, announceRotations, startBackgroundKeepAlive, stopBackgroundKeepAlive, inAppBrowser } from '../lib/announcer'
 
 const BOOKING_URL = import.meta.env.VITE_BOOKING_URL || 'http://localhost:5174'
 
@@ -158,6 +158,9 @@ export function SessionManagePage() {
     if (next) {
       unlockAndTest() // 在手勢裡解鎖 AudioContext,順便唸一句讓團主試音量
       startBackgroundKeepAlive() // 螢幕常亮 + 近無聲音軌保活(鎖屏盡量不斷播報)
+      // LINE/FB 內建瀏覽器的語音常整組壞掉(鐘聲會響、人聲不出) → 提醒改用真瀏覽器
+      const app = inAppBrowser()
+      if (app) alert(t('Announce.inAppWarn', { app }))
     } else {
       stopBackgroundKeepAlive()
     }

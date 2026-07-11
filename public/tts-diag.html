@@ -78,6 +78,12 @@
   #log .ok { color: var(--ok); }
   #log .err { color: var(--err); }
   .hint { font-size: 0.85rem; color: var(--muted); margin: 0; }
+  #iab {
+    display: none;
+    background: color-mix(in srgb, var(--err) 12%, var(--panel));
+    border: 1px solid var(--err); color: var(--err);
+    border-radius: 14px; padding: 0.8rem 1rem; font-size: 0.92rem; font-weight: 700;
+  }
 </style>
 </head>
 <body>
@@ -86,6 +92,8 @@
     <h1>🔊 iPhone 語音診斷</h1>
     <p>羽球語音播報專用。請把<strong>靜音鍵撥到響鈴</strong>、音量開大,然後由上到下每顆按鈕都按一次(每次等 5 秒),最後把「結果板」截圖回傳。</p>
   </header>
+
+  <div id="iab"></div>
 
   <section class="card">
     <h2>結果板(截這張圖回報)</h2>
@@ -118,6 +126,16 @@
 
   // ---- 環境資訊 ----
   log('UA: ' + navigator.userAgent)
+  // LINE/FB/IG 內建瀏覽器:鐘聲會響但語音常整組壞 → 直接請他換 Safari
+  const iabName = /Line\//i.test(navigator.userAgent) ? 'LINE'
+    : /FBAN|FBAV|FB_IAB/i.test(navigator.userAgent) ? 'Facebook'
+    : /Instagram/i.test(navigator.userAgent) ? 'Instagram' : null
+  if (iabName) {
+    const el = $('#iab')
+    el.style.display = 'block'
+    el.textContent = '⚠️ 你正在用 ' + iabName + ' 的內建瀏覽器,這裡的語音本來就常常壞掉。請按右下角「⋯」或分享選單,選「用預設瀏覽器(Safari)開啟」再測一次。'
+    log('內建瀏覽器: ' + iabName, 'err')
+  }
   log('speechSynthesis: ' + (window.speechSynthesis ? '支援' : '不支援'))
   log('audioSession: ' + (navigator.audioSession ? '支援(已設 playback)' : '不支援'))
   if (navigator.audioSession) { try { navigator.audioSession.type = 'playback' } catch (e) { log('audioSession 設定失敗: ' + e, 'err') } }

@@ -8,6 +8,18 @@ const KEY = 'announce' // localStorage:'1' 開/其他 關。預設關 — 開啟
 
 let ctx: AudioContext | null = null
 
+// LINE/FB/IG 的內建瀏覽器(iOS 上是 WKWebView):Web Audio 鐘聲會響,但
+// speechSynthesis 很常整組壞掉或不存在 → 症狀是「只有登登登沒人聲」。
+// 偵測到就提醒團主改用 Safari/Chrome 開。
+export function inAppBrowser(): string | null {
+  const ua = navigator.userAgent
+  if (/Line\//i.test(ua)) return 'LINE'
+  if (/FBAN|FBAV|FB_IAB/i.test(ua)) return 'Facebook'
+  if (/Instagram/i.test(ua)) return 'Instagram'
+  if (/MicroMessenger/i.test(ua)) return 'WeChat'
+  return null
+}
+
 export function isAnnounceOn(): boolean {
   return localStorage.getItem(KEY) === '1'
 }

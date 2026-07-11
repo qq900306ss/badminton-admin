@@ -7,6 +7,7 @@
     "nextUp": "{{court}} finished. {{names}}, you're up — please come on court.",
     "courtDone": "{{court}} finished.",
     "nameSep": ", ",
-    "mediaTitle": "🏸 Court voice announcements standing by"
+    "mediaTitle": "🏸 Court voice announcements standing by",
+    "inAppWarn": "You're viewing this page inside {{app}}'s built-in browser — voice announcements will likely play the chime only, without spoken names. Please open this page in Safari or Chrome (look for \"Open in browser\" under the \"⋯\" or share menu)."
   }
 }

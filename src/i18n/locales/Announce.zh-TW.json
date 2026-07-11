@@ -7,6 +7,7 @@
     "nextUp": "{{court}}結束,請排隊人員 {{names}} 上場打球",
     "courtDone": "{{court}}結束",
     "nameSep": "、",
-    "mediaTitle": "🏸 羽球場語音播報待命中"
+    "mediaTitle": "🏸 羽球場語音播報待命中",
+    "inAppWarn": "你現在是用 {{app}} 的內建瀏覽器開這個頁面,語音播報很可能只有鐘聲、唸不出人名。請改用 Safari 或 Chrome 開啟(通常在右下角「⋯」或分享選單裡有「用預設瀏覽器開啟」)。"
   }
 }
