@@ -1,0 +1,223 @@
+<title>iPhone 語音診斷</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --bg: #f6f8f7;
+    --panel: #ffffff;
+    --ink: #1c2422;
+    --muted: #5c6b66;
+    --line: #dde5e2;
+    --accent: #0e8a72;
+    --ok: #2f8f47;
+    --err: #d64545;
+    --warn: #b07a14;
+    --chip: #eef3f1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1412; --panel: #1a211e; --ink: #e8edeb; --muted: #93a39d;
+      --line: #2a332f; --accent: #2cc4a4; --ok: #4cc06a; --err: #ef6b6b;
+      --warn: #e0a63c; --chip: #232c28;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1412; --panel: #1a211e; --ink: #e8edeb; --muted: #93a39d;
+    --line: #2a332f; --accent: #2cc4a4; --ok: #4cc06a; --err: #ef6b6b;
+    --warn: #e0a63c; --chip: #232c28;
+  }
+  :root[data-theme="light"] {
+    --bg: #f6f8f7; --panel: #ffffff; --ink: #1c2422; --muted: #5c6b66;
+    --line: #dde5e2; --accent: #0e8a72; --ok: #2f8f47; --err: #d64545;
+    --warn: #b07a14; --chip: #eef3f1;
+  }
+  html { background: var(--bg); }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+    color: var(--ink);
+    line-height: 1.55;
+  }
+  .wrap { max-width: 28rem; margin: 0 auto; padding: 1.25rem 1rem 3rem; display: flex; flex-direction: column; gap: 1rem; }
+  header h1 { font-size: 1.35rem; font-weight: 800; margin: 0; text-wrap: balance; }
+  header p { margin: 0.35rem 0 0; color: var(--muted); font-size: 0.9rem; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 0.9rem 1rem; }
+  .card h2 { font-size: 0.8rem; margin: 0 0 0.6rem; color: var(--muted); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  /* 狀態板:朋友截這張圖回報 */
+  #board { display: flex; flex-direction: column; gap: 0.45rem; }
+  .row { display: flex; align-items: center; gap: 0.6rem; font-size: 0.92rem; }
+  .row .name { flex: 1; }
+  .chip {
+    font-size: 0.78rem; font-weight: 700; padding: 0.15rem 0.6rem; border-radius: 999px;
+    background: var(--chip); color: var(--muted); white-space: nowrap;
+  }
+  .chip.ok { background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok); }
+  .chip.err { background: color-mix(in srgb, var(--err) 16%, transparent); color: var(--err); }
+  .chip.warn { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+  button.test {
+    display: block; width: 100%; text-align: left;
+    background: var(--panel); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 14px;
+    padding: 0.85rem 1rem; font-size: 1rem; font-weight: 700; font-family: inherit;
+    cursor: pointer;
+  }
+  button.test small { display: block; font-weight: 400; color: var(--muted); font-size: 0.82rem; margin-top: 0.15rem; }
+  button.test:active { border-color: var(--accent); }
+  button.test:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.test:disabled { opacity: 0.45; cursor: default; }
+  button.test .num { color: var(--accent); margin-right: 0.4rem; }
+  #log {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.78rem; line-height: 1.5;
+    max-height: 16rem; overflow-y: auto; overflow-x: auto;
+    white-space: pre; color: var(--muted);
+  }
+  #log .ok { color: var(--ok); }
+  #log .err { color: var(--err); }
+  .hint { font-size: 0.85rem; color: var(--muted); margin: 0; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>🔊 iPhone 語音診斷</h1>
+    <p>羽球語音播報專用。請把<strong>靜音鍵撥到響鈴</strong>、音量開大,然後由上到下每顆按鈕都按一次(每次等 5 秒),最後把「結果板」截圖回傳。</p>
+  </header>
+
+  <section class="card">
+    <h2>結果板(截這張圖回報)</h2>
+    <div id="board"></div>
+  </section>
+
+  <div id="tests" style="display:flex;flex-direction:column;gap:0.6rem;"></div>
+
+  <p class="hint">「有講(onstart)」= 系統有開始唸;如果顯示有講但你沒聽到聲音,也照實回報,那是另一種問題(輸出路由)。</p>
+
+  <section class="card">
+    <h2>詳細紀錄</h2>
+    <div id="log"></div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s)
+  const logEl = $('#log')
+  const t0 = performance.now()
+  function log(msg, cls) {
+    const s = ((performance.now() - t0) / 1000).toFixed(1).padStart(6) + 's  ' + msg
+    const line = document.createElement('div')
+    if (cls) line.className = cls
+    line.textContent = s
+    logEl.appendChild(line)
+    logEl.scrollTop = logEl.scrollHeight
+  }
+
+  // ---- 環境資訊 ----
+  log('UA: ' + navigator.userAgent)
+  log('speechSynthesis: ' + (window.speechSynthesis ? '支援' : '不支援'))
+  log('audioSession: ' + (navigator.audioSession ? '支援(已設 playback)' : '不支援'))
+  if (navigator.audioSession) { try { navigator.audioSession.type = 'playback' } catch (e) { log('audioSession 設定失敗: ' + e, 'err') } }
+  if (window.speechSynthesis) {
+    const dumpVoices = (tag) => {
+      const vs = speechSynthesis.getVoices()
+      log(tag + ' voices: ' + vs.length + ' 個,zh: ' + vs.filter(v => v.lang.toLowerCase().startsWith('zh')).map(v => v.name + '(' + v.lang + ')').join(', '))
+    }
+    dumpVoices('初始')
+    speechSynthesis.onvoiceschanged = () => dumpVoices('voiceschanged')
+  }
+
+  // ---- 結果板 ----
+  const TESTS = [
+    { id: 1, name: '點擊當下直接講', desc: '最基本:手勢裡立刻 speak' },
+    { id: 2, name: '正式流程:無聲解鎖+鐘聲+1.5秒後講', desc: '跟 app 一樣的順序' },
+    { id: 3, name: '只延遲講(完全不解鎖)', desc: '對照組,iOS 上預期失敗' },
+    { id: 4, name: '只鐘聲(Web Audio)', desc: '你已確認會響,對照用' },
+    { id: 5, name: '空字串解鎖+1.5秒後講', desc: '另一種解鎖寫法' },
+  ]
+  const board = $('#board')
+  const chips = {}
+  for (const t of TESTS) {
+    const row = document.createElement('div')
+    row.className = 'row'
+    const name = document.createElement('span')
+    name.className = 'name'
+    name.textContent = '①②③④⑤'[t.id - 1] + ' ' + t.name
+    const chip = document.createElement('span')
+    chip.className = 'chip'
+    chip.textContent = '未測'
+    chips[t.id] = chip
+    row.append(name, chip)
+    board.appendChild(row)
+  }
+  function setChip(id, text, cls) { chips[id].textContent = text; chips[id].className = 'chip' + (cls ? ' ' + cls : '') }
+
+  // ---- 工具 ----
+  let ctx = null
+  function chime() {
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)()
+    if (ctx.state === 'suspended') ctx.resume()
+    const t = ctx.currentTime + 0.05
+    ;[[523.25, 0], [659.25, 0.28], [783.99, 0.56]].forEach(([f, dt]) => {
+      const o = ctx.createOscillator(), g = ctx.createGain()
+      o.type = 'sine'; o.frequency.value = f
+      g.gain.setValueAtTime(0, t + dt)
+      g.gain.linearRampToValueAtTime(0.45, t + dt + 0.015)
+      g.gain.exponentialRampToValueAtTime(0.001, t + dt + 1)
+      o.connect(g).connect(ctx.destination); o.start(t + dt); o.stop(t + dt + 1)
+    })
+  }
+
+  // speak + 完整生命週期記錄。回報三種結局:講了 / 被擋(onerror) / 沒動靜
+  function speak(testId, text, opts = {}) {
+    const synth = window.speechSynthesis
+    if (!synth) { setChip(testId, '不支援', 'err'); return }
+    const u = new SpeechSynthesisUtterance(text)
+    u.lang = 'zh-TW'
+    if (opts.volume !== undefined) u.volume = opts.volume
+    const tag = '①②③④⑤'[testId - 1] + (opts.tag ? '(' + opts.tag + ')' : '')
+    let settled = false
+    u.onstart = () => { settled = true; log(tag + ' onstart:開始唸「' + text + '」', 'ok'); if (!opts.silent) setChip(testId, '有講(onstart)', 'ok') }
+    u.onend = () => log(tag + ' onend:唸完')
+    u.onerror = (e) => { settled = true; log(tag + ' onerror: ' + e.error, 'err'); if (!opts.silent) setChip(testId, '被擋:' + e.error, 'err') }
+    setTimeout(() => {
+      if (!settled) {
+        log(tag + ' 4 秒沒動靜(speak 被默默吞掉/排隊卡住)', 'err')
+        if (!opts.silent) setChip(testId, '沒動靜', 'warn')
+      }
+    }, 4000)
+    if (opts.cancelFirst && (synth.speaking || synth.pending)) synth.cancel()
+    synth.resume()
+    synth.speak(u)
+    log(tag + ' speak() 已呼叫' + (opts.silent ? '(無聲解鎖句)' : ''))
+  }
+
+  // ---- 五個測試 ----
+  const runs = {
+    1: () => speak(1, '測試一,點擊當下講話'),
+    2: () => {
+      speak(2, ' ', { volume: 0, silent: true, tag: '解鎖' })
+      chime()
+      setChip(2, '測試中…')
+      setTimeout(() => speak(2, '測試二,延遲講話成功', { cancelFirst: true }), 1500)
+    },
+    3: () => { setChip(3, '測試中…'); setTimeout(() => speak(3, '測試三,沒解鎖也講得出來'), 1500) },
+    4: () => { chime(); setChip(4, '你聽得到嗎?', 'warn'); log('④ 鐘聲已排入 Web Audio') },
+    5: () => {
+      speak(5, '', { silent: true, tag: '空字串解鎖' })
+      setChip(5, '測試中…')
+      setTimeout(() => speak(5, '測試五,空字串解鎖後延遲講話'), 1500)
+    },
+  }
+  const testsEl = $('#tests')
+  for (const t of TESTS) {
+    const b = document.createElement('button')
+    b.className = 'test'
+    b.innerHTML = '<span class="num">' + '①②③④⑤'[t.id - 1] + '</span>' + t.name + '<small>' + t.desc + '</small>'
+    b.addEventListener('click', () => {
+      b.disabled = true
+      setTimeout(() => { b.disabled = false }, 5200)
+      runs[t.id]()
+    })
+    testsEl.appendChild(b)
+  }
+})()
+</script>
