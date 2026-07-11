@@ -6,6 +6,7 @@
     "courtN": "{{n}} 番コート",
     "nextUp": "{{court}}終了です。{{names}}さん、コートにお入りください",
     "courtDone": "{{court}}終了です",
-    "nameSep": "、"
+    "nameSep": "、",
+    "mediaTitle": "🏸 コート音声アナウンス待機中"
   }
 }

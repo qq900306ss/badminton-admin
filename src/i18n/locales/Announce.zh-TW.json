@@ -6,6 +6,7 @@
     "courtN": "{{n}} 號場",
     "nextUp": "{{court}}結束,請排隊人員 {{names}} 上場打球",
     "courtDone": "{{court}}結束",
-    "nameSep": "、"
+    "nameSep": "、",
+    "mediaTitle": "🏸 羽球場語音播報待命中"
   }
 }

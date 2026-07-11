@@ -6,6 +6,7 @@
     "courtN": "Court {{n}}",
     "nextUp": "{{court}} finished. {{names}}, you're up — please come on court.",
     "courtDone": "{{court}} finished.",
-    "nameSep": ", "
+    "nameSep": ", ",
+    "mediaTitle": "🏸 Court voice announcements standing by"
   }
 }

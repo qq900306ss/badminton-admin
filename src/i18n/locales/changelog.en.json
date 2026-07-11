@@ -3,7 +3,7 @@
     "r0": {
       "i0": "🔊 New \"Voice announcements\": when a game ends (your button, or a successful on-court vote), your phone plays a ding-dong-ding chime and announces \"Court N finished. ○○, ○○, you're up — please come on court\"; hook up a Bluetooth speaker and the whole venue hears it",
       "i1": "How to use: tap 🔊 at the top right of the in-session admin page to turn it on (it speaks a test line so you can check the volume; the setting is remembered). Announcements follow the interface language, and custom court names are spoken",
-      "i2": "📱 iPhone notes: after opening the page, tap 🔊 or anywhere on the screen once to unlock speech; keep the screen unlocked while managing (the system blocks announcements while locked); on older iPhones (iOS 16 and below), flip the side mute switch back to ring so the chime can play"
+      "i2": "📱 iPhone notes: after opening the page, tap 🔊 or anywhere on the screen once to unlock speech; while announcements are on the screen stays awake automatically, and even if you turn it off manually, background audio keeps announcements running where the device allows (varies by model — test yours; this also keeps your Bluetooth speaker from auto-sleeping); on older iPhones (iOS 16 and below), flip the side mute switch back to ring"
     },
     "r1": {
       "i0": "The invite area now has \"↗ Share to LINE group / social\": send the join link with ready-made text in one tap-no more copy-pasting"

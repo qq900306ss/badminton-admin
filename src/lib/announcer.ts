@@ -39,6 +39,84 @@ function getCtx(): AudioContext {
   return ctx
 }
 
+// ---- 背景保活:螢幕鎖定/關閉後盡量讓播報還能出聲 ----
+// 鎖屏後瀏覽器會凍結網頁(WS 斷、播報停),這是平台限制。但「正在播音訊」的
+// 網頁會被當成音樂 App 繼續跑 → 掛一條循環的近無聲音軌保活。副作用是好的:
+// 藍牙喇叭持續有訊號,不會閒置自動關機。另拿 Screen Wake Lock 讓螢幕不自動
+// 鎖(保底;手動按電源鍵關屏才會走到音軌保活那條,各機型/iOS 版本效果有差)。
+
+// 1 秒 8kHz 16-bit mono,振幅 1/32767(約 -90dB,聽不到但不是全 0 —
+// 全 0 有機會被系統判定「沒在播」而照樣掛起)
+function silentWavUrl(): string {
+  const rate = 8000
+  const n = rate
+  const buf = new ArrayBuffer(44 + n * 2)
+  const v = new DataView(buf)
+  const str = (o: number, s: string) => {
+    for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i))
+  }
+  str(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); str(8, 'WAVE')
+  str(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true)
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true)
+  str(36, 'data'); v.setUint32(40, n * 2, true)
+  for (let i = 0; i < n; i++) v.setInt16(44 + i * 2, 1, true)
+  return URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }))
+}
+
+interface WakeLockSentinelLike { release(): Promise<void> }
+interface WakeLockLike { request(type: 'screen'): Promise<WakeLockSentinelLike> }
+
+let keepAlive: HTMLAudioElement | null = null
+let wakeLock: WakeLockSentinelLike | null = null
+let onVisible: (() => void) | null = null
+
+async function acquireWakeLock() {
+  const wl = (navigator as unknown as { wakeLock?: WakeLockLike }).wakeLock
+  if (!wl) return
+  try {
+    wakeLock = await wl.request('screen')
+  } catch {
+    /* 低電量模式等情況會拒絕,不影響其他功能 */
+  }
+}
+
+// 需在使用者手勢裡呼叫(audio.play 的 autoplay 限制)
+export function startBackgroundKeepAlive() {
+  if (!keepAlive) {
+    claimPlaybackSession()
+    keepAlive = new Audio(silentWavUrl())
+    keepAlive.loop = true
+  }
+  void keepAlive.play().catch(() => {})
+  // 鎖屏畫面/通知中心會顯示成正在播放的媒體,給個像樣的標題
+  const ms = navigator.mediaSession
+  if (ms && 'MediaMetadata' in window) {
+    try {
+      ms.metadata = new MediaMetadata({ title: i18n.t('Announce.mediaTitle') })
+    } catch {
+      /* ignore */
+    }
+  }
+  void acquireWakeLock()
+  // wake lock 在切走/鎖屏時會被系統收回,回到前景要重新拿
+  if (!onVisible) {
+    onVisible = () => {
+      if (document.visibilityState === 'visible' && isAnnounceOn()) void acquireWakeLock()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+  }
+}
+
+export function stopBackgroundKeepAlive() {
+  keepAlive?.pause()
+  void wakeLock?.release().catch(() => {})
+  wakeLock = null
+  if (onVisible) {
+    document.removeEventListener('visibilitychange', onVisible)
+    onVisible = null
+  }
+}
+
 // iOS 只承認「點擊當下」發出的第一句語音;晚 1 秒都不算,之後的語音全被吞。
 // 所以解鎖必須同步做:在手勢 handler 裡立刻唸一個音量 0 的空句過門檻,
 // 解鎖過一次後,這頁接下來的延遲語音(鐘聲後才開口)就都合法了。
@@ -62,6 +140,7 @@ export function primeOnFirstGesture() {
     if (!isAnnounceOn()) return
     getCtx()
     primeSpeech()
+    startBackgroundKeepAlive() // 重新整理後開關本來就開著 → 這一下順便把保活掛回去
     window.removeEventListener('pointerdown', prime)
   }
   window.addEventListener('pointerdown', prime)

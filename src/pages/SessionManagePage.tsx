@@ -25,7 +25,7 @@ import { getTiers, tierOf } from '../lib/levels'
 import { isPhotoUrl } from '../lib/avatar'
 import { connectSessionWS } from '../lib/realtime'
 import { shareContent } from '../lib/share'
-import { isAnnounceOn, setAnnounceOn, unlockAndTest, primeOnFirstGesture, announceCourtEnd, announceRotations } from '../lib/announcer'
+import { isAnnounceOn, setAnnounceOn, unlockAndTest, primeOnFirstGesture, announceCourtEnd, announceRotations, startBackgroundKeepAlive, stopBackgroundKeepAlive } from '../lib/announcer'
 
 const BOOKING_URL = import.meta.env.VITE_BOOKING_URL || 'http://localhost:5174'
 
@@ -144,12 +144,23 @@ export function SessionManagePage() {
   // 語音播報開關(登登登+唸下一組)。重新整理後聲音要等頁面被點過才准出,
   // 掛個一次性手勢監聽先解鎖,投票結束(沒按任何鈕)的播報才不會被瀏覽器吃掉
   const [announceOn, setAnnounceState] = useState(isAnnounceOn())
-  useEffect(() => primeOnFirstGesture(), [])
+  useEffect(() => {
+    const off = primeOnFirstGesture()
+    return () => {
+      off()
+      stopBackgroundKeepAlive() // 離開管理頁就不用佔著螢幕常亮/背景音軌
+    }
+  }, [])
   function toggleAnnounce() {
     const next = !announceOn
     setAnnounceOn(next)
     setAnnounceState(next)
-    if (next) unlockAndTest() // 在手勢裡解鎖 AudioContext,順便唸一句讓團主試音量
+    if (next) {
+      unlockAndTest() // 在手勢裡解鎖 AudioContext,順便唸一句讓團主試音量
+      startBackgroundKeepAlive() // 螢幕常亮 + 近無聲音軌保活(鎖屏盡量不斷播報)
+    } else {
+      stopBackgroundKeepAlive()
+    }
   }
 
   const [showQR, setShowQR] = useState(true)
