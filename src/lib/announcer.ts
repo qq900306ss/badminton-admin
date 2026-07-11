@@ -39,24 +39,32 @@ function getCtx(): AudioContext {
   return ctx
 }
 
+// iOS 只承認「點擊當下」發出的第一句語音;晚 1 秒都不算,之後的語音全被吞。
+// 所以解鎖必須同步做:在手勢 handler 裡立刻唸一個音量 0 的空句過門檻,
+// 解鎖過一次後,這頁接下來的延遲語音(鐘聲後才開口)就都合法了。
+let speechPrimed = false
+function primeSpeech() {
+  const synth = window.speechSynthesis
+  if (!synth || speechPrimed) return
+  synth.getVoices() // 觸發 voices 非同步載入
+  const u = new SpeechSynthesisUtterance(' ')
+  u.volume = 0
+  synth.speak(u)
+  speechPrimed = true
+}
+
 // 瀏覽器 autoplay 政策:重新整理後 AudioContext / speechSynthesis 要等頁面被點過
-// 一次才准出聲。掛一個一次性的 pointerdown 把聲音偷偷解鎖,投票結束的播報
-// (完全沒按任何鈕就要出聲的路徑)才不會被吃掉。
+// 才准出聲。掛 pointerdown 把聲音偷偷解鎖,投票結束的播報(完全沒按任何鈕就要
+// 出聲的路徑)才不會被吃掉。開關是關的就先不解鎖、繼續等(等到才卸監聽 —
+// pointerdown 比 click 先發,開啟開關的那一下輪到這裡時 localStorage 還是關)。
 export function primeOnFirstGesture() {
   const prime = () => {
-    if (isAnnounceOn()) {
-      getCtx()
-      const synth = window.speechSynthesis
-      if (synth) {
-        synth.getVoices() // 觸發 voices 非同步載入
-        // iOS 的語音要「在手勢裡真的講過一次」才解鎖,唸一個音量 0 的空句過門檻
-        const u = new SpeechSynthesisUtterance(' ')
-        u.volume = 0
-        synth.speak(u)
-      }
-    }
+    if (!isAnnounceOn()) return
+    getCtx()
+    primeSpeech()
+    window.removeEventListener('pointerdown', prime)
   }
-  window.addEventListener('pointerdown', prime, { once: true })
+  window.addEventListener('pointerdown', prime)
   return () => window.removeEventListener('pointerdown', prime)
 }
 
@@ -108,7 +116,9 @@ function pickVoice(lang: string): SpeechSynthesisVoice | undefined {
 function speak(text: string) {
   const synth = window.speechSynthesis
   if (!synth) return
-  synth.cancel() // 舊播報還沒唸完就來新的 → 直接蓋掉,名單以最新為準
+  // 舊播報還沒唸完就來新的 → 蓋掉,名單以最新為準。iOS 有個雷:沒在講話時
+  // cancel() 會連下一句 speak 一起吞掉,所以有東西在講/排隊才 cancel
+  if (synth.speaking || synth.pending) synth.cancel()
   synth.resume() // iOS 偶爾卡在 paused 狀態,speak 會默默排隊不出聲 — 先喚醒
   const u = new SpeechSynthesisUtterance(text)
   const lang =
@@ -120,8 +130,11 @@ function speak(text: string) {
   synth.speak(u)
 }
 
-// 開啟時在使用者手勢裡呼叫:解鎖 AudioContext + 唸一句測試,順便讓團主確認喇叭音量
+// 開啟時在使用者手勢裡呼叫:同步解鎖 AudioContext + 語音(iOS 過了點擊當下
+// 就不認帳),再登登登 + 唸一句測試,順便讓團主確認喇叭音量
 export function unlockAndTest() {
+  getCtx()
+  primeSpeech()
   void chime().then(() => speak(i18n.t('Announce.enabled')))
 }
 
