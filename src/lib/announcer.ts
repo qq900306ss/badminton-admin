@@ -204,21 +204,74 @@ function pickVoice(lang: string): SpeechSynthesisVoice | undefined {
   return cands.sort((a, b) => score(b) - score(a))[0]
 }
 
-function speak(text: string) {
-  const synth = window.speechSynthesis
-  if (!synth) return
-  // 舊播報還沒唸完就來新的 → 蓋掉,名單以最新為準。iOS 有個雷:沒在講話時
-  // cancel() 會連下一句 speak 一起吞掉,所以有東西在講/排隊才 cancel
-  if (synth.speaking || synth.pending) synth.cancel()
-  synth.resume() // iOS 偶爾卡在 paused 狀態,speak 會默默排隊不出聲 — 先喚醒
-  const u = new SpeechSynthesisUtterance(text)
-  const lang =
-    ({ 'zh-TW': 'zh-TW', en: 'en-US', ja: 'ja-JP' } as Record<string, string>)[i18n.language] ?? 'zh-TW'
-  u.lang = lang
-  const v = pickVoice(lang)
-  if (v) u.voice = v
-  u.rate = 0.95 // 稍慢一點點,吵雜球場裡人名聽得更清楚
-  synth.speak(u)
+const LANG_TAG: Record<string, string> = { 'zh-TW': 'zh-TW', en: 'en-US', ja: 'ja-JP' }
+
+// 瀏覽器的語音是跟作業系統要的:Windows 沒裝日文語言包、Android 沒下載日文
+// TTS 時,指定 ja-JP 會一片安靜(鐘聲照響)。與其靜音漏播,不如自動退回
+// 裝置真的有語音的語言(介面語言 → 中文 → 英文),播報文案也跟著用該語言組。
+function speakableLng(): string {
+  const voices = window.speechSynthesis?.getVoices() ?? []
+  if (!voices.length) return i18n.language // voices 還沒非同步載完,別亂 fallback
+  const has = (lng: string) => {
+    const tag = LANG_TAG[lng] ?? lng
+    return voices.some((v) => v.lang.replace('_', '-').toLowerCase().startsWith(tag.slice(0, 2).toLowerCase()))
+  }
+  for (const lng of [i18n.language, 'zh-TW', 'en']) if (has(lng)) return lng
+  return i18n.language
+}
+
+// 唸一句,唸完(或引擎死掉)才 resolve — 佇列靠這個逐一前進
+function speakOnce(text: string, lng: string): Promise<void> {
+  return new Promise((resolve) => {
+    const synth = window.speechSynthesis
+    if (!synth) return resolve()
+    // 佇列輪到我們時引擎理應閒著;還有殘留就是卡住的舊句,清掉。
+    // (iOS 雷:沒在講話時 cancel() 會吞掉下一句,所以有講/排隊才 cancel)
+    if (synth.speaking || synth.pending) synth.cancel()
+    synth.resume() // iOS 偶爾卡在 paused 狀態,speak 會默默排隊不出聲 — 先喚醒
+    const u = new SpeechSynthesisUtterance(text)
+    const lang = LANG_TAG[lng] ?? 'zh-TW'
+    u.lang = lang
+    const v = pickVoice(lang)
+    if (v) u.voice = v
+    u.rate = 0.95 // 稍慢一點點,吵雜球場裡人名聽得更清楚
+    let done = false
+    const finish = () => {
+      if (!done) {
+        done = true
+        resolve()
+      }
+    }
+    u.onend = finish
+    u.onerror = finish
+    // 保險絲:引擎沒回 onend 也要讓佇列前進(以字數估一句話最長多久)
+    setTimeout(finish, 4000 + text.length * 350)
+    synth.speak(u)
+  })
+}
+
+// ---- 播報佇列:兩個場地幾乎同時結束時排隊逐一播,不互相蓋台;每則唸兩次 ----
+interface AnnounceJob { text: string; lng: string; repeat: number }
+const jobs: AnnounceJob[] = []
+let pumping = false
+
+async function pump() {
+  if (pumping) return
+  pumping = true
+  while (jobs.length) {
+    const job = jobs.shift()!
+    await chime()
+    for (let i = 0; i < job.repeat; i++) {
+      await speakOnce(job.text, job.lng)
+      if (i < job.repeat - 1) await new Promise((r) => setTimeout(r, 500))
+    }
+  }
+  pumping = false
+}
+
+function enqueue(text: string, lng: string, repeat: number) {
+  jobs.push({ text, lng, repeat })
+  void pump()
 }
 
 // 開啟時在使用者手勢裡呼叫:同步解鎖 AudioContext + 語音(iOS 過了點擊當下
@@ -226,27 +279,32 @@ function speak(text: string) {
 export function unlockAndTest() {
   getCtx()
   primeSpeech()
-  void chime().then(() => speak(i18n.t('Announce.enabled')))
-}
-
-function labelOf(court: Pick<CourtView, 'name' | 'court_num'>): string {
-  return court.name?.trim() ? court.name : i18n.t('Announce.courtN', { n: court.court_num })
+  const lng = speakableLng()
+  enqueue(i18n.getFixedT(lng)('Announce.enabled'), lng, 1)
 }
 
 // 同一個結束會從兩條路進來(團主按鈕的 onSuccess + 伺服器 WS 廣播的 diff),
 // 用 court_id + 時間窗擋重複播;正常兩場之間隔好幾分鐘,15 秒很安全
 const recent = new Map<string, number>()
 
-export function announceCourtEnd(courtId: string, courtLabel: string, names: string[]) {
+export function announceCourtEnd(
+  courtId: string,
+  court: Pick<CourtView, 'name' | 'court_num'>,
+  names: string[]
+) {
   if (!isAnnounceOn()) return
   const now = Date.now()
   if (now - (recent.get(courtId) ?? 0) < 15000) return
   recent.set(courtId, now)
+  // 文案用「裝置真的唸得出來」的語言組(介面日文但沒裝日文語音 → 退回中文)
+  const lng = speakableLng()
+  const ft = i18n.getFixedT(lng)
+  const label = court.name?.trim() ? court.name : ft('Announce.courtN', { n: court.court_num })
   const opts = { interpolation: { escapeValue: false } } // 要唸的是純文字,別把人名 HTML 轉義
   const text = names.length
-    ? i18n.t('Announce.nextUp', { court: courtLabel, names: names.join(i18n.t('Announce.nameSep')), ...opts })
-    : i18n.t('Announce.courtDone', { court: courtLabel, ...opts })
-  void chime().then(() => speak(text))
+    ? ft('Announce.nextUp', { court: label, names: names.join(ft('Announce.nameSep')), ...opts })
+    : ft('Announce.courtDone', { court: label, ...opts })
+  enqueue(text, lng, 2) // 唸兩次,第一次沒聽清楚很正常
 }
 
 // 投票結束沒有專屬 WS 事件 — 伺服器只廣播整份新 view(scope 'game')。套用前跟舊 view
@@ -270,6 +328,6 @@ export function announceRotations(prev: SessionView | undefined, next: SessionVi
       o.queue.length === 0 &&
       c.playing.every((p) => !p.player_id)
     if (promoted.length === 0 && !emptiedOut) continue
-    announceCourtEnd(c.court_id, labelOf(c), promoted.map((p) => p.display_name))
+    announceCourtEnd(c.court_id, c, promoted.map((p) => p.display_name))
   }
 }

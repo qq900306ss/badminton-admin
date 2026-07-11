@@ -11,7 +11,7 @@ export interface ChangelogEntry {
 // in the changelog locale fragments (keys `changelog.r<release>.i<item>`) and is
 // read at call time so it follows the current language.
 const RELEASES: { date: string; count: number }[] = [
-  { date: '2026/07/11', count: 3 },
+  { date: '2026/07/11', count: 4 },
   { date: '2026/07/06', count: 1 },
   { date: '2026/07/05', count: 2 },
   { date: '2026/07/03', count: 5 },
