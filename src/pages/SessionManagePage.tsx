@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { QRCodeSVG } from 'qrcode.react'
 import { sessionApi } from '../api/client'
-import type { SessionPlayer } from '../api/client'
+import type { SessionPlayer, SessionView } from '../api/client'
 import { useSessionView, useSessionPlayers, useManageActions } from '../hooks/useApi'
 import { ManageCourtCard } from '../components/ManageCourtCard'
 import { StatsPanel } from '../components/StatsPanel'
@@ -25,6 +25,7 @@ import { getTiers, tierOf } from '../lib/levels'
 import { isPhotoUrl } from '../lib/avatar'
 import { connectSessionWS } from '../lib/realtime'
 import { shareContent } from '../lib/share'
+import { isAnnounceOn, setAnnounceOn, unlockAndTest, primeOnFirstGesture, announceCourtEnd, announceRotations } from '../lib/announcer'
 
 const BOOKING_URL = import.meta.env.VITE_BOOKING_URL || 'http://localhost:5174'
 
@@ -110,6 +111,11 @@ export function SessionManagePage() {
         if (m.view) {
           const at = m.at ?? Date.now()
           if (at >= lastApplied.current) {
+            // 投票結束成功只會以 scope 'game' 的全量 view 廣播進來 —— 套用前先跟
+            // 舊 view 比對,找出剛輪替的場地做語音播報(團主自己按的那條路在
+            // onEnd 就播了,announcer 內部會擋重複)
+            if (scope === 'game')
+              announceRotations(qc.getQueryData<SessionView>(['session', sid]), m.view)
             lastApplied.current = at
             qc.setQueryData(['session', sid], m.view)
             if (m.players) qc.setQueryData(['session-players', sid], m.players)
@@ -134,6 +140,17 @@ export function SessionManagePage() {
       }
     )
   }, [sid, qc])
+
+  // 語音播報開關(登登登+唸下一組)。重新整理後聲音要等頁面被點過才准出,
+  // 掛個一次性手勢監聽先解鎖,投票結束(沒按任何鈕)的播報才不會被瀏覽器吃掉
+  const [announceOn, setAnnounceState] = useState(isAnnounceOn())
+  useEffect(() => primeOnFirstGesture(), [])
+  function toggleAnnounce() {
+    const next = !announceOn
+    setAnnounceOn(next)
+    setAnnounceState(next)
+    if (next) unlockAndTest() // 在手勢裡解鎖 AudioContext,順便唸一句讓團主試音量
+  }
 
   const [showQR, setShowQR] = useState(true)
   const [poster, setPoster] = useState(false)
@@ -195,6 +212,13 @@ export function SessionManagePage() {
         <button onClick={() => nav('/')} className="text-sm text-gray-400">← {t('SessionManagePage.back')}</button>
         <span className="font-extrabold text-gray-800">{t('SessionManagePage.onCourtManage')}</span>
         <div className="flex items-center gap-3">
+          <button
+            onClick={toggleAnnounce}
+            title={announceOn ? t('Announce.toggleTitleOn') : t('Announce.toggleTitleOff')}
+            className={`text-base leading-none ${announceOn ? '' : 'grayscale opacity-50'}`}
+          >
+            🔊
+          </button>
           <button onClick={() => setSummary(true)} className="text-sm font-semibold text-brand-pink">{t('SessionManagePage.summary')}</button>
           <button onClick={closeSession} className="text-sm font-semibold text-red-400">{t('SessionManagePage.endSession')}</button>
         </div>
@@ -619,7 +643,14 @@ export function SessionManagePage() {
             <div key={court.court_id} className="space-y-2">
               <ManageCourtCard
                 court={court}
-                onEnd={() => endCourt.mutate(court.court_id)}
+                onEnd={() => {
+                  // 按下當下 queue 就是下一組名單,先抓好;等伺服器確認結束成功再播報
+                  const label = court.name?.trim() ? court.name : t('Announce.courtN', { n: court.court_num })
+                  const names = court.queue.map((q) => q.display_name)
+                  endCourt.mutate(court.court_id, {
+                    onSuccess: () => announceCourtEnd(court.court_id, label, names),
+                  })
+                }}
                 onUndoEnd={() => undoEnd.mutate(court.court_id)}
                 onKick={(playerId) => kick.mutate({ courtId: court.court_id, playerId })}
                 onRename={(name) => renameCourt.mutate({ courtId: court.court_id, name })}

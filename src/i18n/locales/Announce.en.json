@@ -1,0 +1,11 @@
+{
+  "Announce": {
+    "toggleTitleOn": "Voice announcements: on (tap to turn off)",
+    "toggleTitleOff": "Voice announcements: off (tap to enable — plays a chime and calls the next players when a game ends)",
+    "enabled": "Voice announcements enabled",
+    "courtN": "Court {{n}}",
+    "nextUp": "{{court}} finished. {{names}}, you're up — please come on court.",
+    "courtDone": "{{court}} finished.",
+    "nameSep": ", "
+  }
+}

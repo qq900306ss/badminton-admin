@@ -1,0 +1,11 @@
+{
+  "Announce": {
+    "toggleTitleOn": "音声アナウンス:オン(タップでオフ)",
+    "toggleTitleOff": "音声アナウンス:オフ(タップでオン。試合終了時にチャイム+次のメンバーを読み上げます)",
+    "enabled": "音声アナウンスをオンにしました",
+    "courtN": "{{n}} 番コート",
+    "nextUp": "{{court}}終了です。{{names}}さん、コートにお入りください",
+    "courtDone": "{{court}}終了です",
+    "nameSep": "、"
+  }
+}

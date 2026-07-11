@@ -1,0 +1,11 @@
+{
+  "Announce": {
+    "toggleTitleOn": "語音播報:開(點擊關閉)",
+    "toggleTitleOff": "語音播報:關(點擊開啟,結束這場時會登登登+唸出下一組名單)",
+    "enabled": "語音播報已開啟",
+    "courtN": "{{n}} 號場",
+    "nextUp": "{{court}}結束,請排隊人員 {{names}} 上場打球",
+    "courtDone": "{{court}}結束",
+    "nameSep": "、"
+  }
+}

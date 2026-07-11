@@ -5,6 +5,7 @@
 Back-office for the badminton court management system: Google login → create a session (set name / time / password / courts / roster) → QR code → in-session management (swap courts, remove players, add players, change levels) → stats. Super-admins can manage hosts and impersonate them.
 
 🔗 **Live**: https://d1r9u0ja59y4rv.cloudfront.net
+📋 [Changelog](CHANGELOG.md)
 
 ## Related
 
