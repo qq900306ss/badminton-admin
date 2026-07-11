@@ -16,8 +16,25 @@ export function setAnnounceOn(on: boolean) {
   localStorage.setItem(KEY, on ? '1' : '0')
 }
 
+// iOS 17+:把網頁音訊宣告成「媒體播放」,否則 iPhone 側邊靜音鍵撥下去時
+// Web Audio 的鐘聲會被當提示音整個吃掉(音樂類不會,但我們的登登登會)
+interface AudioSessionLike { type: string }
+function claimPlaybackSession() {
+  const session = (navigator as unknown as { audioSession?: AudioSessionLike }).audioSession
+  if (session) {
+    try {
+      session.type = 'playback'
+    } catch {
+      /* 舊版不支援就算了 */
+    }
+  }
+}
+
 function getCtx(): AudioContext {
-  if (!ctx) ctx = new AudioContext()
+  if (!ctx) {
+    claimPlaybackSession()
+    ctx = new AudioContext()
+  }
   if (ctx.state === 'suspended') void ctx.resume()
   return ctx
 }
@@ -29,7 +46,14 @@ export function primeOnFirstGesture() {
   const prime = () => {
     if (isAnnounceOn()) {
       getCtx()
-      window.speechSynthesis?.getVoices() // 順便觸發 voices 非同步載入
+      const synth = window.speechSynthesis
+      if (synth) {
+        synth.getVoices() // 觸發 voices 非同步載入
+        // iOS 的語音要「在手勢裡真的講過一次」才解鎖,唸一個音量 0 的空句過門檻
+        const u = new SpeechSynthesisUtterance(' ')
+        u.volume = 0
+        synth.speak(u)
+      }
     }
   }
   window.addEventListener('pointerdown', prime, { once: true })
@@ -85,6 +109,7 @@ function speak(text: string) {
   const synth = window.speechSynthesis
   if (!synth) return
   synth.cancel() // 舊播報還沒唸完就來新的 → 直接蓋掉,名單以最新為準
+  synth.resume() // iOS 偶爾卡在 paused 狀態,speak 會默默排隊不出聲 — 先喚醒
   const u = new SpeechSynthesisUtterance(text)
   const lang =
     ({ 'zh-TW': 'zh-TW', en: 'en-US', ja: 'ja-JP' } as Record<string, string>)[i18n.language] ?? 'zh-TW'
