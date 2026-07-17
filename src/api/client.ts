@@ -46,6 +46,7 @@ export interface CourtView {
   court_id: string
   court_num: number
   name?: string
+  locked?: boolean // 團主鎖定中:玩家端不能自助上場/排隊
   status: 'empty' | 'playing'
   playing: PlayerSlot[]
   queue: PlayerSlot[]
@@ -252,6 +253,8 @@ export const sessionApi = {
     api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/add-queue`, { player_id: playerId }),
   swapQueue: (sessionId: string, args: { court_a: string; players_a: string[]; court_b: string; players_b: string[] }) =>
     api.post(`/api/sessions/${sessionId}/swap-queue`, args),
+  lockCourt: (sessionId: string, courtId: string, locked: boolean) =>
+    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/lock`, { locked }),
 }
 
 // on-site seating board: leader-authorized, but with the SAME rules as the

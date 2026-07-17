@@ -173,5 +173,10 @@ export function useManageActions(sessionId: string) {
       alert(m ?? i18n.t('useApi.swapFailed'))
     },
   })
-  return { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, approveFamily, renameCourt, removeCourt, addQueue, swapQueue, removePlayer }
+  const lockCourt = useMutation({
+    mutationFn: (v: { courtId: string; locked: boolean }) =>
+      sessionApi.lockCourt(sessionId, v.courtId, v.locked),
+    onSuccess: invalidate,
+  })
+  return { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, approveFamily, renameCourt, removeCourt, addQueue, swapQueue, lockCourt, removePlayer }
 }

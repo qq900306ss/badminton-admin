@@ -13,6 +13,9 @@
     "endRotate": "End game → next group",
     "endGame": "End game",
     "undoEnd": "Undo last end (within 10 min)",
+    "lock": "Lock court",
+    "unlock": "Unlock court",
+    "locked": "Locked",
     "removeCourt": "Delete this court"
   }
 }

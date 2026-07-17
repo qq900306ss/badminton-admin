@@ -28,6 +28,8 @@ interface Props {
   onKick: (playerId: string) => void
   onRename: (name: string) => void
   onRemove: () => void
+  // 鎖定/解鎖這個場地(團主):鎖定後玩家端不能自助上場/排隊,團主仍可手動排
+  onToggleLock: () => void
   // 跟別的場地交換排隊的人 — 只在「這裡有人排隊且別場也有人排隊」時由頁面傳入
   onSwapQueue?: () => void
 }
@@ -54,7 +56,7 @@ function Chip({ slot, onKick }: { slot: PlayerSlot; onKick: () => void }) {
   )
 }
 
-export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onRemove, onSwapQueue }: Props) {
+export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onRemove, onToggleLock, onSwapQueue }: Props) {
   const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
   const [nameInput, setNameInput] = useState(court.name ?? '')
@@ -72,7 +74,7 @@ export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onR
     setEditing(false)
   }
   return (
-    <div className="card space-y-3">
+    <div className={`card space-y-3 ${court.locked ? 'ring-2 ring-rose-200' : ''}`}>
       <div className="flex items-center justify-between gap-2">
         {editing ? (
           <div className="flex items-center gap-1 flex-1">
@@ -94,17 +96,22 @@ export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onR
             {title} <span className="text-gray-300 text-xs">✎</span>
           </button>
         )}
-        {filled === 0 ? (
-          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">{t('ManageCourtCard.empty')}</span>
-        ) : filled === 4 ? (
-          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-mint text-emerald-700">
-            {t('ManageCourtCard.inProgress')}{elapsedMins(court.started_at) !== null ? t('ManageCourtCard.minsElapsed', { mins: elapsedMins(court.started_at) }) : ''}
-          </span>
-        ) : (
-          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-yellow text-amber-700">
-            {t('ManageCourtCard.gathering', { filled })}
-          </span>
-        )}
+        <div className="flex items-center gap-1.5">
+          {court.locked && (
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-600">🔒 {t('ManageCourtCard.locked')}</span>
+          )}
+          {filled === 0 ? (
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">{t('ManageCourtCard.empty')}</span>
+          ) : filled === 4 ? (
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-mint text-emerald-700">
+              {t('ManageCourtCard.inProgress')}{elapsedMins(court.started_at) !== null ? t('ManageCourtCard.minsElapsed', { mins: elapsedMins(court.started_at) }) : ''}
+            </span>
+          ) : (
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-yellow text-amber-700">
+              {t('ManageCourtCard.gathering', { filled })}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* playing */}
@@ -158,6 +165,15 @@ export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onR
           </button>
         )}
       </div>
+
+      <button
+        onClick={onToggleLock}
+        className={`w-full text-sm font-bold py-2.5 rounded-2xl active:scale-95 transition-transform ${
+          court.locked ? 'bg-rose-100 text-rose-600' : 'bg-gray-100 text-gray-500'
+        }`}
+      >
+        {court.locked ? `🔓 ${t('ManageCourtCard.unlock')}` : `🔒 ${t('ManageCourtCard.lock')}`}
+      </button>
 
       <button onClick={onRemove} className="w-full text-xs text-red-300 hover:text-red-400">
         {t('ManageCourtCard.removeCourt')}

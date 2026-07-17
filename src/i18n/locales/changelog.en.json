@@ -1,5 +1,8 @@
 {
   "changelog": {
+    "r6": {
+      "i0": "New \"Lock court\" feature: every court card gets a 🔒 Lock button. Once you lock a court, drop-in players can't self-join or queue on it (they see \"This court has been locked by the host\"), while you can still seat people manually — handy for gathering players onto a just-emptied court without others grabbing the open spots; tap 🔓 to unlock when you're done"
+    },
     "r0": {
       "i0": "🔊 New \"Voice announcements\": when a game ends (your button, or a successful on-court vote), your phone plays a ding-dong-ding chime and announces \"Court N finished. ○○, ○○, you're up — please come on court\"; hook up a Bluetooth speaker and the whole venue hears it",
       "i1": "How to use: tap 🔊 at the top right of the in-session admin page to turn it on (it speaks a test line so you can check the volume; the setting is remembered). Announcements follow the interface language, and custom court names are spoken",

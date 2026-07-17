@@ -67,7 +67,7 @@ export function SessionManagePage() {
   const [wsUp, setWsUp] = useState(false) // WS 活著 → 輪詢降頻成 60 秒對帳
   const { data: session, isLoading } = useSessionView(sid, wsUp)
   const { data: players } = useSessionPlayers(sid, wsUp)
-  const { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, approveFamily, renameCourt, removeCourt, addQueue, swapQueue, removePlayer } = useManageActions(sid)
+  const { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, approveFamily, renameCourt, removeCourt, addQueue, swapQueue, lockCourt, removePlayer } = useManageActions(sid)
   const confirm = useConfirm()
   const qc = useQueryClient()
 
@@ -668,6 +668,7 @@ export function SessionManagePage() {
                 onUndoEnd={() => undoEnd.mutate(court.court_id)}
                 onKick={(playerId) => kick.mutate({ courtId: court.court_id, playerId })}
                 onRename={(name) => renameCourt.mutate({ courtId: court.court_id, name })}
+                onToggleLock={() => lockCourt.mutate({ courtId: court.court_id, locked: !court.locked })}
                 onSwapQueue={
                   // 入口在「有別的場地、且任一邊有人排隊」時出現(沒人排隊的場地
                   // 也能把別場的人換過來)

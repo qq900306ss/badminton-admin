@@ -13,6 +13,9 @@
     "endRotate": "結束這場 → 換下一組",
     "endGame": "結束這場",
     "undoEnd": "復原剛剛的結束(10 分鐘內)",
+    "lock": "鎖定場地",
+    "unlock": "解鎖場地",
+    "locked": "已鎖定",
     "removeCourt": "刪除這個場地"
   }
 }
