@@ -1,5 +1,8 @@
 {
   "changelog": {
+    "r7": {
+      "i0": "The drop-in player front-end now has a floating \"🏸 Host\" invite button + speech bubble (\"Want to host your own games?\") in the bottom-right: one tap opens the host console in a new tab so players can start their own group too — it helps spread this tool and doesn't affect any existing flow"
+    },
     "r6": {
       "i0": "New \"Lock court\" feature: every court card gets a 🔒 Lock button. Once you lock a court, drop-in players can't self-join or queue on it (they see \"This court has been locked by the host\"), while you can still seat people manually — handy for gathering players onto a just-emptied court without others grabbing the open spots; tap 🔓 to unlock when you're done"
     },
