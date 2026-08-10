@@ -30,6 +30,7 @@
     "settleCollected": "已收 {{paid}} / {{total}} 人",
     "settleHint": "點人切換已收/未收",
     "settlePaid": "已收",
-    "settleUnpaid": "未收"
+    "settleUnpaid": "未收",
+    "settleNoMatch": "找不到符合的人"
   }
 }

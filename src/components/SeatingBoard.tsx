@@ -256,7 +256,7 @@ function SettleModal({ people, busy, onToggle, onClose }: {
         </div>
         <div className="overflow-y-auto p-3 space-y-1.5">
           {list.length === 0 ? (
-            <p className="text-center text-sm text-gray-300 py-6">{t('SeatingBoard.noPeople')}</p>
+            <p className="text-center text-sm text-gray-300 py-6">{t('SeatingBoard.settleNoMatch')}</p>
           ) : (
             list.map((p) => (
               <button

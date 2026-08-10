@@ -30,6 +30,7 @@
     "settleCollected": "Collected {{paid}} / {{total}}",
     "settleHint": "Tap a person to toggle paid/unpaid",
     "settlePaid": "Paid",
-    "settleUnpaid": "Unpaid"
+    "settleUnpaid": "Unpaid",
+    "settleNoMatch": "No one matches"
   }
 }

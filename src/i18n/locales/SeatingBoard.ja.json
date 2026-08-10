@@ -30,6 +30,7 @@
     "settleCollected": "受領 {{paid}} / {{total}} 人",
     "settleHint": "タップで受領/未受領を切替",
     "settlePaid": "受領済み",
-    "settleUnpaid": "未受領"
+    "settleUnpaid": "未受領",
+    "settleNoMatch": "該当する人がいません"
   }
 }
