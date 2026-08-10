@@ -7,7 +7,6 @@
     "mins": " · {{mins}}分",
     "gathering": "募集中 {{filled}}/4",
     "queueAdd": "順番待ち +",
-    "queueHint": "「順番待ち +」で追加",
     "searchName": "🔍 名前を検索",
     "noPeople": "追加できる人がいません",
     "games": "{{games}}戦",
@@ -20,7 +19,7 @@
     "boardTitle": "現場配置ボード",
     "landscape": "横向き",
     "portrait": "縦向き",
-    "hint": "空き位置の ＋ か「順番待ち +」で人を追加 · コート上の人をタップで交代",
+    "hint": "空き位置か順番待ちの ＋ で人を追加 · コート上の人をタップで交代",
     "noCourts": "このセッションにはまだコートがありません",
     "endRotate": "終了して交代",
     "endGame": "この試合を終了",
@@ -34,6 +33,7 @@
     "settleNoMatch": "該当する人がいません",
     "lock": "コートをロック",
     "unlock": "ロック解除",
-    "lockedChip": "ロック中"
+    "lockedChip": "ロック中",
+    "queueLabel": "順番待ち {{n}}/4"
   }
 }

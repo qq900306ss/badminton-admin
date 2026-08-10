@@ -7,7 +7,6 @@
     "mins": " · {{mins}} min",
     "gathering": "Gathering {{filled}}/4",
     "queueAdd": "Queue +",
-    "queueHint": "Tap \"Queue +\" to add",
     "searchName": "🔍 Search name",
     "noPeople": "No one available to add",
     "games": "{{games}} games",
@@ -20,7 +19,7 @@
     "boardTitle": "On-site seating board",
     "landscape": "Landscape",
     "portrait": "Portrait",
-    "hint": "Tap an empty spot ＋ or \"Queue +\" to add someone · tap a player on court to sub out",
+    "hint": "Tap an empty ＋ (court or queue) to add someone · tap a player on court to sub out",
     "noCourts": "No courts in this session yet",
     "endRotate": "End game → rotate",
     "endGame": "End game",
@@ -34,6 +33,7 @@
     "settleNoMatch": "No one matches",
     "lock": "Lock court",
     "unlock": "Unlock court",
-    "lockedChip": "Locked"
+    "lockedChip": "Locked",
+    "queueLabel": "Queue {{n}}/4"
   }
 }

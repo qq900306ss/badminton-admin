@@ -35,7 +35,7 @@ function Avatar({ slot, onClick, locked }: { slot: PlayerSlot; onClick?: () => v
     <button
       onClick={onClick}
       disabled={!onClick}
-      className={`flex flex-col items-center gap-1 ${onClick ? 'active:scale-90 transition-transform' : ''}`}
+      className={`w-full min-w-0 flex flex-col items-center gap-1 ${onClick ? 'active:scale-90 transition-transform' : ''}`}
     >
       <div className="relative">
         {isPhotoUrl(slot.avatar_url) ? (
@@ -57,7 +57,8 @@ function Avatar({ slot, onClick, locked }: { slot: PlayerSlot; onClick?: () => v
           <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gray-500 text-white text-[9px] rounded-full px-1 leading-4 shadow">🔒</span>
         )}
       </div>
-      <span className="text-xs font-semibold max-w-[4.5rem] truncate text-gray-700">{slot.display_name}</span>
+      {/* 名字吃格寬 truncate(寫死 max-w 在窄格會把圓擠歪 —— 前台跑版同款問題) */}
+      <span className="w-full px-0.5 text-center text-xs font-semibold truncate text-gray-700">{slot.display_name}</span>
     </button>
   )
 }
@@ -133,7 +134,7 @@ function BoardCourt({ court, onEmptySlot, onQueueZone, onFilledPlayer, onQueuedP
         <div className="absolute left-3 right-3 top-1/2 -translate-y-1/2 border-t-2 border-dashed border-white" />
         <div className="relative grid grid-cols-2 gap-y-3 py-2">
           {slots.map((slot, i) => (
-            <div key={i} className="h-16 flex items-center justify-center">
+            <div key={i} className="h-16 min-w-0 flex items-center justify-center">
               {slot.player_id ? (
                 <Avatar slot={slot} locked={full} onClick={() => onFilledPlayer(slot.player_id, !full)} />
               ) : (
@@ -144,20 +145,38 @@ function BoardCourt({ court, onEmptySlot, onQueueZone, onFilledPlayer, onQueuedP
         </div>
       </div>
 
-      {/* queue */}
+      {/* queue — 固定 4 格(復刻前台 stable-grid 修法):有人=頭像、下一空位=可點的
+          虛線圓、其餘=灰圓。高度恆定,有人排隊卡片不再忽然變高、頭像不跳位 */}
       <div className="rounded-xl p-2 bg-gray-50/60">
-        <div className="flex items-center gap-2 flex-wrap min-h-[1.5rem]">
-          <button
-            onClick={onQueueZone}
-            disabled={!queueRoom}
-            className="text-[11px] font-bold px-2 py-1 rounded-full bg-brand-yellow text-amber-700 disabled:opacity-30 active:scale-90 transition-transform"
-          >
-            {t('SeatingBoard.queueAdd')}
-          </button>
-          {court.queue.map((p) => (
-            <Avatar key={p.player_id} slot={p} onClick={() => onQueuedPlayer(p.player_id)} />
-          ))}
-          {court.queue.length === 0 && <span className="text-[11px] text-gray-300">{t('SeatingBoard.queueHint')}</span>}
+        <p className="text-[10px] text-gray-400 font-semibold mb-1">{t('SeatingBoard.queueLabel', { n: court.queue.length })}</p>
+        <div className="grid grid-cols-4 gap-1">
+          {Array.from({ length: 4 }, (_, i) => {
+            const p = court.queue[i]
+            return (
+              <div key={i} className="h-16 min-w-0 flex items-center justify-center">
+                {p ? (
+                  <Avatar slot={p} onClick={() => onQueuedPlayer(p.player_id)} />
+                ) : i === court.queue.length && queueRoom ? (
+                  <div className="w-full min-w-0 flex flex-col items-center gap-1">
+                    <button
+                      onClick={onQueueZone}
+                      aria-label={t('SeatingBoard.queueAdd')}
+                      className="w-11 h-11 rounded-full border-2 border-dashed border-amber-400/70 text-amber-500 flex items-center justify-center
+                        text-xl font-bold bg-white/50 hover:bg-amber-400 hover:text-white active:scale-90 transition-all"
+                    >
+                      +
+                    </button>
+                    <span className="text-xs">&nbsp;</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="w-11 h-11 rounded-full border-2 border-dashed border-gray-200 bg-white/30" />
+                    <span className="text-xs">&nbsp;</span>
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
       </div>
 
