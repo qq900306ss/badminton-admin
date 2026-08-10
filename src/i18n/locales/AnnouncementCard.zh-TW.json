@@ -1,0 +1,15 @@
+{
+  "AnnouncementCard": {
+    "heading": "場內公告",
+    "add": "寫公告",
+    "edit": "編輯",
+    "hint": "寫給場內所有人看的訊息(例如:10 點後請小聲、打完聚餐),大家會即時看到",
+    "placeholder": "想跟大家說什麼?",
+    "publish": "發佈",
+    "saving": "發佈中…",
+    "cancel": "取消",
+    "removeHint": "清空後發佈即可移除公告",
+    "errMax": "公告最多 500 字",
+    "errFailed": "更新失敗,請再試一次"
+  }
+}

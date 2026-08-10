@@ -21,6 +21,15 @@
     "landscape": "橫向",
     "portrait": "直版",
     "hint": "點空位 ＋ 或「排隊 +」挑人加入 · 點場上的人可換下",
-    "noCourts": "這場還沒有球場"
+    "noCourts": "這場還沒有球場",
+    "endRotate": "結束這場 → 換下一組",
+    "endGame": "結束這場",
+    "undoEnd": "復原",
+    "settleBtn": "結算",
+    "settleTitle": "臨打費結算",
+    "settleCollected": "已收 {{paid}} / {{total}} 人",
+    "settleHint": "點人切換已收/未收",
+    "settlePaid": "已收",
+    "settleUnpaid": "未收"
   }
 }

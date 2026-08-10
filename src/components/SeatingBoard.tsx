@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { CourtView, PlayerSlot, SessionPlayer } from '../api/client'
-import { useSessionView, useSessionPlayers, useSeatActions } from '../hooks/useApi'
+import { useSessionView, useSessionPlayers, useSeatActions, useManageActions } from '../hooks/useApi'
 import { tierOf } from '../lib/levels'
 import { isPhotoUrl } from '../lib/avatar'
+import { announceCourtEnd } from '../lib/announcer'
 
 // the leader's on-site seating board for people without a phone.
 // flow: tap an empty slot (circle) or 排隊 + → a name-list popup appears → pick a
 // person → they go in. no scrolling to a bottom bench. rules match the player
 // front-end (in-progress / full courts are locked — tap a playing person to 下場
 // only while the court is still gathering).
+// the board also carries 結束這場 per court + a 💰 結算 popup (mark 臨打費 paid),
+// so the on-site tablet never needs to leave this screen.
 
 const PALETTE = ['bg-brand-pink', 'bg-brand-mint', 'bg-brand-yellow', 'bg-brand-peach', 'bg-brand-lavender', 'bg-purple-200', 'bg-blue-200', 'bg-teal-200']
 function fallbackColor(id: string) {
@@ -82,9 +85,12 @@ interface CourtProps {
   onQueueZone: () => void
   onFilledPlayer: (playerId: string, removable: boolean) => void
   onQueuedPlayer: (playerId: string) => void
+  onEnd: () => void
+  onUndoEnd: () => void
+  endBusy: boolean
 }
 
-function BoardCourt({ court, onEmptySlot, onQueueZone, onFilledPlayer, onQueuedPlayer }: CourtProps) {
+function BoardCourt({ court, onEmptySlot, onQueueZone, onFilledPlayer, onQueuedPlayer, onEnd, onUndoEnd, endBusy }: CourtProps) {
   const { t } = useTranslation()
   const slots = court.playing
   const filled = slots.filter((s) => s.player_id).length
@@ -137,6 +143,26 @@ function BoardCourt({ court, onEmptySlot, onQueueZone, onFilledPlayer, onQueuedP
           ))}
           {court.queue.length === 0 && <span className="text-[11px] text-gray-300">{t('SeatingBoard.queueHint')}</span>}
         </div>
+      </div>
+
+      {/* 結束這場(滿場=換下一組)+ 剛結束的 10 分鐘內可復原 — 跟管理頁同一套規則 */}
+      <div className="mt-2 flex gap-2">
+        <button
+          onClick={onEnd}
+          disabled={endBusy || (filled === 0 && court.queue.length === 0)}
+          className="btn-primary flex-1 !py-2 text-xs disabled:opacity-40"
+        >
+          {full ? t('SeatingBoard.endRotate') : t('SeatingBoard.endGame')}
+        </button>
+        {court.can_undo && (
+          <button
+            onClick={onUndoEnd}
+            disabled={endBusy}
+            className="shrink-0 text-xs font-bold px-3 rounded-2xl bg-amber-100 text-amber-700 active:scale-95 transition-transform disabled:opacity-40"
+          >
+            ↩ {t('SeatingBoard.undoEnd')}
+          </button>
+        )}
       </div>
     </div>
   )
@@ -195,16 +221,82 @@ function PickerModal({ title, people, onPick, onClose }: {
   )
 }
 
+// 💰 結算彈窗:列出所有成員(沒繳的在前),點一下切換已收/未收臨打費,
+// 順便看每人打了幾場 — 散場收錢就在排點板上完成,不用切回管理頁。
+function SettleModal({ people, busy, onToggle, onClose }: {
+  people: SessionPlayer[]
+  busy: boolean
+  onToggle: (playerId: string, paid: boolean) => void
+  onClose: () => void
+}) {
+  const { t } = useTranslation()
+  const [q, setQ] = useState('')
+  const list = people
+    .filter((p) => p.display_name.includes(q.trim()))
+    .slice()
+    .sort((a, b) => Number(a.paid) - Number(b.paid) || a.display_name.localeCompare(b.display_name))
+  const paidCount = people.filter((p) => p.paid).length
+  return (
+    <div className="fixed inset-0 z-[60] bg-black/40 flex items-end sm:items-center justify-center p-3" onClick={onClose}>
+      <div className="bg-white rounded-3xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="px-4 py-3 border-b shrink-0">
+          <div className="flex items-center justify-between">
+            <span className="font-extrabold text-gray-800">💰 {t('SeatingBoard.settleTitle')}</span>
+            <button onClick={onClose} className="text-sm font-bold text-gray-400 px-1">✕</button>
+          </div>
+          <p className="text-xs text-gray-400 mt-1">
+            {t('SeatingBoard.settleCollected', { paid: paidCount, total: people.length })} · {t('SeatingBoard.settleHint')}
+          </p>
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder={t('SeatingBoard.searchName')}
+            className="mt-2 w-full border-2 border-gray-200 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:border-brand-pink"
+          />
+        </div>
+        <div className="overflow-y-auto p-3 space-y-1.5">
+          {list.length === 0 ? (
+            <p className="text-center text-sm text-gray-300 py-6">{t('SeatingBoard.noPeople')}</p>
+          ) : (
+            list.map((p) => (
+              <button
+                key={p.player_id}
+                disabled={busy}
+                onClick={() => onToggle(p.player_id, !p.paid)}
+                className={`w-full flex items-center justify-between gap-2 px-3 py-3 rounded-2xl active:scale-[0.98] transition-transform disabled:opacity-60 ${
+                  p.paid ? 'bg-amber-50' : 'bg-gray-50'
+                }`}
+              >
+                <span className="min-w-0 flex items-center gap-1.5">
+                  <span className="font-semibold text-gray-700 truncate">{p.display_name}</span>
+                  <span className="shrink-0 text-[11px] text-gray-400 tabular-nums">{t('SeatingBoard.games', { games: p.games })}</span>
+                </span>
+                <span className={`shrink-0 text-xs font-bold px-2.5 py-1 rounded-full ${
+                  p.paid ? 'bg-amber-400 text-white' : 'bg-gray-200 text-gray-500'
+                }`}>
+                  {p.paid ? `💰 ${t('SeatingBoard.settlePaid')}` : t('SeatingBoard.settleUnpaid')}
+                </span>
+              </button>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClose: () => void }) {
   const { t } = useTranslation()
   const { data: session } = useSessionView(sessionId)
   const { data: players } = useSessionPlayers(sessionId)
   const { seatPlaying, seatQueue, unseatPlaying, unseatQueue } = useSeatActions(sessionId)
+  const { endCourt, undoEnd, setPaid } = useManageActions(sessionId)
 
   const [orient, setOrient] = useState<'landscape' | 'portrait'>('landscape')
   // a slot/queue waiting for a person to be picked from the popup.
   // position === null means the queue.
   const [picker, setPicker] = useState<{ courtId: string; position: number | null } | null>(null)
+  const [settle, setSettle] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
 
   useEffect(() => {
@@ -251,6 +343,17 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
     if (busy) return
     unseatQueue.mutate({ courtId, playerId }, { onError: onErr })
   }
+  const endBusy = endCourt.isPending || undoEnd.isPending
+  function endGame(court: CourtView) {
+    if (endBusy) return
+    // 按下當下 queue 就是下一組名單,先抓好;伺服器確認成功才播報(同管理頁)
+    const snap = { name: court.name, court_num: court.court_num }
+    const names = court.queue.map((p) => p.display_name)
+    endCourt.mutate(court.court_id, {
+      onSuccess: () => announceCourtEnd(court.court_id, snap, names),
+      onError: onErr,
+    })
+  }
 
   const pickerCourt = picker ? courts.find((c) => c.court_id === picker.courtId) : null
   const pickerCourtName = pickerCourt ? (pickerCourt.name?.trim() ? pickerCourt.name : t('SeatingBoard.courtN', { n: pickerCourt.court_num })) : ''
@@ -262,6 +365,12 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
       <div className="bg-white shadow-sm px-4 py-2.5 flex items-center gap-2 shrink-0">
         <button onClick={onClose} className="text-sm font-bold text-gray-500 bg-gray-100 rounded-full px-3 py-1.5 active:scale-95">✕ {t('SeatingBoard.close')}</button>
         <span className="font-extrabold text-gray-800 flex-1 text-center">🏸 {t('SeatingBoard.boardTitle')}</span>
+        <button
+          onClick={() => setSettle(true)}
+          className="text-xs font-bold px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 active:scale-95"
+        >
+          💰 {t('SeatingBoard.settleBtn')}
+        </button>
         <div className="flex rounded-full bg-gray-100 p-0.5 text-xs font-bold">
           <button onClick={() => setOrient('landscape')} className={`px-3 py-1 rounded-full ${orient === 'landscape' ? 'bg-brand-pink text-white' : 'text-gray-500'}`}>{t('SeatingBoard.landscape')}</button>
           <button onClick={() => setOrient('portrait')} className={`px-3 py-1 rounded-full ${orient === 'portrait' ? 'bg-brand-pink text-white' : 'text-gray-500'}`}>{t('SeatingBoard.portrait')}</button>
@@ -301,6 +410,9 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
                   onQueueZone={() => setPicker({ courtId: court.court_id, position: null })}
                   onFilledPlayer={(pid, removable) => tapFilledPlayer(court.court_id, pid, removable)}
                   onQueuedPlayer={(pid) => tapQueuedPlayer(court.court_id, pid)}
+                  onEnd={() => endGame(court)}
+                  onUndoEnd={() => undoEnd.mutate(court.court_id, { onError: onErr })}
+                  endBusy={endBusy}
                 />
               </div>
             ))}
@@ -310,6 +422,15 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
 
       {picker && (
         <PickerModal title={pickerTitle} people={offCourt} onPick={pick} onClose={() => setPicker(null)} />
+      )}
+
+      {settle && (
+        <SettleModal
+          people={(players ?? []).filter((p) => !p.pending)}
+          busy={setPaid.isPending}
+          onToggle={(playerId, paid) => setPaid.mutate({ playerId, paid })}
+          onClose={() => setSettle(false)}
+        />
       )}
     </div>
   )

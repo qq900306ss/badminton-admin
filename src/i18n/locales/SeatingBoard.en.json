@@ -21,6 +21,15 @@
     "landscape": "Landscape",
     "portrait": "Portrait",
     "hint": "Tap an empty spot ＋ or \"Queue +\" to add someone · tap a player on court to sub out",
-    "noCourts": "No courts in this session yet"
+    "noCourts": "No courts in this session yet",
+    "endRotate": "End game → rotate",
+    "endGame": "End game",
+    "undoEnd": "Undo",
+    "settleBtn": "Settle up",
+    "settleTitle": "Court-fee settlement",
+    "settleCollected": "Collected {{paid}} / {{total}}",
+    "settleHint": "Tap a person to toggle paid/unpaid",
+    "settlePaid": "Paid",
+    "settleUnpaid": "Unpaid"
   }
 }

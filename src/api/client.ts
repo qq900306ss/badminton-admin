@@ -75,6 +75,7 @@ export interface SessionView {
   end_at?: string
   queue_open_at?: string
   contact_url?: string // 團主自填的聯繫/報名連結(外部,選填)
+  announcement?: string // 場內公告(團主寫給場內成員,選填)
   // 前台報名
   description?: string // 團簡介(選填,公開)
   signup_open?: boolean // 開放前台報名
@@ -228,6 +229,8 @@ export const sessionApi = {
     api.put<{ data: SessionView }>(`/api/sessions/${sessionId}/contact`, { contact_url: contactUrl }),
   setDescription: (sessionId: string, description: string) =>
     api.put<{ data: SessionView }>(`/api/sessions/${sessionId}/description`, { description }),
+  setAnnouncement: (sessionId: string, announcement: string) =>
+    api.put<{ data: SessionView }>(`/api/sessions/${sessionId}/announcement`, { announcement }),
   setSignupSettings: (sessionId: string, s: { signup_open?: boolean; signup_quota?: number }) =>
     api.put<{ data: SessionView }>(`/api/sessions/${sessionId}/signup-settings`, s),
   setAdvanced: (sessionId: string, s: AdvancedSettings) =>

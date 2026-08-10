@@ -14,6 +14,7 @@ import { PasswordCard } from '../components/PasswordCard'
 import { TimesCard } from '../components/TimesCard'
 import { LocationCard } from '../components/LocationCard'
 import { ContactCard } from '../components/ContactCard'
+import { AnnouncementCard } from '../components/AnnouncementCard'
 import { FairPlayCard } from '../components/FairPlayCard'
 import { SeatingBoard } from '../components/SeatingBoard'
 import { SwapQueueModal } from '../components/SwapQueueModal'
@@ -396,6 +397,9 @@ export function SessionManagePage() {
             </div>
           </div>
         )}
+
+        {/* 📢 場內公告 — 寫給場內所有人,玩家端即時看到 */}
+        <AnnouncementCard sessionId={sid} announcement={session?.announcement} />
 
         {/* 🙋 臨打報名審核 — 獨立於成員列表,有 pending 報名才出現 */}
         <SignupReviewPanel

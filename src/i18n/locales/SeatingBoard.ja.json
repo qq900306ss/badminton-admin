@@ -21,6 +21,15 @@
     "landscape": "横向き",
     "portrait": "縦向き",
     "hint": "空き位置の ＋ か「順番待ち +」で人を追加 · コート上の人をタップで交代",
-    "noCourts": "このセッションにはまだコートがありません"
+    "noCourts": "このセッションにはまだコートがありません",
+    "endRotate": "終了して交代",
+    "endGame": "この試合を終了",
+    "undoEnd": "元に戻す",
+    "settleBtn": "精算",
+    "settleTitle": "参加費の精算",
+    "settleCollected": "受領 {{paid}} / {{total}} 人",
+    "settleHint": "タップで受領/未受領を切替",
+    "settlePaid": "受領済み",
+    "settleUnpaid": "未受領"
   }
 }

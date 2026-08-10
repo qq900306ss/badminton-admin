@@ -42,6 +42,10 @@
       "i8": "Family guests need host approval, and member management shows avatars",
       "i9": "Picking a city/county reveals the matching \"district\" dropdown",
       "i10": "You're automatically prompted to update when a new version is available"
+    },
+    "r8": {
+      "i0": "Seating board upgrade: each court now has an \"End game\" button and the header a \"💰 Settle up\" popup — seating, rotating and collecting fees all on one screen",
+      "i1": "New \"📢 Announcement\": write a message for everyone in the session (e.g. dinner afterwards) — players see it instantly"
     }
   }
 }

@@ -1,0 +1,15 @@
+{
+  "AnnouncementCard": {
+    "heading": "Announcement",
+    "add": "Write one",
+    "edit": "Edit",
+    "hint": "A message everyone in this session sees instantly (e.g. quiet after 10pm, dinner afterwards)",
+    "placeholder": "Anything to tell everyone?",
+    "publish": "Publish",
+    "saving": "Publishing…",
+    "cancel": "Cancel",
+    "removeHint": "Publish an empty message to remove the announcement",
+    "errMax": "Max 500 characters",
+    "errFailed": "Update failed, please try again"
+  }
+}
