@@ -31,6 +31,9 @@
     "settleHint": "Tap a person to toggle paid/unpaid",
     "settlePaid": "Paid",
     "settleUnpaid": "Unpaid",
-    "settleNoMatch": "No one matches"
+    "settleNoMatch": "No one matches",
+    "lock": "Lock court",
+    "unlock": "Unlock court",
+    "lockedChip": "Locked"
   }
 }

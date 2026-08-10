@@ -45,7 +45,8 @@
     },
     "r8": {
       "i0": "Seating board upgrade: each court now has an \"End game\" button and the header a \"💰 Settle up\" popup — seating, rotating and collecting fees all on one screen",
-      "i1": "New \"📢 Announcement\": write a message for everyone in the session (e.g. dinner afterwards) — players see it instantly"
+      "i1": "New \"📢 Announcement\": write a message for everyone in the session (e.g. dinner afterwards) — players see it instantly",
+      "i2": "Courts can now be 🔒 locked/unlocked right on the seating board (locked = players can't self-serve join/queue; board seating still works)"
     }
   }
 }

@@ -31,6 +31,9 @@
     "settleHint": "タップで受領/未受領を切替",
     "settlePaid": "受領済み",
     "settleUnpaid": "未受領",
-    "settleNoMatch": "該当する人がいません"
+    "settleNoMatch": "該当する人がいません",
+    "lock": "コートをロック",
+    "unlock": "ロック解除",
+    "lockedChip": "ロック中"
   }
 }

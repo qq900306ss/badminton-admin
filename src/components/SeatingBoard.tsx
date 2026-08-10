@@ -88,9 +88,12 @@ interface CourtProps {
   onEnd: () => void
   onUndoEnd: () => void
   endBusy: boolean
+  // 鎖定/解鎖(擋玩家端自助上場/排隊;排點板代排不受影響)
+  onToggleLock: () => void
+  lockBusy: boolean
 }
 
-function BoardCourt({ court, onEmptySlot, onQueueZone, onFilledPlayer, onQueuedPlayer, onEnd, onUndoEnd, endBusy }: CourtProps) {
+function BoardCourt({ court, onEmptySlot, onQueueZone, onFilledPlayer, onQueuedPlayer, onEnd, onUndoEnd, endBusy, onToggleLock, lockBusy }: CourtProps) {
   const { t } = useTranslation()
   const slots = court.playing
   const filled = slots.filter((s) => s.player_id).length
@@ -99,9 +102,21 @@ function BoardCourt({ court, onEmptySlot, onQueueZone, onFilledPlayer, onQueuedP
   const queueRoom = court.queue.length < 4
 
   return (
-    <div className="card !p-3">
-      <div className="flex items-center justify-between mb-2">
-        <span className="font-extrabold text-gray-700 text-sm">{court.name?.trim() ? court.name : t('SeatingBoard.courtN', { n: court.court_num })}</span>
+    <div className={`card !p-3 ${court.locked ? 'ring-2 ring-rose-200' : ''}`}>
+      <div className="flex items-center justify-between mb-2 gap-1">
+        <span className="font-extrabold text-gray-700 text-sm truncate">{court.name?.trim() ? court.name : t('SeatingBoard.courtN', { n: court.court_num })}</span>
+        <div className="flex items-center gap-1.5 shrink-0">
+        <button
+          onClick={onToggleLock}
+          disabled={lockBusy}
+          aria-label={court.locked ? t('SeatingBoard.unlock') : t('SeatingBoard.lock')}
+          title={court.locked ? t('SeatingBoard.unlock') : t('SeatingBoard.lock')}
+          className={`text-[11px] font-bold px-2 py-0.5 rounded-full active:scale-90 transition-transform disabled:opacity-40 ${
+            court.locked ? 'bg-rose-100 text-rose-600' : 'bg-gray-100 text-gray-400'
+          }`}
+        >
+          {court.locked ? `🔒 ${t('SeatingBoard.lockedChip')}` : '🔓'}
+        </button>
         {filled === 0 ? (
           <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">{t('SeatingBoard.empty')}</span>
         ) : full ? (
@@ -109,6 +124,7 @@ function BoardCourt({ court, onEmptySlot, onQueueZone, onFilledPlayer, onQueuedP
         ) : (
           <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-brand-yellow text-amber-700">{t('SeatingBoard.gathering', { filled })}</span>
         )}
+        </div>
       </div>
 
       {/* court */}
@@ -290,7 +306,7 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
   const { data: session } = useSessionView(sessionId)
   const { data: players } = useSessionPlayers(sessionId)
   const { seatPlaying, seatQueue, unseatPlaying, unseatQueue } = useSeatActions(sessionId)
-  const { endCourt, undoEnd, setPaid } = useManageActions(sessionId)
+  const { endCourt, undoEnd, setPaid, lockCourt } = useManageActions(sessionId)
 
   const [orient, setOrient] = useState<'landscape' | 'portrait'>('landscape')
   // a slot/queue waiting for a person to be picked from the popup.
@@ -413,6 +429,8 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
                   onEnd={() => endGame(court)}
                   onUndoEnd={() => undoEnd.mutate(court.court_id, { onError: onErr })}
                   endBusy={endBusy}
+                  onToggleLock={() => lockCourt.mutate({ courtId: court.court_id, locked: !court.locked }, { onError: onErr })}
+                  lockBusy={lockCourt.isPending}
                 />
               </div>
             ))}
