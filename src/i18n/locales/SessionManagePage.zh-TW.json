@@ -1,6 +1,12 @@
 {
   "SessionManagePage": {
     "confirmCloseMessage": "確定要結束這次開團嗎?",
+    "confirmEndCourt": "結束「{{name}}」這場嗎?場上的人會下場,排隊的遞補上場。",
+    "confirmEndCourtBtn": "結束這場",
+    "confirmUndoEnd": "復原剛剛的結束嗎?剛下場的那組會回到場上。",
+    "confirmUndoEndBtn": "復原",
+    "confirmAddPlaying": "讓「{{player}}」上「{{court}}」場上?",
+    "confirmAddQueue": "把「{{player}}」排進「{{court}}」的排隊?",
     "endSession": "結束開團",
     "familyOf": "{{name}} 的家人",
     "someone": "某人",

@@ -4,7 +4,7 @@
     "courtN": "場地 {{n}}",
     "empty": "空場",
     "inProgress": "進行中",
-    "mins": " · {{mins}} 分",
+    "mins": " · {{mins}} 分鐘",
     "gathering": "湊人中 {{filled}}/4",
     "queueAdd": "排隊 +",
     "searchName": "🔍 搜尋名字",
@@ -34,6 +34,14 @@
     "lock": "鎖定場地",
     "unlock": "解鎖場地",
     "lockedChip": "已鎖定",
-    "queueLabel": "排隊 {{n}}/4"
+    "queueLabel": "排隊 {{n}}/4",
+    "confirmEnd": "結束「{{name}}」這場嗎?場上的人會下場,排隊的遞補上場。",
+    "confirmEndBtn": "結束這場",
+    "confirmUndo": "復原剛剛的結束嗎?剛下場的那組會回到場上。",
+    "confirmUndoBtn": "復原",
+    "confirmSeat": "讓「{{player}}」上「{{court}}」場上?",
+    "confirmSeatBtn": "上場",
+    "confirmQueue": "把「{{player}}」排進「{{court}}」的排隊?",
+    "confirmQueueBtn": "排隊"
   }
 }

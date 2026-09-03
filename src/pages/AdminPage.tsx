@@ -160,7 +160,13 @@ export function AdminPage() {
   return (
     <div className="min-h-screen bg-brand-bg pb-10">
       <header className="bg-white shadow-sm px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-        <button onClick={() => nav('/')} className="text-sm text-gray-400">{t('AdminPage.back')}</button>
+        {/* 一律回「上一頁」(瀏覽歷史),不是硬跳前台;沒有上一頁才 fallback 回前台 */}
+        <button
+          onClick={() => ((window.history.state?.idx ?? 0) > 0 ? nav(-1) : nav('/'))}
+          className="text-sm text-gray-400"
+        >
+          {t('AdminPage.back')}
+        </button>
         <span className="font-extrabold text-gray-800">{t('AdminPage.superAdmin')}</span>
         <span className="w-12" />
       </header>

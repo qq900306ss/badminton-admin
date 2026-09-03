@@ -19,6 +19,8 @@
     "updateHint": "Clear cache and update to the latest version",
     "updateToLatest": "🔄 Update to latest",
     "ongoingSessions": "Ongoing sessions 🏸",
+    "upcomingSessions": "Not started yet ⏰",
+    "memberCounts": "👥 {{total}} joined · {{played}} played",
     "untitled": "Untitled",
     "playingCourts": "🏸 Playing {{n}}",
     "pendingSignups": "🙋 Signups {{n}}",

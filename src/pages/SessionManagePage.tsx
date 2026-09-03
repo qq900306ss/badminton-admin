@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { QRCodeSVG } from 'qrcode.react'
 import { sessionApi } from '../api/client'
-import type { SessionPlayer, SessionView } from '../api/client'
+import type { CourtView, SessionPlayer, SessionView } from '../api/client'
 import { useSessionView, useSessionPlayers, useManageActions } from '../hooks/useApi'
 import { ManageCourtCard } from '../components/ManageCourtCard'
 import { StatsPanel } from '../components/StatsPanel'
@@ -217,6 +217,9 @@ export function SessionManagePage() {
   }
 
   const targetPlayer = (players ?? []).find((p) => p.player_id === levelTarget)
+  // 場地顯示名稱(有取名用名字,否則「場地 N」)— 確認視窗文案用
+  const courtTitle = (court: CourtView) =>
+    court.name?.trim() ? court.name : t('ManageCourtCard.courtN', { n: court.court_num })
   // owner_id → display name, so family members can show "(○○ 的家人)"
   const ownerLabel = (p: SessionPlayer) =>
     p.owner_id ? t('SessionManagePage.familyOf', { name: nameById.get(p.owner_id) ?? t('SessionManagePage.someone') }) : ''
@@ -661,7 +664,12 @@ export function SessionManagePage() {
             <div key={court.court_id} className="space-y-2">
               <ManageCourtCard
                 court={court}
-                onEnd={() => {
+                onEnd={async () => {
+                  // 防呆:先確認再結束,避免誤觸把整組換下場
+                  if (!(await confirm({
+                    message: t('SessionManagePage.confirmEndCourt', { name: courtTitle(court) }),
+                    confirmText: t('SessionManagePage.confirmEndCourtBtn'),
+                  }))) return
                   // 按下當下 queue 就是下一組名單,先抓好;等伺服器確認結束成功再播報
                   const snap = { name: court.name, court_num: court.court_num }
                   const names = court.queue.map((q) => q.display_name)
@@ -669,7 +677,13 @@ export function SessionManagePage() {
                     onSuccess: () => announceCourtEnd(court.court_id, snap, names),
                   })
                 }}
-                onUndoEnd={() => undoEnd.mutate(court.court_id)}
+                onUndoEnd={async () => {
+                  if (!(await confirm({
+                    message: t('SessionManagePage.confirmUndoEnd'),
+                    confirmText: t('SessionManagePage.confirmUndoEndBtn'),
+                  }))) return
+                  undoEnd.mutate(court.court_id)
+                }}
                 onKick={(playerId) => kick.mutate({ courtId: court.court_id, playerId })}
                 onRename={(name) => renameCourt.mutate({ courtId: court.court_id, name })}
                 onToggleLock={() => lockCourt.mutate({ courtId: court.court_id, locked: !court.locked })}
@@ -763,14 +777,27 @@ export function SessionManagePage() {
                             <div className="flex gap-1">
                             <button
                               disabled={playingFull}
-                              onClick={() => { addPlaying.mutate({ courtId: court.court_id, playerId: p.player_id }); setAddTarget(null); setAddFilter('') }}
+                              onClick={async () => {
+                                // 防呆:確認排誰上哪個場地,避免點錯人
+                                if (!(await confirm({
+                                  message: t('SessionManagePage.confirmAddPlaying', { player: p.display_name, court: courtTitle(court) }),
+                                  confirmText: t('SessionManagePage.goOnCourt'),
+                                }))) return
+                                addPlaying.mutate({ courtId: court.court_id, playerId: p.player_id }); setAddTarget(null); setAddFilter('')
+                              }}
                               className="px-2.5 py-1 rounded-full text-xs font-bold bg-brand-mint text-emerald-700 disabled:opacity-30"
                             >
                               {t('SessionManagePage.goOnCourt')}
                             </button>
                             <button
                               disabled={queueFull}
-                              onClick={() => { addQueue.mutate({ courtId: court.court_id, playerId: p.player_id }); setAddTarget(null); setAddFilter('') }}
+                              onClick={async () => {
+                                if (!(await confirm({
+                                  message: t('SessionManagePage.confirmAddQueue', { player: p.display_name, court: courtTitle(court) }),
+                                  confirmText: t('SessionManagePage.queue'),
+                                }))) return
+                                addQueue.mutate({ courtId: court.court_id, playerId: p.player_id }); setAddTarget(null); setAddFilter('')
+                              }}
                               className="px-2.5 py-1 rounded-full text-xs font-bold bg-brand-yellow text-amber-700 disabled:opacity-30"
                             >
                               {t('SessionManagePage.queue')}

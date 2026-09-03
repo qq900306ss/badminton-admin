@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { CourtView, PlayerSlot, SessionPlayer } from '../api/client'
 import { useSessionView, useSessionPlayers, useSeatActions, useManageActions } from '../hooks/useApi'
+import { useConfirm } from './Confirm'
 import { tierOf } from '../lib/levels'
 import { isPhotoUrl } from '../lib/avatar'
 import { announceCourtEnd } from '../lib/announcer'
@@ -326,6 +327,7 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
   const { data: players } = useSessionPlayers(sessionId)
   const { seatPlaying, seatQueue, unseatPlaying, unseatQueue } = useSeatActions(sessionId)
   const { endCourt, undoEnd, setPaid, lockCourt } = useManageActions(sessionId)
+  const confirm = useConfirm()
 
   const [orient, setOrient] = useState<'landscape' | 'portrait'>('landscape')
   // a slot/queue waiting for a person to be picked from the popup.
@@ -360,10 +362,17 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
   const busy =
     seatPlaying.isPending || seatQueue.isPending || unseatPlaying.isPending || unseatQueue.isPending
 
-  function pick(playerId: string) {
+  async function pick(playerId: string) {
     if (!picker || busy) return
-    if (picker.position != null) {
-      seatPlaying.mutate({ courtId: picker.courtId, playerId, position: picker.position }, { onError: onErr })
+    // 防呆:確認排誰上哪個場地/排隊,避免名單裡點錯人
+    const player = (players ?? []).find((p) => p.player_id === playerId)?.display_name ?? ''
+    const toPlaying = picker.position != null
+    if (!(await confirm({
+      message: t(toPlaying ? 'SeatingBoard.confirmSeat' : 'SeatingBoard.confirmQueue', { player, court: pickerCourtName }),
+      confirmText: t(toPlaying ? 'SeatingBoard.confirmSeatBtn' : 'SeatingBoard.confirmQueueBtn'),
+    }))) return
+    if (toPlaying) {
+      seatPlaying.mutate({ courtId: picker.courtId, playerId, position: picker.position! }, { onError: onErr })
     } else {
       seatQueue.mutate({ courtId: picker.courtId, playerId }, { onError: onErr })
     }
@@ -379,8 +388,15 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
     unseatQueue.mutate({ courtId, playerId }, { onError: onErr })
   }
   const endBusy = endCourt.isPending || undoEnd.isPending
-  function endGame(court: CourtView) {
+  const courtLabel = (court: CourtView) =>
+    court.name?.trim() ? court.name : t('SeatingBoard.courtN', { n: court.court_num })
+  async function endGame(court: CourtView) {
     if (endBusy) return
+    // 防呆:先確認再結束,避免誤觸把整組換下場
+    if (!(await confirm({
+      message: t('SeatingBoard.confirmEnd', { name: courtLabel(court) }),
+      confirmText: t('SeatingBoard.confirmEndBtn'),
+    }))) return
     // 按下當下 queue 就是下一組名單,先抓好;伺服器確認成功才播報(同管理頁)
     const snap = { name: court.name, court_num: court.court_num }
     const names = court.queue.map((p) => p.display_name)
@@ -388,6 +404,13 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
       onSuccess: () => announceCourtEnd(court.court_id, snap, names),
       onError: onErr,
     })
+  }
+  async function undoEndGame(courtId: string) {
+    if (!(await confirm({
+      message: t('SeatingBoard.confirmUndo'),
+      confirmText: t('SeatingBoard.confirmUndoBtn'),
+    }))) return
+    undoEnd.mutate(courtId, { onError: onErr })
   }
 
   const pickerCourt = picker ? courts.find((c) => c.court_id === picker.courtId) : null
@@ -446,7 +469,7 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
                   onFilledPlayer={(pid, removable) => tapFilledPlayer(court.court_id, pid, removable)}
                   onQueuedPlayer={(pid) => tapQueuedPlayer(court.court_id, pid)}
                   onEnd={() => endGame(court)}
-                  onUndoEnd={() => undoEnd.mutate(court.court_id, { onError: onErr })}
+                  onUndoEnd={() => undoEndGame(court.court_id)}
                   endBusy={endBusy}
                   onToggleLock={() => lockCourt.mutate({ courtId: court.court_id, locked: !court.locked }, { onError: onErr })}
                   lockBusy={lockCourt.isPending}

@@ -19,6 +19,8 @@
     "updateHint": "清除快取、更新到最新版",
     "updateToLatest": "🔄 更新到最新版",
     "ongoingSessions": "進行中的開團 🏸",
+    "upcomingSessions": "尚未開始的開團 ⏰",
+    "memberCounts": "👥 {{total}} 人 · {{played}} 人打過",
     "untitled": "未命名",
     "playingCourts": "🏸 開打中 {{n}}",
     "pendingSignups": "🙋 報名 {{n}}",

@@ -19,6 +19,8 @@
     "updateHint": "キャッシュを消去して最新版に更新",
     "updateToLatest": "🔄 最新版に更新",
     "ongoingSessions": "進行中の募集 🏸",
+    "upcomingSessions": "開始前の募集 ⏰",
+    "memberCounts": "👥 {{total}}人 · {{played}}人プレー済み",
     "untitled": "無題",
     "playingCourts": "🏸 プレー中 {{n}}",
     "pendingSignups": "🙋 申し込み {{n}}",

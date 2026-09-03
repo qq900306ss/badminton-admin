@@ -34,6 +34,14 @@
     "lock": "Lock court",
     "unlock": "Unlock court",
     "lockedChip": "Locked",
-    "queueLabel": "Queue {{n}}/4"
+    "queueLabel": "Queue {{n}}/4",
+    "confirmEnd": "End this game on {{name}}? Players on court come off and the queue rotates in.",
+    "confirmEndBtn": "End game",
+    "confirmUndo": "Undo the last end? The group that just came off goes back on court.",
+    "confirmUndoBtn": "Undo",
+    "confirmSeat": "Put {{player}} on {{court}}?",
+    "confirmSeatBtn": "Seat",
+    "confirmQueue": "Add {{player}} to the queue for {{court}}?",
+    "confirmQueueBtn": "Queue"
   }
 }

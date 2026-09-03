@@ -1,6 +1,12 @@
 {
   "SessionManagePage": {
     "confirmCloseMessage": "End this session for good?",
+    "confirmEndCourt": "End this game on {{name}}? Players on court come off and the queue rotates in.",
+    "confirmEndCourtBtn": "End game",
+    "confirmUndoEnd": "Undo the last end? The group that just came off goes back on court.",
+    "confirmUndoEndBtn": "Undo",
+    "confirmAddPlaying": "Put {{player}} on {{court}}?",
+    "confirmAddQueue": "Add {{player}} to the queue for {{court}}?",
     "endSession": "End session",
     "familyOf": "{{name}}'s family",
     "someone": "someone",

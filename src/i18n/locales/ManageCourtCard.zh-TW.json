@@ -4,7 +4,7 @@
     "save": "存",
     "empty": "空場",
     "inProgress": "進行中",
-    "minsElapsed": " · 已 {{mins}} 分",
+    "minsElapsed": " · 已 {{mins}} 分鐘",
     "gathering": "湊人中 {{filled}}/4",
     "playing": "場上 ({{filled}}/4)",
     "none": "無",

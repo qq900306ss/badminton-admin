@@ -1,5 +1,11 @@
 {
   "changelog": {
+    "r9": {
+      "i0": "🛡 Confirmation guards: \"End game\", \"Undo\", and seating people on court / into the queue (seating board & manual add) now show a confirm dialog first — no more accidental taps",
+      "i1": "The home session list now splits \"Ongoing\" vs \"Not started yet\": sessions whose start time hasn't arrived are no longer shown as ongoing, and move over automatically when it's time",
+      "i2": "Session cards now show member counts: everyone joined, plus how many have actually played a game",
+      "i3": "The elapsed-time chip now reads \"X min\" with a proper unit"
+    },
     "r7": {
       "i0": "The drop-in player front-end now has a floating \"🏸 Host\" invite button + speech bubble (\"Want to host your own games?\") in the bottom-right: one tap opens the host console in a new tab so players can start their own group too — it helps spread this tool and doesn't affect any existing flow"
     },

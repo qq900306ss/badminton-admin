@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { FeedbackButton } from '../components/FeedbackButton'
-import { sessionApi, type Org } from '../api/client'
+import { sessionApi, type Org, type SessionSummary } from '../api/client'
 import { InstallButton } from '../components/InstallButton'
 import { TimeSelect } from '../components/TimeSelect'
 import { useConfirm } from '../components/Confirm'
@@ -69,6 +69,16 @@ export function DashboardPage() {
   const openSessions = (mySessions ?? []).filter((s) => s.status === 'open')
   const MAX_OPEN = 7 // 與後端 maxOpenPerOrg 一致;同時開團上限,擋濫開
   const atOpenLimit = openSessions.length >= MAX_OPEN
+  // 現在時刻放 state(render 保持純),每分鐘更新 → 「尚未開始 → 進行中」時間到自動換區
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000)
+    return () => clearInterval(id)
+  }, [])
+  // 「進行中」= 真的在時段內(開打時間已到);還沒到開打時間的列「尚未開始」
+  const notStarted = (s: SessionSummary) => !!s.start_at && new Date(s.start_at).getTime() > now
+  const ongoingSessions = openSessions.filter((s) => !notStarted(s))
+  const upcomingSessions = openSessions.filter(notStarted)
   const pastSessions = (mySessions ?? [])
     .filter((s) => s.status !== 'open')
     .sort((a, b) => (b.opened_at || '').localeCompare(a.opened_at || ''))
@@ -227,40 +237,58 @@ export function DashboardPage() {
       )}
 
       <div className="max-w-md mx-auto p-4 space-y-4">
-        {/* my ongoing sessions */}
-        {openSessions.length > 0 && (
-          <div className="card space-y-2">
-            <span className="font-bold text-gray-700">{t('DashboardPage.ongoingSessions')}</span>
-            {openSessions.map((s) => (
-              <button
-                key={s.session_id}
-                onClick={() => nav(`/session/${s.session_id}`)}
-                className="w-full text-left px-4 py-3 rounded-2xl bg-brand-mint/40
-                  hover:bg-brand-mint transition-colors flex items-center justify-between"
-              >
-                <div className="min-w-0">
-                  <p className="font-bold text-gray-700 flex items-center gap-2 flex-wrap">
-                    {s.title || t('DashboardPage.untitled')}
-                    {!!s.playing_courts && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-brand-pink/15 text-brand-pink font-semibold">
-                        {t('DashboardPage.playingCourts', { n: s.playing_courts })}
-                      </span>
-                    )}
-                    {!!s.pending_signups && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-semibold">
-                        {t('DashboardPage.pendingSignups', { n: s.pending_signups })}
-                      </span>
-                    )}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {fmtRange(s)} · {t('DashboardPage.courtsCount', { n: s.num_courts })}
-                  </p>
+        {/* my open sessions — 真的在時段內的列「進行中」,還沒到開打時間的列「尚未開始」 */}
+        {(() => {
+          const sessionRow = (s: SessionSummary, upcoming: boolean) => (
+            <button
+              key={s.session_id}
+              onClick={() => nav(`/session/${s.session_id}`)}
+              className={`w-full text-left px-4 py-3 rounded-2xl transition-colors flex items-center justify-between ${
+                upcoming ? 'bg-brand-lavender/40 hover:bg-brand-lavender' : 'bg-brand-mint/40 hover:bg-brand-mint'
+              }`}
+            >
+              <div className="min-w-0">
+                <p className="font-bold text-gray-700 flex items-center gap-2 flex-wrap">
+                  {s.title || t('DashboardPage.untitled')}
+                  {!!s.playing_courts && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-brand-pink/15 text-brand-pink font-semibold">
+                      {t('DashboardPage.playingCourts', { n: s.playing_courts })}
+                    </span>
+                  )}
+                  {!!s.pending_signups && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-semibold">
+                      {t('DashboardPage.pendingSignups', { n: s.pending_signups })}
+                    </span>
+                  )}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {fmtRange(s)} · {t('DashboardPage.courtsCount', { n: s.num_courts })}
+                </p>
+                {/* 團內人數:全部成員 vs 實際上場打過的 */}
+                <p className="text-xs text-gray-500">
+                  {t('DashboardPage.memberCounts', { total: s.joined_count ?? 0, played: s.played_count ?? 0 })}
+                </p>
+              </div>
+              <span className="text-brand-pink font-semibold text-sm shrink-0">{t('DashboardPage.manage')}</span>
+            </button>
+          )
+          return (
+            <>
+              {ongoingSessions.length > 0 && (
+                <div className="card space-y-2">
+                  <span className="font-bold text-gray-700">{t('DashboardPage.ongoingSessions')}</span>
+                  {ongoingSessions.map((s) => sessionRow(s, false))}
                 </div>
-                <span className="text-brand-pink font-semibold text-sm shrink-0">{t('DashboardPage.manage')}</span>
-              </button>
-            ))}
-          </div>
-        )}
+              )}
+              {upcomingSessions.length > 0 && (
+                <div className="card space-y-2">
+                  <span className="font-bold text-gray-700">{t('DashboardPage.upcomingSessions')}</span>
+                  {upcomingSessions.map((s) => sessionRow(s, true))}
+                </div>
+              )}
+            </>
+          )
+        })()}
 
         {/* past sessions history */}
         {pastSessions.length > 0 && (

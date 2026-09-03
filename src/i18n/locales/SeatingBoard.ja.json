@@ -34,6 +34,14 @@
     "lock": "コートをロック",
     "unlock": "ロック解除",
     "lockedChip": "ロック中",
-    "queueLabel": "順番待ち {{n}}/4"
+    "queueLabel": "順番待ち {{n}}/4",
+    "confirmEnd": "「{{name}}」のこのゲームを終了しますか?コート上の人は下がり、順番待ちの人が入ります。",
+    "confirmEndBtn": "終了する",
+    "confirmUndo": "さっきの終了を元に戻しますか?下がったグループがコートに戻ります。",
+    "confirmUndoBtn": "元に戻す",
+    "confirmSeat": "「{{player}}」を「{{court}}」に入れますか?",
+    "confirmSeatBtn": "入れる",
+    "confirmQueue": "「{{player}}」を「{{court}}」の順番待ちに追加しますか?",
+    "confirmQueueBtn": "追加"
   }
 }

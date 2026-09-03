@@ -1,6 +1,12 @@
 {
   "SessionManagePage": {
     "confirmCloseMessage": "このセッションを終了しますか?",
+    "confirmEndCourt": "「{{name}}」のこのゲームを終了しますか?コート上の人は下がり、順番待ちの人が入ります。",
+    "confirmEndCourtBtn": "終了する",
+    "confirmUndoEnd": "さっきの終了を元に戻しますか?下がったグループがコートに戻ります。",
+    "confirmUndoEndBtn": "元に戻す",
+    "confirmAddPlaying": "「{{player}}」を「{{court}}」に入れますか?",
+    "confirmAddQueue": "「{{player}}」を「{{court}}」の順番待ちに追加しますか?",
     "endSession": "セッション終了",
     "familyOf": "{{name}}さんの家族",
     "someone": "誰か",
