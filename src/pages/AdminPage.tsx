@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -36,7 +36,14 @@ export function AdminPage() {
 
   const [tab, setTab] = useState<Tab>('orgs')
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null) // filter sessions by leader
-  const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'closed'>('all')
+  // 狀態三分:進行中(open 且開打時間已到)/ 尚未開始(open 但還沒到)/ 已結束
+  const [statusFilter, setStatusFilter] = useState<'all' | 'ongoing' | 'upcoming' | 'closed'>('all')
+  // 現在時刻放 state(render 保持純),每分鐘更新 → 時間到自動變進行中
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000)
+    return () => clearInterval(id)
+  }, [])
   const [citySel, setCitySel] = useState('')
   const [distSel, setDistSel] = useState('')
   const [sessionSearch, setSessionSearch] = useState('')
@@ -73,7 +80,17 @@ export function AdminPage() {
   const sessions = (allSessions ?? [])
     .slice()
     .sort((a, b) => (b.opened_at || '').localeCompare(a.opened_at || ''))
-  const openCount = sessions.filter((s) => s.status === 'open').length
+  // 尚未開始 = open 但開打時間還沒到;進行中 = open 且已到時段
+  const notStarted = (s: SessionSummary) =>
+    s.status === 'open' && !!s.start_at && new Date(s.start_at).getTime() > now
+  const sessionState = (s: SessionSummary): 'ongoing' | 'upcoming' | 'closed' =>
+    s.status !== 'open' ? 'closed' : notStarted(s) ? 'upcoming' : 'ongoing'
+  const openCount = sessions.filter((s) => sessionState(s) === 'ongoing').length
+  // 每個團主開過幾團(團主管理列表顯示用)
+  const sessionCountByOrg = sessions.reduce<Record<string, number>>((acc, s) => {
+    acc[s.org_id] = (acc[s.org_id] ?? 0) + 1
+    return acc
+  }, {})
   // 縣市 / 區 選項從實際開團資料推導(只列有開團的地區)
   const cityOpts = [...new Set(sessions.map((s) => s.city).filter(Boolean))] as string[]
   const distOpts = [
@@ -81,7 +98,7 @@ export function AdminPage() {
   ] as string[]
   const shownSessions = sessions
     .filter((s) => (selectedOrg ? s.org_id === selectedOrg : true))
-    .filter((s) => (statusFilter === 'all' ? true : s.status === statusFilter))
+    .filter((s) => (statusFilter === 'all' ? true : sessionState(s) === statusFilter))
     .filter((s) => (citySel ? s.city === citySel : true))
     .filter((s) => (distSel ? s.district === distSel : true))
     .filter((s) => {
@@ -102,7 +119,7 @@ export function AdminPage() {
     // 依加入時間排序,最新的在最上面
     .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''))
   // jump from a stat card straight to the relevant view
-  const goSessions = (status: 'all' | 'open') => {
+  const goSessions = (status: 'all' | 'ongoing') => {
     setSelectedOrg(null)
     setStatusFilter(status)
     setSessionSearch('')
@@ -192,7 +209,7 @@ export function AdminPage() {
           <div className="grid grid-cols-3 gap-3">
             {[
               { label: t('AdminPage.statHosts'), value: leaderCount, emoji: '🧑‍🏫', onClick: () => setTab('orgs') },
-              { label: t('AdminPage.statActive'), value: openCount, emoji: '🏸', onClick: () => goSessions('open') },
+              { label: t('AdminPage.statActive'), value: openCount, emoji: '🏸', onClick: () => goSessions('ongoing') },
               { label: t('AdminPage.statTotalSessions'), value: sessions.length, emoji: '📋', onClick: () => goSessions('all') },
             ].map((stat) => (
               <button
@@ -254,7 +271,13 @@ export function AdminPage() {
                           <span className="ml-2 text-xs bg-red-100 text-red-500 px-2 py-0.5 rounded-full">{t('AdminPage.disabledBadge')}</span>
                         )}
                       </p>
-                      <p className="text-xs text-gray-400 truncate">{o.google_email}</p>
+                      <p className="text-xs text-gray-400 truncate">
+                        {o.google_email}
+                        {/* 這位團主開過幾團(從已載入的所有開團算,不另打 API) */}
+                        {(sessionCountByOrg[o.org_id] ?? 0) > 0 && (
+                          <span> · {t('AdminPage.orgSessionCount', { n: sessionCountByOrg[o.org_id] })}</span>
+                        )}
+                      </p>
                     </button>
                     {o.role !== 'superadmin' && (
                       <div className="flex items-center gap-2 shrink-0">
@@ -317,11 +340,12 @@ export function AdminPage() {
                 </select>
                 <select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as 'all' | 'open' | 'closed')}
+                  onChange={(e) => setStatusFilter(e.target.value as 'all' | 'ongoing' | 'upcoming' | 'closed')}
                   className="border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm bg-white focus:outline-none focus:border-brand-pink"
                 >
                   <option value="all">{t('AdminPage.allStatuses')}</option>
-                  <option value="open">{t('AdminPage.statusActive')}</option>
+                  <option value="ongoing">{t('AdminPage.statusActive')}</option>
+                  <option value="upcoming">{t('AdminPage.statusNotStarted')}</option>
                   <option value="closed">{t('AdminPage.statusEnded')}</option>
                 </select>
                 <select
@@ -358,13 +382,26 @@ export function AdminPage() {
                   <div className="min-w-0">
                     <p className="font-semibold text-gray-700 truncate">
                       {s.title || t('AdminPage.untitled')}
-                      <span
-                        className={`ml-2 text-xs px-2 py-0.5 rounded-full ${
-                          s.status === 'open' ? 'bg-brand-mint text-emerald-700' : 'bg-gray-100 text-gray-400'
-                        }`}
-                      >
-                        {s.status === 'open' ? t('AdminPage.statusActive') : t('AdminPage.statusEnded')}
-                      </span>
+                      {(() => {
+                        const state = sessionState(s)
+                        return (
+                          <span
+                            className={`ml-2 text-xs px-2 py-0.5 rounded-full ${
+                              state === 'ongoing'
+                                ? 'bg-brand-mint text-emerald-700'
+                                : state === 'upcoming'
+                                  ? 'bg-brand-lavender/60 text-violet-600'
+                                  : 'bg-gray-100 text-gray-400'
+                            }`}
+                          >
+                            {state === 'ongoing'
+                              ? t('AdminPage.statusActive')
+                              : state === 'upcoming'
+                                ? t('AdminPage.statusNotStarted')
+                                : t('AdminPage.statusEnded')}
+                          </span>
+                        )
+                      })()}
                       {!!s.playing_courts && (
                         <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-brand-pink/15 text-brand-pink font-semibold">
                           {t('AdminPage.playingCourts', { count: s.playing_courts })}
@@ -374,6 +411,10 @@ export function AdminPage() {
                     <p className="text-xs text-gray-400 truncate">
                       {orgNameOf(s.org_id)}
                       {fmtRange(s) && <span> · {fmtRange(s)}</span>} · {t('AdminPage.courtsCount', { count: s.num_courts })}
+                      {/* open 的團才會帶人數(全部成員/實際打過) */}
+                      {s.status === 'open' && (
+                        <span> · {t('AdminPage.memberCounts', { total: s.joined_count ?? 0, played: s.played_count ?? 0 })}</span>
+                      )}
                     </p>
                   </div>
                   <span className="text-brand-pink text-sm font-semibold shrink-0">{t('AdminPage.view')}</span>
