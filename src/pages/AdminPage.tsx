@@ -411,9 +411,9 @@ export function AdminPage() {
                     <p className="text-xs text-gray-400 truncate">
                       {orgNameOf(s.org_id)}
                       {fmtRange(s) && <span> · {fmtRange(s)}</span>} · {t('AdminPage.courtsCount', { count: s.num_courts })}
-                      {/* open 的團才會帶人數(全部成員/實際打過) */}
-                      {s.status === 'open' && (
-                        <span> · {t('AdminPage.memberCounts', { total: s.joined_count ?? 0, played: s.played_count ?? 0 })}</span>
+                      {/* 人數(全部成員/實際打過)— 已結束的名單保留 ~90 天,期限內也統計得到 */}
+                      {s.joined_count !== undefined && (
+                        <span> · {t('AdminPage.memberCounts', { total: s.joined_count, played: s.played_count ?? 0 })}</span>
                       )}
                     </p>
                   </div>

@@ -306,7 +306,15 @@ export function DashboardPage() {
                     onClick={() => nav(`/session/${s.session_id}`)}
                     className="flex-1 text-left flex items-center justify-between gap-2 min-w-0"
                   >
-                    <span className="text-gray-600 truncate">{s.title || t('DashboardPage.untitled')}</span>
+                    <span className="min-w-0">
+                      <span className="block text-gray-600 truncate">{s.title || t('DashboardPage.untitled')}</span>
+                      {/* 已結束的也統計(名單保留 ~90 天,期限內有資料) */}
+                      {s.joined_count !== undefined && (
+                        <span className="block text-xs text-gray-400">
+                          {t('DashboardPage.memberCounts', { total: s.joined_count, played: s.played_count ?? 0 })}
+                        </span>
+                      )}
+                    </span>
                     <span className="text-xs text-gray-400 shrink-0">{fmtRange(s)}</span>
                   </button>
                   <button

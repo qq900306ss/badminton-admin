@@ -8,6 +8,7 @@
 - 「進行中 · 已 X 分」補上單位 → 「X 分鐘」(zh-TW 文案)
 - 超管頁「← 返回」改為「← 上一頁」:走瀏覽歷史返回,沒有上一頁才 fallback 回前台
 - 後端配合:SessionSummary 新增 played_count;attachMemberCounts 對所有 open session 計算人數(原本只算開放報名的)
+- 已結束的團也統計人數:團主歷史紀錄與超管「所有開團」列表都會顯示(結團後名單保留 ~90 天,期限內有資料;後端 attachMemberCounts 改為 allSessions 模式 + semaphore 16 限流)
 
 ## 2026-07-18 — 玩家端新增「開團」宣傳入口(成長)
 
