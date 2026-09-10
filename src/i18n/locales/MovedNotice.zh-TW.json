@@ -3,8 +3,10 @@
     "title": "網址搬家了!",
     "body": "開團後台換了新網址,你桌面上這顆是舊的,之後會停止更新。請到新網址重新登入並重新加到主畫面,團跟資料都在帳號裡不會不見。",
     "open": "👑 前往新網址",
-    "copy": "複製新網址",
+    "androidButton": "👑 用 Chrome 開新網址",
+    "copy": "📋 複製新網址",
     "copied": "已複製",
+    "iosCopyHint": "iPhone 在這裡裝不了:複製後開 Safari 貼上 → 登入 → 分享 → 加入主畫面。",
     "hint": "重新安裝:Android 在 Chrome 選單「安裝應用程式」;iPhone 用 Safari 開 → 分享 → 加入主畫面。",
     "later": "稍後再說"
   }

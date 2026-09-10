@@ -21,6 +21,13 @@ function isStandalone(): boolean {
   )
 }
 
+// 從舊 PWA 直接 <a> 開新網址會開在舊 App 的視窗裡(還是 standalone、裝不了);
+// Android 用 Chrome intent 把真正的 Chrome 叫出來,開不了就 fallback 回原網址
+function androidChromeIntentUrl(url: string): string {
+  const u = new URL(url)
+  return `intent://${u.host}${u.pathname}${u.search}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(url)};end`
+}
+
 // storage 被瀏覽器禁掉(隱私模式/設定)會直接 throw,這裡不能讓它炸到 ErrorBoundary
 const LATER_KEY = 'moved_notice_later'
 function readLater(): boolean {
@@ -47,6 +54,9 @@ export function MovedNotice() {
   const [copied, setCopied] = useState(false)
   const target = `https://${CANONICAL_HOST}${window.location.pathname}${window.location.search}${window.location.hash}`
   const newUrl = `https://${CANONICAL_HOST}/`
+  const ua = navigator.userAgent || ''
+  const isAndroid = /android/i.test(ua)
+  const isIos = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
 
   useEffect(() => {
     if (legacy && !standalone) window.location.replace(target)
@@ -72,12 +82,26 @@ export function MovedNotice() {
         <p className="font-extrabold text-gray-800 text-lg">{t('MovedNotice.title')}</p>
         <p className="text-sm text-gray-600">{t('MovedNotice.body')}</p>
         <div className="bg-gray-50 rounded-xl px-3 py-2 text-xs text-gray-500 break-all select-all">{newUrl}</div>
-        <a href={newUrl} target="_blank" rel="noopener noreferrer" className="btn-primary block text-center">
-          {t('MovedNotice.open')}
-        </a>
-        <button onClick={copy} className="btn-secondary w-full text-sm">
-          {copied ? `✓ ${t('MovedNotice.copied')}` : t('MovedNotice.copy')}
-        </button>
+        {isAndroid ? (
+          <a href={androidChromeIntentUrl(newUrl)} className="btn-primary block text-center">
+            {t('MovedNotice.androidButton')}
+          </a>
+        ) : isIos ? (
+          <button onClick={copy} className="btn-primary w-full">
+            {copied ? `✓ ${t('MovedNotice.copied')}` : t('MovedNotice.copy')}
+          </button>
+        ) : (
+          <a href={newUrl} target="_blank" rel="noopener noreferrer" className="btn-primary block text-center">
+            {t('MovedNotice.open')}
+          </a>
+        )}
+        {isIos ? (
+          <p className="text-xs text-gray-500">{t('MovedNotice.iosCopyHint')}</p>
+        ) : (
+          <button onClick={copy} className="btn-secondary w-full text-sm">
+            {copied ? `✓ ${t('MovedNotice.copied')}` : t('MovedNotice.copy')}
+          </button>
+        )}
         <p className="text-[11px] text-gray-400">{t('MovedNotice.hint')}</p>
         <button
           onClick={() => {
