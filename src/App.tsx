@@ -15,6 +15,8 @@ import { UpdateBanner } from './components/UpdateBanner'
 import { ConfirmProvider } from './components/Confirm'
 import { LanguageSwitcher } from './components/LanguageSwitcher'
 import { MovedNotice } from './components/MovedNotice'
+// 靜態匯入:一啟動就接住 beforeinstallprompt(比任何 lazy 頁面都早發)
+import './lib/installPrompt'
 
 // real-time comes from the WebSocket; these defaults stop redundant refetch
 // storms (every query re-firing on each tab focus) so we don't hammer the API.

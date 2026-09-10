@@ -32,6 +32,10 @@
     "genericOr": " or ",
     "genericAddHome": "“Add to Home Screen”",
     "genericEnd": ".",
-    "gotIt": "Got it"
+    "gotIt": "Got it",
+    "oldappTitle": "🚚 You're still inside the old app — it can't install the new one here",
+    "oldappAndroid": "Tap ⋮ in the top-right of this window → \"Open in Chrome\". In real Chrome you'll get the install button.",
+    "oldappIos": "Copy the address → open Safari and paste → sign in → Share → Add to Home Screen. Then delete the old icon.",
+    "oldappOther": "Copy the address into a browser, then use its menu: \"Install app\" / \"Add to Home screen\"."
   }
 }

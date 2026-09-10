@@ -32,6 +32,10 @@
     "genericOr": "或",
     "genericAddHome": "「加到主畫面」",
     "genericEnd": "即可。",
-    "gotIt": "知道了"
+    "gotIt": "知道了",
+    "oldappTitle": "🚚 你還在舊的 App 裡面,這裡裝不了新的",
+    "oldappAndroid": "點這個視窗右上角的 ⋮ → 「在 Chrome 中開啟」,到真正的 Chrome 就會有安裝鈕。",
+    "oldappIos": "複製網址 → 開 Safari 貼上 → 登入 → 分享 → 加入主畫面。裝好後舊的那顆可以刪掉。",
+    "oldappOther": "把網址複製到瀏覽器開,再從選單「安裝應用程式 / 加到主畫面」。"
   }
 }

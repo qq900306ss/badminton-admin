@@ -54,6 +54,8 @@ export function MovedNotice() {
   const [copied, setCopied] = useState(false)
   const target = `https://${CANONICAL_HOST}${window.location.pathname}${window.location.search}${window.location.hash}`
   const newUrl = `https://${CANONICAL_HOST}/`
+  // 連結/intent 帶 ?moved=1:開在舊 App 視窗裡時 referrer 是空的,登入頁要靠這個知道「被舊 App 開著」改顯示出口說明
+  const movedUrl = `https://${CANONICAL_HOST}/login?moved=1`
   const ua = navigator.userAgent || ''
   const isAndroid = /android/i.test(ua)
   const isIos = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
@@ -83,7 +85,7 @@ export function MovedNotice() {
         <p className="text-sm text-gray-600">{t('MovedNotice.body')}</p>
         <div className="bg-gray-50 rounded-xl px-3 py-2 text-xs text-gray-500 break-all select-all">{newUrl}</div>
         {isAndroid ? (
-          <a href={androidChromeIntentUrl(newUrl)} className="btn-primary block text-center">
+          <a href={androidChromeIntentUrl(movedUrl)} className="btn-primary block text-center">
             {t('MovedNotice.androidButton')}
           </a>
         ) : isIos ? (
@@ -91,7 +93,7 @@ export function MovedNotice() {
             {copied ? `✓ ${t('MovedNotice.copied')}` : t('MovedNotice.copy')}
           </button>
         ) : (
-          <a href={newUrl} target="_blank" rel="noopener noreferrer" className="btn-primary block text-center">
+          <a href={movedUrl} target="_blank" rel="noopener noreferrer" className="btn-primary block text-center">
             {t('MovedNotice.open')}
           </a>
         )}
