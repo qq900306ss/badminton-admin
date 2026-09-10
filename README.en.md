@@ -4,14 +4,14 @@
 
 Back-office for the badminton court management system: Google login → create a session (set name / time / password / courts / roster) → QR code → in-session management (swap courts, remove players, add players, change levels) → stats. Super-admins can manage hosts and impersonate them.
 
-🔗 **Live**: https://d1r9u0ja59y4rv.cloudfront.net
+🔗 **Live**: https://host.badminton-tw.fyi
 📋 [Changelog](CHANGELOG.md)
 
 ## Related
 
 | | URL |
 |--|------|
-| Player front-end (booking) | https://d2mg2bpjvlg672.cloudfront.net |
+| Player front-end (booking) | https://badminton-tw.fyi |
 | Backend API | https://pp2p4ln2cogxt4mi5f2wl3rqi40vskvs.lambda-url.ap-northeast-1.on.aws |
 
 ## Local development

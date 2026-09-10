@@ -1,0 +1,11 @@
+{
+  "MovedNotice": {
+    "title": "We've moved!",
+    "body": "The host console has a new address. The icon on your home screen points to the old one and will stop updating. Please sign in at the new address and add it to your home screen again — your groups and data are tied to your account.",
+    "open": "👑 Go to the new address",
+    "copy": "Copy new address",
+    "copied": "Copied",
+    "hint": "Reinstall: Android — Chrome menu → \"Install app\"; iPhone — open in Safari → Share → \"Add to Home Screen\".",
+    "later": "Later"
+  }
+}

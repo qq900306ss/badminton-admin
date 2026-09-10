@@ -1,5 +1,13 @@
 # 更新日誌
 
+## 2026-09-11 — 自訂網域 host.badminton-tw.fyi + PNG 圖示 / OG 預覽卡
+
+- 後台改走 `https://host.badminton-tw.fyi`(玩家端 `https://badminton-tw.fyi`、API `https://api.badminton-tw.fyi`);GitHub secrets `VITE_API_URL` / `VITE_BOOKING_URL` 已換
+- `MovedNotice`:舊 `*.cloudfront.net` 網址開到 → 瀏覽器直接跳新網域同路徑;已安裝的 PWA(standalone)顯示全螢幕「網址搬家請到新網址重新登入/加到主畫面」提醒,可稍後
+- PNG 圖示:192/512 + maskable + `apple-touch-icon` 180 滿版(iOS 不吃 SVG、透明角會變黑);manifest 改列 PNG
+- `index.html` 補 description + `og:*` 預覽卡(`og-image.png` 1200×630)
+- README 三語網址換新
+
 ## 2026-09-03 — 防呆確認、開團列表分「進行中/尚未開始」、顯示團內人數
 
 - 防呆確認:「結束這場」「復原剛剛的結束」以及排點板/手動排的「上場」「排隊」,執行前都會先跳確認視窗(沿用既有 Confirm 元件),避免誤觸

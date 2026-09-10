@@ -14,6 +14,7 @@ import { ConnectionBanner } from './components/ConnectionBanner'
 import { UpdateBanner } from './components/UpdateBanner'
 import { ConfirmProvider } from './components/Confirm'
 import { LanguageSwitcher } from './components/LanguageSwitcher'
+import { MovedNotice } from './components/MovedNotice'
 
 // real-time comes from the WebSocket; these defaults stop redundant refetch
 // storms (every query re-firing on each tab focus) so we don't hammer the API.
@@ -37,6 +38,8 @@ export default function App() {
     <QueryClientProvider client={qc}>
       <ErrorBoundary>
       <ConfirmProvider>
+      {/* 舊 cloudfront 網址:瀏覽器直接跳新網域、已安裝 PWA 顯示重新安裝提醒 */}
+      <MovedNotice />
       <LanguageSwitcher />
       <ConnectionBanner />
       <UpdateBanner />

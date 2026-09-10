@@ -4,14 +4,14 @@
 
 バドミントンのコート管理システムの管理画面。Google ログイン → セッション作成（名前・時間・パスワード・コート・参加者リストを設定）→ QR コード → 開催中の管理（コート入れ替え、参加者の除外・追加、レベル変更）→ 統計。スーパー管理者は主催者の管理となりすましログインができます。
 
-🔗 **本番**: https://d1r9u0ja59y4rv.cloudfront.net
+🔗 **本番**: https://host.badminton-tw.fyi
 📋 [更新履歴](CHANGELOG.md)
 
 ## 関連
 
 | | URL |
 |--|------|
-| 当日参加者フロントエンド (booking) | https://d2mg2bpjvlg672.cloudfront.net |
+| 当日参加者フロントエンド (booking) | https://badminton-tw.fyi |
 | バックエンド API | https://pp2p4ln2cogxt4mi5f2wl3rqi40vskvs.lambda-url.ap-northeast-1.on.aws |
 
 ## ローカル開発
