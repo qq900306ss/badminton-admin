@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-    <link rel="apple-touch-icon" href="/icon.svg" />
+    <!-- iOS 不吃 SVG 的 apple-touch-icon,而且透明角會變黑 → 用滿版 PNG -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#7C3AED" />
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -11,6 +12,17 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="羽球後台" />
+    <meta name="description" content="團主開團、排場、收費一個畫面搞定。Google 登入即可自助開團。" />
+    <!-- LINE / FB 貼連結時的預覽卡(og:image 必須是絕對網址) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="羽球揪團 後台" />
+    <meta property="og:title" content="羽球揪團 後台 — 團主開團、排場、收費一個畫面搞定" />
+    <meta property="og:description" content="Google 登入即可自助開團,免費。" />
+    <meta property="og:url" content="https://host.badminton-tw.fyi/" />
+    <meta property="og:image" content="https://host.badminton-tw.fyi/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <title>羽球揪團 後台</title>
   </head>
   <body>
