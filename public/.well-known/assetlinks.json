@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "fyi.badmintontw.app",
+      "sha256_cert_fingerprints": [
+        "83:4E:AF:B8:25:97:3F:F8:19:F0:4C:6B:B8:C9:13:F1:B6:05:B8:BE:7E:A1:31:92:BF:F3:6B:D7:9C:7C:9A:76"
+      ]
+    }
+  }
+]
