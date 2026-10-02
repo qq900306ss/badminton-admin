@@ -7,6 +7,7 @@
     "copyUrl": "📋 複製網址(貼到瀏覽器開)",
     "loginWithGoogle": "使用 Google 登入",
     "authorizedOnly": "只有被授權的團主與管理員能登入",
-    "installLabel": "📲 安裝後台到桌面"
+    "installLabel": "📲 安裝後台到桌面",
+    "agreeTerms": "登入即表示你同意<terms>《使用條款》</terms>與<privacy>《隱私權政策》</privacy>"
   }
 }

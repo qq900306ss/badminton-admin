@@ -184,17 +184,21 @@ export function SessionManagePage() {
   const [editTitle, setEditTitle] = useState(false)
   const [titleInput, setTitleInput] = useState('')
   const [savingTitle, setSavingTitle] = useState(false)
+  const [titleErr, setTitleErr] = useState('')
 
   async function saveTitle() {
-    const t = titleInput.trim()
-    if (!t) return
+    const v = titleInput.trim()
+    if (!v) return
     setSavingTitle(true)
+    setTitleErr('')
     try {
-      await sessionApi.setTitle(sid, t)
+      await sessionApi.setTitle(sid, v)
       qc.invalidateQueries({ queryKey: ['session', sid] })
       setEditTitle(false)
-    } catch {
-      /* keep editing on failure */
+    } catch (e: unknown) {
+      // keep editing on failure;後端訊息(例如含不當字詞)直接秀出來
+      const m = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
+      setTitleErr(m ?? t('SessionManagePage.titleSaveFailed'))
     } finally {
       setSavingTitle(false)
     }
@@ -279,6 +283,7 @@ export function SessionManagePage() {
           <button
             onClick={() => {
               setTitleInput(session?.title ?? '')
+              setTitleErr('')
               setEditTitle(true)
             }}
             className="flex items-center gap-2 text-left group"
@@ -290,6 +295,7 @@ export function SessionManagePage() {
             <span className="text-gray-300 group-hover:text-brand-pink text-base">✏️</span>
           </button>
         )}
+        {editTitle && titleErr && <p className="text-red-400 text-sm -mt-2">{titleErr}</p>}
 
         {/* QR code share */}
         <div className="card">

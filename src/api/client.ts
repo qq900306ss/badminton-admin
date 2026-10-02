@@ -40,6 +40,7 @@ export interface PlayerSlot {
   level: number
   games: number
   avatar_url?: string
+  account_ref?: string // 封鎖用的穩定匿名識別碼(臨時加的人沒有)
 }
 
 export interface CourtView {
@@ -115,6 +116,7 @@ export interface SessionPlayer {
   pending?: boolean // 待團主核准(家人或前台報名)
   is_signup?: boolean // 從前台報名進來(pending 期間顯示在報名審核區)
   signup_msg?: string // 報名留言
+  account_ref?: string // 封鎖用的穩定匿名識別碼(臨時加的人沒有)
 }
 
 export interface SessionSummary {
@@ -293,17 +295,55 @@ export const adminApi = {
   listSessions: () => api.get<{ data: SessionSummary[] }>('/api/admin/sessions'),
   listFeedback: () => api.get<{ data: Feedback[] }>('/api/admin/feedback'),
   listPlayers: () => api.get<{ data: AdminPlayer[] }>('/api/admin/players'),
+  // 停權/解除停權:立即生效(後端 middleware 擋掉該帳號的玩家 API 與登入)
+  setPlayerBanned: (playerId: string, banned: boolean) =>
+    api.post<{ data: { banned: boolean } }>(`/api/admin/players/${encodeURIComponent(playerId)}/ban`, { banned }),
+  // 清除名稱與頭像:帳號名稱清空、頭像回預設,開放中場次的名字改「球友」
+  resetPlayerProfile: (playerId: string) =>
+    api.post<{ data: { reset: boolean } }>(`/api/admin/players/${encodeURIComponent(playerId)}/reset-profile`),
+  // 檢舉(含封鎖時自動寫的那筆);預設只拿待處理
+  listReports: (status: 'open' | 'all') =>
+    api.get<{ data: Report[] }>('/api/admin/reports', { params: { status } }),
+  resolveReport: (id: string, note: string) =>
+    api.post<{ data: { resolved: boolean } }>('/api/admin/reports/resolve', { id, note }),
 }
 
 export interface AdminPlayer {
   player_id: string
-  provider: 'google' | 'line'
+  provider: 'google' | 'line' | 'apple'
   display_name: string // 登入時的名字
   join_name?: string // 現在使用的名稱
   avatar_url?: string // 現在使用的頭像(emoji 或照片網址)
   photo_url?: string // 登入提供的大頭貼
   default_level?: number
   email?: string
+  banned?: boolean // 超管停權中
+  created_at: string
+}
+
+export type ReportReason = 'inappropriate' | 'harassment' | 'spam' | 'other' | 'blocked'
+
+// 玩家檢舉(reason=blocked 是玩家封鎖對方時自動寫的那筆)。
+// target_* / session_* 是檢舉當下的內容快照 — 就算對方之後改掉,超管還看得到原文。
+export interface Report {
+  id: string // ts_id
+  reporter_id: string
+  reporter_name: string
+  target_type: 'player' | 'session'
+  session_id: string
+  session_player_id?: string
+  target_account_id?: string // player 型:被檢舉的帳號(家人 → 帶他來的帳號);團主手動加的名字沒有
+  target_org_id: string
+  target_name?: string
+  target_avatar_url?: string
+  session_title?: string
+  session_description?: string
+  session_announcement?: string
+  reason: ReportReason
+  detail?: string
+  status: 'open' | 'resolved'
+  resolved_at?: string
+  resolved_note?: string
   created_at: string
 }
 

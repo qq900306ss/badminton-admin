@@ -77,9 +77,15 @@ export function useManageActions(sessionId: string) {
   const invalidatePlayers = () =>
     qc.invalidateQueries({ queryKey: ['session-players', sessionId] })
 
+  // 名字類的動作:後端會擋不當字詞(400)→ 把後端訊息秀出來,不要默默失敗
+  const alertErr = (fallbackKey: string) => (e: unknown) => {
+    const m = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
+    alert(m ?? i18n.t(fallbackKey))
+  }
   const addPlayer = useMutation({
     mutationFn: (name: string) => sessionApi.addPlayer(sessionId, name),
     onSuccess: invalidatePlayers,
+    onError: alertErr('useApi.addPlayerFailed'),
   })
   const setLevel = useMutation({
     mutationFn: (v: { playerId: string; level: number }) =>
@@ -96,6 +102,7 @@ export function useManageActions(sessionId: string) {
       invalidatePlayers()
       invalidate()
     },
+    onError: alertErr('useApi.renameFailed'),
   })
   const setPaid = useMutation({
     mutationFn: (v: { playerId: string; paid: boolean }) =>

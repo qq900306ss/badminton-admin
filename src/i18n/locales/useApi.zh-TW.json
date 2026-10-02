@@ -1,6 +1,8 @@
 {
   "useApi": {
     "approveFailed": "核准失敗,請稍後再試",
-    "swapFailed": "交換失敗,請稍後再試"
+    "swapFailed": "交換失敗,請稍後再試",
+    "renameFailed": "改名失敗,請稍後再試",
+    "addPlayerFailed": "新增失敗,請稍後再試"
   }
 }

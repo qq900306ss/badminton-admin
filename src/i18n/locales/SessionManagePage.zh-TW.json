@@ -73,6 +73,7 @@
     "goOnCourt": "上場",
     "queue": "排隊",
     "noOneToAdd": "沒有可加入的人",
-    "liveSync": "⚡ 即時同步 · 已報到 {{n}} 人"
+    "liveSync": "⚡ 即時同步 · 已報到 {{n}} 人",
+    "titleSaveFailed": "團名更新失敗,請稍後再試"
   }
 }

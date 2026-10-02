@@ -1,9 +1,11 @@
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { InstallButton } from '../components/InstallButton'
 import { isInAppBrowser } from '../lib/inAppBrowser'
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 const REDIRECT_URI = `${location.origin}/auth/callback`
+// 使用條款 / 隱私權政策放在玩家端網域(同一份,不在後台另存)
+const BOOKING_URL = import.meta.env.VITE_BOOKING_URL || 'http://localhost:5174'
 
 export function LoginPage() {
   const { t } = useTranslation()
@@ -54,6 +56,15 @@ export function LoginPage() {
         </svg>
         {t('LoginPage.loginWithGoogle')}
       </button>
+      <p className="text-xs text-gray-400 mt-3 text-center max-w-xs">
+        <Trans
+          i18nKey="LoginPage.agreeTerms"
+          components={{
+            terms: <a href={`${BOOKING_URL}/terms`} target="_blank" rel="noopener noreferrer" className="underline text-brand-pink" />,
+            privacy: <a href={`${BOOKING_URL}/privacy`} target="_blank" rel="noopener noreferrer" className="underline text-brand-pink" />,
+          }}
+        />
+      </p>
       <p className="text-xs text-gray-300 mt-6 text-center max-w-xs">
         {t('LoginPage.authorizedOnly')}
       </p>

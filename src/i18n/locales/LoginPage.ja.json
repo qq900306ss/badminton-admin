@@ -7,6 +7,7 @@
     "copyUrl": "📋 URLをコピー(ブラウザに貼り付け)",
     "loginWithGoogle": "Googleでログイン",
     "authorizedOnly": "認証された主催者と管理者のみログインできます",
-    "installLabel": "📲 管理画面をホームに追加"
+    "installLabel": "📲 管理画面をホームに追加",
+    "agreeTerms": "ログインすると、<terms>利用規約</terms>と<privacy>プライバシーポリシー</privacy>に同意したものとみなされます"
   }
 }

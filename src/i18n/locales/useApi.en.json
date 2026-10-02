@@ -1,6 +1,8 @@
 {
   "useApi": {
     "approveFailed": "Approval failed, please try again later",
-    "swapFailed": "Swap failed, please try again later"
+    "swapFailed": "Swap failed, please try again later",
+    "renameFailed": "Rename failed, please try again later",
+    "addPlayerFailed": "Failed to add, please try again later"
   }
 }

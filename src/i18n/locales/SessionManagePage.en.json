@@ -73,6 +73,7 @@
     "goOnCourt": "Play",
     "queue": "Queue",
     "noOneToAdd": "No one to add",
-    "liveSync": "⚡ Live sync · {{n}} checked in"
+    "liveSync": "⚡ Live sync · {{n}} checked in",
+    "titleSaveFailed": "Failed to update the name, please try again later"
   }
 }
