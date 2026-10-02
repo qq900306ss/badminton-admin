@@ -99,7 +99,6 @@ export function AdminPage() {
   const [error, setError] = useState('')
   const [reportFilter, setReportFilter] = useState<'open' | 'all'>('open')
   const [notes, setNotes] = useState<Record<string, string>>({}) // 檢舉 id → 處理備註草稿
-  const [resetIds, setResetIds] = useState<Set<string>>(() => new Set()) // 這次已清除名稱頭像的帳號
 
   const { data: orgs } = useQuery({
     queryKey: ['orgs'],
@@ -118,6 +117,7 @@ export function AdminPage() {
     queryKey: ['admin-players'],
     queryFn: () => adminApi.listPlayers().then((r) => r.data.data),
     enabled: tab === 'members' || tab === 'reports', // only scan when needed(檢舉要看停權狀態)
+    refetchInterval: tab === 'reports' ? 60000 : false, // 跟待處理檢舉同步對帳,新帳號被檢舉才拿得到處理鈕
   })
   // 待處理檢舉:導覽 badge 也靠它 → 一直拉、每分鐘對帳(承諾 24 小時內處理)
   const { data: openReports, isError: openReportsErr } = useQuery({
@@ -229,10 +229,7 @@ export function AdminPage() {
   })
   const resetProfile = useMutation({
     mutationFn: (playerId: string) => adminApi.resetPlayerProfile(playerId),
-    onSuccess: (_r, playerId) => {
-      setResetIds((s) => new Set(s).add(playerId))
-      qc.invalidateQueries({ queryKey: ['admin-players'] })
-    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-players'] }),
     onError: alertErr,
   })
   const resolveReport = useMutation({
@@ -696,10 +693,10 @@ export function AdminPage() {
                                 resetProfile.mutate(acct.player_id)
                               }
                             }}
-                            disabled={resetIds.has(acct.player_id) || (resetProfile.isPending && resetProfile.variables === acct.player_id)}
+                            disabled={resetProfile.isPending && resetProfile.variables === acct.player_id}
                             className="text-xs font-bold px-3 py-1.5 rounded-2xl border-2 border-amber-200 text-amber-600 disabled:opacity-50"
                           >
-                            {resetIds.has(acct.player_id) ? t('AdminPage.resetDone') : t('AdminPage.resetProfile')}
+                            {resetProfile.isSuccess && resetProfile.variables === acct.player_id ? t('AdminPage.resetDone') : t('AdminPage.resetProfile')}
                           </button>
                           <BanToggle
                             boxed
