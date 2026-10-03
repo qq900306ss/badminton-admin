@@ -1,5 +1,13 @@
 # 更新日誌
 
+## 2026-10-03 — 超管看得到玩家從哪個平台來(iOS App / Android App / PWA / 網頁)
+
+- 會員管理每列右側加「來源」:最近使用的平台徽章(🍎 iOS App 帶版本號、🤖 Android App、📱 主畫面 PWA、🌐 網頁、— 未知)+ 最近使用時間;註冊時的平台跟現在不同才另外標「註冊於 …」
+- 會員管理上方一排來源統計(依最近使用的平台算),點一下只看那個平台、再點一次取消
+- 意見回饋、檢舉列表在有來源資料時也顯示同一個徽章
+- 解析與文字集中在 `lib/clientSource.ts` + `components/ClientBadge.tsx`;三語系在 `ClientSource.*.json`
+- 後端配合:玩家帳號新增 `signup_client` / `last_client` / `last_seen_at`,意見回饋與檢舉新增 `client`(前台用 `X-Client` 標頭回報);舊帳號沒有資料顯示「未知」
+
 ## 2026-09-11 — 自訂網域 host.badminton-tw.fyi + PNG 圖示 / OG 預覽卡
 
 - 後台改走 `https://host.badminton-tw.fyi`(玩家端 `https://badminton-tw.fyi`、API `https://api.badminton-tw.fyi`);GitHub secrets `VITE_API_URL` / `VITE_BOOKING_URL` 已換

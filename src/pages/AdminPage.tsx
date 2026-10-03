@@ -5,6 +5,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { adminApi, type SessionSummary, type AdminPlayer, type Report, type ReportReason } from '../api/client'
 import { useConfirm } from '../components/Confirm'
 import { isPhotoUrl } from '../lib/avatar'
+import { ClientBadge } from '../components/ClientBadge'
+import { CLIENT_PLATFORMS, parseClient, platformEmoji, platformName, type ClientPlatform } from '../lib/clientSource'
 
 function fmtRange(s: SessionSummary): string {
   if (!s.start_at) return ''
@@ -98,6 +100,7 @@ export function AdminPage() {
   const [orgName, setOrgName] = useState('')
   const [error, setError] = useState('')
   const [reportFilter, setReportFilter] = useState<'open' | 'all'>('open')
+  const [platformFilter, setPlatformFilter] = useState<ClientPlatform | null>(null) // 會員管理:只看某個來源平台
   const [notes, setNotes] = useState<Record<string, string>>({}) // 檢舉 id → 處理備註草稿
 
   const { data: orgs } = useQuery({
@@ -170,7 +173,16 @@ export function AdminPage() {
       if (!q) return true
       return (s.title || '').includes(q) || orgNameOf(s.org_id).includes(q)
     })
+  // 各來源平台的人數(依最近使用的平台算,不受搜尋/篩選影響)
+  const platformCounts = (players ?? []).reduce(
+    (acc, p) => {
+      acc[parseClient(p.last_client).platform]++
+      return acc
+    },
+    { ios: 0, android: 0, pwa: 0, web: 0, unknown: 0 } as Record<ClientPlatform, number>
+  )
   const shownPlayers = (players ?? [])
+    .filter((p) => !platformFilter || parseClient(p.last_client).platform === platformFilter)
     .filter((p) => {
       const q = playerSearch.trim()
       if (!q) return true
@@ -546,6 +558,30 @@ export function AdminPage() {
                 placeholder={t('AdminPage.playerSearchPlaceholder')}
                 className="w-full border-2 border-gray-200 rounded-2xl px-3 py-1.5 text-sm focus:outline-none focus:border-brand-pink"
               />
+              {/* 來源平台統計(點一下只看那個平台,再點一次取消) */}
+              {players && (
+                <div className="flex flex-wrap gap-1.5">
+                  <button
+                    onClick={() => setPlatformFilter(null)}
+                    className={`text-xs font-bold px-3 py-1 rounded-full ${
+                      platformFilter === null ? 'bg-brand-pink text-white' : 'bg-gray-100 text-gray-500'
+                    }`}
+                  >
+                    {t('ClientSource.filterAll')} {players.length}
+                  </button>
+                  {CLIENT_PLATFORMS.map((pf) => (
+                    <button
+                      key={pf}
+                      onClick={() => setPlatformFilter(platformFilter === pf ? null : pf)}
+                      className={`text-xs font-bold px-3 py-1 rounded-full ${
+                        platformFilter === pf ? 'bg-brand-pink text-white' : 'bg-gray-100 text-gray-500'
+                      }`}
+                    >
+                      {platformEmoji(pf)} {platformName(pf, t)} {platformCounts[pf]}
+                    </button>
+                  ))}
+                </div>
+              )}
               <p className="text-[11px] text-gray-400">{t('AdminPage.identityHint')}</p>
               {!players && <p className="text-sm text-gray-300">{t('AdminPage.loading')}</p>}
               {players && shownPlayers.length === 0 && <p className="text-sm text-gray-300">{t('AdminPage.noPlayersFound')}</p>}
@@ -577,6 +613,20 @@ export function AdminPage() {
                         {p.default_level ? t('AdminPage.defaultLevel', { level: p.default_level }) : t('AdminPage.noLevelSet')}
                       </p>
                     </div>
+                  </div>
+                  {/* 來源:最近使用的平台 + 時間;註冊時的平台不一樣才另外標 */}
+                  <div className="shrink-0 flex flex-col items-end gap-0.5 max-w-[9rem]">
+                    <ClientBadge client={p.last_client} />
+                    {p.last_seen_at && (
+                      <span className="text-[10px] text-gray-400 whitespace-nowrap">
+                        {t('ClientSource.lastSeen', { when: fmtWhen(p.last_seen_at) })}
+                      </span>
+                    )}
+                    {p.signup_client && parseClient(p.signup_client).platform !== parseClient(p.last_client).platform && (
+                      <span className="text-[10px] text-gray-300 whitespace-nowrap">
+                        {t('ClientSource.signupFrom', { platform: platformName(parseClient(p.signup_client).platform, t) })}
+                      </span>
+                    )}
                   </div>
                   <BanToggle
                     banned={!!p.banned}
@@ -640,6 +690,7 @@ export function AdminPage() {
                           {t('AdminPage.resolvedBadge')}
                         </span>
                       )}
+                      <ClientBadge client={r.client} hideUnknown />
                       <span className="text-[11px] text-gray-300 ml-auto">{fmtWhen(r.created_at)}</span>
                     </div>
                     <p className="text-xs text-gray-400">
@@ -771,6 +822,7 @@ export function AdminPage() {
                     </span>
                     <span className="font-semibold text-gray-700 text-sm">{f.author_name || t('AdminPage.anonymous')}</span>
                     {f.email && <span className="text-xs text-gray-400">{f.email}</span>}
+                    <ClientBadge client={f.client} hideUnknown />
                     <span className="text-[11px] text-gray-300 ml-auto">{fmtWhen(f.created_at)}</span>
                   </div>
                   <p className="text-sm text-gray-600 whitespace-pre-wrap">{f.message}</p>

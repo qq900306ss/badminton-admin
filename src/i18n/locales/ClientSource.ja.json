@@ -1,0 +1,12 @@
+{
+  "ClientSource": {
+    "ios": "iOS アプリ",
+    "android": "Android アプリ",
+    "pwa": "ホーム画面 PWA",
+    "web": "Web",
+    "unknown": "不明",
+    "filterAll": "すべての経路",
+    "lastSeen": "最終利用 {{when}}",
+    "signupFrom": "登録経路:{{platform}}"
+  }
+}

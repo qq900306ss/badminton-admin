@@ -1,0 +1,12 @@
+{
+  "ClientSource": {
+    "ios": "iOS App",
+    "android": "Android App",
+    "pwa": "主畫面 PWA",
+    "web": "網頁",
+    "unknown": "未知",
+    "filterAll": "全部來源",
+    "lastSeen": "最近使用 {{when}}",
+    "signupFrom": "註冊於 {{platform}}"
+  }
+}

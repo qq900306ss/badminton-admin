@@ -319,6 +319,10 @@ export interface AdminPlayer {
   email?: string
   banned?: boolean // 超管停權中
   created_at: string
+  // 來源平台(前台 X-Client 標頭;格式見 lib/clientSource.ts),舊帳號沒有
+  signup_client?: string // 註冊(第一次登入)時的平台
+  last_client?: string // 最近一次使用的平台
+  last_seen_at?: string // 最近使用時間(RFC3339 UTC)
 }
 
 export type ReportReason = 'inappropriate' | 'harassment' | 'spam' | 'other' | 'blocked'
@@ -345,6 +349,7 @@ export interface Report {
   resolved_at?: string
   resolved_note?: string
   created_at: string
+  client?: string // 檢舉人送出時的平台
 }
 
 export interface Feedback {
@@ -355,4 +360,5 @@ export interface Feedback {
   email?: string
   message: string
   created_at: string
+  client?: string // 送出時的平台
 }

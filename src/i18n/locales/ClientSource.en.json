@@ -1,0 +1,12 @@
+{
+  "ClientSource": {
+    "ios": "iOS App",
+    "android": "Android App",
+    "pwa": "Home-screen PWA",
+    "web": "Web",
+    "unknown": "Unknown",
+    "filterAll": "All sources",
+    "lastSeen": "Last seen {{when}}",
+    "signupFrom": "Signed up via {{platform}}"
+  }
+}
