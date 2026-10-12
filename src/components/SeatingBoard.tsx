@@ -400,7 +400,7 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
     // 按下當下 queue 就是下一組名單,先抓好;伺服器確認成功才播報(同管理頁)
     const snap = { name: court.name, court_num: court.court_num }
     const names = court.queue.map((p) => p.display_name)
-    endCourt.mutate(court.court_id, {
+    endCourt.mutate(court, {
       onSuccess: () => announceCourtEnd(court.court_id, snap, names),
       onError: onErr,
     })

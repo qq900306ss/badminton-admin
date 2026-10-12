@@ -679,7 +679,7 @@ export function SessionManagePage() {
                   // 按下當下 queue 就是下一組名單,先抓好;等伺服器確認結束成功再播報
                   const snap = { name: court.name, court_num: court.court_num }
                   const names = court.queue.map((q) => q.display_name)
-                  endCourt.mutate(court.court_id, {
+                  endCourt.mutate(court, {
                     onSuccess: () => announceCourtEnd(court.court_id, snap, names),
                   })
                 }}

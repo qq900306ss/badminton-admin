@@ -247,8 +247,9 @@ export const sessionApi = {
     api.put(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/name`, { name }),
   removeCourt: (sessionId: string, courtId: string) =>
     api.delete(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}`),
-  endCourt: (sessionId: string, courtId: string) =>
-    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/end`),
+  // expectPlaying = 按下當下看到的場上名單;後端比對不符(剛被投票結束)回 409,不會誤結束下一組
+  endCourt: (sessionId: string, courtId: string, expectPlaying: string[]) =>
+    api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/end`, { expect_playing: expectPlaying }),
   undoEnd: (sessionId: string, courtId: string) =>
     api.post(`/api/sessions/${sessionId}/courts/${encodeURIComponent(courtId)}/undo-end`),
   kick: (sessionId: string, courtId: string, playerId: string) =>

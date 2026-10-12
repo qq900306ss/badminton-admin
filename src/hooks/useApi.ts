@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { sessionApi, seatApi } from '../api/client'
+import { sessionApi, seatApi, type CourtView } from '../api/client'
 import i18n from '../i18n'
 
 // 推送求快、輪詢對帳:WS 活著時資料由伺服器主動推,輪詢降到 60 秒只做
@@ -129,12 +129,15 @@ export function useManageActions(sessionId: string) {
   })
 
   const endCourt = useMutation({
-    mutationFn: (courtId: string) => sessionApi.endCourt(sessionId, courtId),
+    mutationFn: (court: CourtView) =>
+      sessionApi.endCourt(sessionId, court.court_id, court.playing.map((s) => s?.player_id).filter(Boolean)),
     // ending a game changes player stats too → refresh players, not just courts
     onSuccess: () => {
       invalidate()
       invalidatePlayers()
     },
+    // 409 = 這場已被投票結束 → 拉最新畫面
+    onError: () => invalidate(),
   })
   const undoEnd = useMutation({
     mutationFn: (courtId: string) => sessionApi.undoEnd(sessionId, courtId),
