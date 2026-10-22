@@ -15,14 +15,18 @@ function fallbackColor(id: string) {
   return PALETTE[h % PALETTE.length]
 }
 
-function elapsedMins(startedAt?: string): number | null {
+// 算到現在,但過了團的結束時間就停在結束時間(跟後端計入的分鐘數一致)
+function elapsedMins(startedAt?: string, stopAt?: string): number | null {
   if (!startedAt) return null
-  const ms = Date.now() - new Date(startedAt).getTime()
+  const stop = stopAt ? new Date(stopAt).getTime() : NaN
+  const end = Number.isNaN(stop) ? Date.now() : Math.min(Date.now(), stop)
+  const ms = end - new Date(startedAt).getTime()
   return ms < 0 ? null : Math.floor(ms / 60000)
 }
 
 interface Props {
   court: CourtView
+  stopAt?: string // 團的結束時間:過了就不再往上算
   onEnd: () => void
   onUndoEnd: () => void
   onKick: (playerId: string) => void
@@ -56,7 +60,7 @@ function Chip({ slot, onKick }: { slot: PlayerSlot; onKick: () => void }) {
   )
 }
 
-export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onRemove, onToggleLock, onSwapQueue }: Props) {
+export function ManageCourtCard({ court, stopAt, onEnd, onUndoEnd, onKick, onRename, onRemove, onToggleLock, onSwapQueue }: Props) {
   const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
   const [nameInput, setNameInput] = useState(court.name ?? '')
@@ -104,7 +108,7 @@ export function ManageCourtCard({ court, onEnd, onUndoEnd, onKick, onRename, onR
             <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">{t('ManageCourtCard.empty')}</span>
           ) : filled === 4 ? (
             <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-mint text-emerald-700">
-              {t('ManageCourtCard.inProgress')}{elapsedMins(court.started_at) !== null ? t('ManageCourtCard.minsElapsed', { mins: elapsedMins(court.started_at) }) : ''}
+              {t('ManageCourtCard.inProgress')}{elapsedMins(court.started_at, stopAt) !== null ? t('ManageCourtCard.minsElapsed', { mins: elapsedMins(court.started_at, stopAt) }) : ''}
             </span>
           ) : (
             <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-yellow text-amber-700">

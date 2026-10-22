@@ -21,9 +21,12 @@ function fallbackColor(id: string) {
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0
   return PALETTE[h % PALETTE.length]
 }
-function elapsedMins(startedAt?: string): number | null {
+// 算到現在,但過了團的結束時間就停在結束時間(跟後端計入的分鐘數一致)
+function elapsedMins(startedAt?: string, stopAt?: string): number | null {
   if (!startedAt) return null
-  const ms = Date.now() - new Date(startedAt).getTime()
+  const stop = stopAt ? new Date(stopAt).getTime() : NaN
+  const end = Number.isNaN(stop) ? Date.now() : Math.min(Date.now(), stop)
+  const ms = end - new Date(startedAt).getTime()
   return ms < 0 ? null : Math.floor(ms / 60000)
 }
 
@@ -83,6 +86,7 @@ function EmptySlot({ onClick }: { onClick: () => void }) {
 
 interface CourtProps {
   court: CourtView
+  stopAt?: string // 團的結束時間:過了就不再往上算
   onEmptySlot: (position: number) => void
   onQueueZone: () => void
   onFilledPlayer: (playerId: string, removable: boolean) => void
@@ -95,12 +99,12 @@ interface CourtProps {
   lockBusy: boolean
 }
 
-function BoardCourt({ court, onEmptySlot, onQueueZone, onFilledPlayer, onQueuedPlayer, onEnd, onUndoEnd, endBusy, onToggleLock, lockBusy }: CourtProps) {
+function BoardCourt({ court, stopAt, onEmptySlot, onQueueZone, onFilledPlayer, onQueuedPlayer, onEnd, onUndoEnd, endBusy, onToggleLock, lockBusy }: CourtProps) {
   const { t } = useTranslation()
   const slots = court.playing
   const filled = slots.filter((s) => s.player_id).length
   const full = filled === 4
-  const mins = elapsedMins(court.started_at)
+  const mins = elapsedMins(court.started_at, stopAt)
   const queueRoom = court.queue.length < 4
 
   return (
@@ -464,6 +468,7 @@ export function SeatingBoard({ sessionId, onClose }: { sessionId: string; onClos
               <div key={court.court_id} className="min-w-0">
                 <BoardCourt
                   court={court}
+                  stopAt={session?.end_at}
                   onEmptySlot={(pos) => setPicker({ courtId: court.court_id, position: pos })}
                   onQueueZone={() => setPicker({ courtId: court.court_id, position: null })}
                   onFilledPlayer={(pid, removable) => tapFilledPlayer(court.court_id, pid, removable)}
