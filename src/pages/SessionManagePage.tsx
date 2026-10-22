@@ -670,6 +670,7 @@ export function SessionManagePage() {
             <div key={court.court_id} className="space-y-2">
               <ManageCourtCard
                 court={court}
+                stopAt={session?.end_at}
                 onEnd={async () => {
                   // 防呆:先確認再結束,避免誤觸把整組換下場
                   if (!(await confirm({
