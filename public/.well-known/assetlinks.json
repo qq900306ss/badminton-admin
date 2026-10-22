@@ -5,7 +5,8 @@
       "namespace": "android_app",
       "package_name": "fyi.badmintontw.app",
       "sha256_cert_fingerprints": [
-        "83:4E:AF:B8:25:97:3F:F8:19:F0:4C:6B:B8:C9:13:F1:B6:05:B8:BE:7E:A1:31:92:BF:F3:6B:D7:9C:7C:9A:76"
+        "83:4E:AF:B8:25:97:3F:F8:19:F0:4C:6B:B8:C9:13:F1:B6:05:B8:BE:7E:A1:31:92:BF:F3:6B:D7:9C:7C:9A:76",
+        "96:52:94:C1:32:EA:D7:12:3E:39:65:EF:33:A2:54:EC:4B:53:26:13:D7:6C:EC:6F:1A:01:D5:31:32:6B:9D:F9"
       ]
     }
   }
