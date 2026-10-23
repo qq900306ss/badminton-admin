@@ -35,5 +35,9 @@ jobs:
           S3_BUCKET: ${{ secrets.S3_BUCKET }}
           CF_DISTRIBUTION_ID: ${{ secrets.CF_DISTRIBUTION_ID }}
         run: |
-          aws s3 sync dist/ "s3://$S3_BUCKET/" --delete
+          # 檔名帶 hash 的 JS/CSS:內容永遠不變 → 快取一年,瀏覽器/CDN 不用再回來問。
+          # 不加 --delete:還開著舊版頁面的人,稍後載入的舊 chunk 還拿得到(不會白畫面)
+          aws s3 sync dist/assets "s3://$S3_BUCKET/assets/" --cache-control "public,max-age=31536000,immutable"
+          # 其他(index.html、sw.js、version.json、manifest、圖示):每次都回來確認,沒變就 304,新版才看得到
+          aws s3 sync dist/ "s3://$S3_BUCKET/" --delete --exclude "assets/*" --cache-control "no-cache"
           aws cloudfront create-invalidation --distribution-id "$CF_DISTRIBUTION_ID" --paths "/*"
