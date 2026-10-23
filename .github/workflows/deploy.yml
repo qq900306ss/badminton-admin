@@ -5,6 +5,12 @@ on:
     branches: [main]
   workflow_dispatch: {}
 
+# 同時只跑一個部署:連續 merge 兩個 PR 時,以前兩次部署會同時跑,
+# 先開始的那次最後才寫入 index.html,把新版首頁蓋回舊版。現在後來的排隊等前一個跑完。
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
