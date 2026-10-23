@@ -1,10 +1,18 @@
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useLocation } from 'react-router-dom'
 import { SUPPORTED_LANGS, LANG_LABELS, type Lang } from '../i18n'
 
 // Floating language picker. Fixed so it's reachable from every page/screen
 // without threading a header prop through each route.
+// 場內管理頁有底部分頁列,浮動鈕會壓到 → 那頁不顯示,改在「更多」分頁放一列語言選擇(LanguageRow)。
 export function LanguageSwitcher() {
+  const { pathname } = useLocation()
+  if (pathname.startsWith('/session/')) return null
+  return <FloatingLanguageSwitcher />
+}
+
+function FloatingLanguageSwitcher() {
   const { i18n } = useTranslation()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -51,6 +59,26 @@ export function LanguageSwitcher() {
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+// 放在頁面裡的語言選擇(一排按鈕)
+export function LanguageRow() {
+  const { i18n } = useTranslation()
+  const current = (SUPPORTED_LANGS as readonly string[]).includes(i18n.language) ? (i18n.language as Lang) : 'zh-TW'
+  return (
+    <div className="flex items-center gap-1.5 px-3 py-2">
+      <span className="text-lg">🌐</span>
+      {SUPPORTED_LANGS.map((lng) => (
+        <button
+          key={lng}
+          onClick={() => i18n.changeLanguage(lng)}
+          className={`text-xs font-bold px-3 py-1.5 rounded-full ${lng === current ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500'}`}
+        >
+          {LANG_LABELS[lng]}
+        </button>
+      ))}
     </div>
   )
 }
