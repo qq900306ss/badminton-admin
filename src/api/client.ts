@@ -180,10 +180,11 @@ export const sessionApi = {
   renameMyOrg: (orgName: string) => api.put<{ data: Org }>('/api/my/org', { org_name: orgName }),
   setMyOrgAvatar: (avatarUrl: string) =>
     api.put<{ data: Org }>('/api/my/org/avatar', { avatar_url: avatarUrl }),
-  orgAvatarUploadUrl: (contentType: string) =>
+  // size 會簽進上傳網址(後端限 3MB),實際檔案大小不同 S3 會拒絕
+  orgAvatarUploadUrl: (contentType: string, size: number) =>
     api.post<{ data: { upload_url: string; public_url: string } }>(
       '/api/my/org/avatar-upload-url',
-      { content_type: contentType }
+      { content_type: contentType, size }
     ),
   games: (sessionId: string) =>
     api.get<{ data: GameLog[] }>(`/api/sessions/${sessionId}/games`),

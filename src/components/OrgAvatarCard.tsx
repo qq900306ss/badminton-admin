@@ -31,7 +31,7 @@ export function OrgAvatarCard({ org }: { org: Org | null }) {
     setErr('')
     try {
       const ct = file.type || 'image/jpeg'
-      const r = await sessionApi.orgAvatarUploadUrl(ct)
+      const r = await sessionApi.orgAvatarUploadUrl(ct, file.size)
       const { upload_url, public_url } = r.data.data
       const put = await fetch(upload_url, { method: 'PUT', body: file, headers: { 'Content-Type': ct } })
       if (!put.ok) throw new Error('upload failed')
