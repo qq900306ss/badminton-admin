@@ -2,14 +2,16 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 
-// 首次使用的翻頁式導覽(團主端):開團 → 收人 → 現場排點 → 收尾 4 張卡。
+// 首次使用的翻頁式導覽(團主端):開團 → 邀請 → 收人 → 現場排點 → 收錢收尾 5 張卡。
 // 看完/略過記在 localStorage,之後可從「⚙️ 設定 → 📖 使用教學」重看。
-export const ONBOARD_KEY = 'onboard_admin_v1'
+// v2:介面改成手機版(底部分頁、照上一團再開)→ 換 key,舊團主會再看到一次新版教學
+export const ONBOARD_KEY = 'onboard_admin_v2'
 
 const CARDS = [
   { emoji: '🎉', key: 'openGroup' },
+  { emoji: '📲', key: 'invite' },
   { emoji: '🙋', key: 'collect' },
-  { emoji: '📋', key: 'onsite' },
+  { emoji: '🏸', key: 'onsite' },
   { emoji: '💰', key: 'fees' },
 ]
 
