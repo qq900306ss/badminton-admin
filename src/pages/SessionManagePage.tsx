@@ -47,7 +47,7 @@ function dupOrdinals(players: SessionPlayer[]): Record<string, number> {
   return out
 }
 
-// 手機優先的場內管理:底部四個分頁(場地 / 點名・收錢 / 邀請 / 更多)。
+// 手機優先的場內管理:底部四個分頁(場地 / 成員・收錢 / 邀請 / 更多)。
 // 比賽中最常用的「場地」是預設分頁,一打開就是;危險操作(結束開團)收在「更多」最下面。
 type Tab = 'courts' | 'roster' | 'invite' | 'more'
 const TABS: Tab[] = ['courts', 'roster', 'invite', 'more']
@@ -71,7 +71,7 @@ export function SessionManagePage() {
   const { data: session, isLoading } = useSessionView(sid, wsUp)
   const { data: players } = useSessionPlayers(sid, wsUp)
   const actions = useManageActions(sid)
-  const { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, approveFamily, renameCourt, removeCourt, addQueue, swapQueue, lockCourt, removePlayer, addReserved, setArrived, linkReserved } = actions
+  const { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, approveFamily, renameCourt, removeCourt, addQueue, swapQueue, lockCourt, removePlayer } = actions
   const confirm = useConfirm()
   const qc = useQueryClient()
 
@@ -212,8 +212,6 @@ export function SessionManagePage() {
   const queued = courts.reduce((n, c) => n + c.queue.length, 0)
   const idle = roster.filter((p) => p.claimed && !where.has(p.player_id)).length
   const pendingSignups = (players ?? []).filter((p) => p.pending && p.is_signup).length
-  const notHere = roster.filter((p) => !p.claimed).length
-  const noShows = roster.filter((p) => p.reserved && !p.claimed)
 
   async function endOne(court: CourtView) {
     if (!(await confirm({ message: t('SessionManagePage.confirmEndCourt', { name: courtTitle(court) }), confirmText: t('SessionManagePage.confirmEndCourtBtn') }))) return
@@ -224,7 +222,7 @@ export function SessionManagePage() {
 
   const NAV: { key: Tab; icon: string; label: string; badge?: number }[] = [
     { key: 'courts', icon: '🏸', label: t('Manage.tabCourts') },
-    { key: 'roster', icon: '✅', label: t('Manage.tabRoster'), badge: pendingSignups || undefined },
+    { key: 'roster', icon: '👥', label: t('Manage.tabRoster'), badge: pendingSignups || undefined },
     { key: 'invite', icon: '📲', label: t('Manage.tabInvite') },
     { key: 'more', icon: '⚙️', label: t('Manage.tabMore') },
   ]
@@ -283,7 +281,6 @@ export function SessionManagePage() {
                 { icon: '🏸', text: t('Manage.chipPlaying', { n: playingCourts, total: courts.length }) },
                 { icon: '⏳', text: t('Manage.chipQueued', { n: queued }) },
                 { icon: '🙋', text: t('Manage.chipIdle', { n: idle }) },
-                ...(notHere ? [{ icon: '🚶', text: t('Manage.chipNotHere', { n: notHere }), go: 'roster' as Tab }] : []),
                 ...(pendingSignups ? [{ icon: '📝', text: t('Manage.chipSignups', { n: pendingSignups }), go: 'roster' as Tab, hot: true }] : []),
               ].map((c) => (
                 <button
@@ -350,11 +347,9 @@ export function SessionManagePage() {
               roster={roster}
               dup={dup}
               onOpen={(p) => setPlayerSheet(p.player_id)}
-              onArrived={(p, arrived) => setArrived.mutate({ playerId: p.player_id, arrived })}
               onPaid={(p, paid) => setPaid.mutate({ playerId: p.player_id, paid })}
               onAddOne={(n) => addPlayer.mutate(n)}
-              onPaste={(names) => addReserved.mutate(names)}
-              busyId={(setArrived.isPending && setArrived.variables?.playerId) || (setPaid.isPending && setPaid.variables?.playerId) || undefined}
+              busyId={(setPaid.isPending && setPaid.variables?.playerId) || undefined}
             />
           </>
         )}
@@ -400,27 +395,6 @@ export function SessionManagePage() {
               <SheetAction icon="📊" label={t('SessionManagePage.summary')} hint={t('Manage.summaryHint')} onClick={() => setSummary(true)} />
               <LanguageRow />
             </div>
-            {noShows.length > 0 && (
-              <div className="bg-white rounded-3xl shadow-sm p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-extrabold text-gray-800">🚫 {t('Manage.noShowTitle', { n: noShows.length })}</span>
-                  <button
-                    onClick={() => navigator.clipboard.writeText(noShows.map((p) => p.display_name).join('\n'))}
-                    className="text-xs font-bold text-brand-pink"
-                  >
-                    {t('Manage.copy')}
-                  </button>
-                </div>
-                <p className="text-[11px] text-gray-400">{t('Manage.noShowHint')}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {noShows.map((p) => (
-                    <span key={p.player_id} className="text-xs font-semibold bg-rose-50 text-rose-600 rounded-full px-2.5 py-1">
-                      {p.display_name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
             <StatsPanel sessionId={sid} players={roster} />
             <ActionLogPanel sessionId={sid} />
             <button onClick={closeSession} className="w-full py-3.5 rounded-2xl border-2 border-red-200 text-red-500 font-extrabold bg-white">
@@ -460,15 +434,12 @@ export function SessionManagePage() {
         key={playerSheet ?? 'none'}
         player={sheetPlayer}
         onCourt={sheetWhere ? { courtTitle: courtTitle(sheetWhere.court), playing: sheetWhere.playing } : undefined}
-        joined={roster.filter((p) => !p.reserved && !p.owner_id && !p.is_temp && p.player_id !== playerSheet)}
         ownerName={sheetPlayer?.owner_id ? byId.get(sheetPlayer.owner_id)?.display_name : undefined}
         onClose={() => setPlayerSheet(null)}
-        onArrived={(arrived) => sheetPlayer && setArrived.mutate({ playerId: sheetPlayer.player_id, arrived })}
         onPaid={(paid) => sheetPlayer && setPaid.mutate({ playerId: sheetPlayer.player_id, paid })}
         onLevel={(level) => sheetPlayer && setLevel.mutate({ playerId: sheetPlayer.player_id, level })}
         onRename={(name) => sheetPlayer && setPlayerName.mutate({ playerId: sheetPlayer.player_id, name })}
         onApprove={() => sheetPlayer && approveFamily.mutate(sheetPlayer.player_id)}
-        onLink={(fromPlayerId) => sheetPlayer && linkReserved.mutate({ reservedId: sheetPlayer.player_id, fromPlayerId })}
         onOffCourt={() => {
           if (sheetPlayer && sheetWhere) kick.mutate({ courtId: sheetWhere.court.court_id, playerId: sheetPlayer.player_id })
           setPlayerSheet(null)
