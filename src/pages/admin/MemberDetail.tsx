@@ -98,7 +98,7 @@ export function MemberDetail({
                 <p className="text-xs text-gray-400">
                   {t('AdminConsole.loginName', { name: p.display_name || '—' })}
                   {' · '}
-                  {p.default_level ? t('AdminPage.defaultLevel', { level: p.default_level }) : t('AdminPage.noLevelSet')}
+                  {p.default_level === -1 ? t('AdminConsole.levelPrivate') : p.default_level ? t('AdminPage.defaultLevel', { level: p.default_level }) : t('AdminPage.noLevelSet')}
                 </p>
               </div>
               {p.photo_url && p.photo_url !== p.avatar_url && <Swatch url={p.photo_url} fallback="?" size="sm" />}

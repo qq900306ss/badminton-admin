@@ -125,6 +125,7 @@
     "partnersHint": "Based on games from the last {{n}} sessions played. People with accounts are merged across renames.",
     "retentionHint": "Rosters are kept ~90 days after a session ends; older sessions aren't shown.",
     "viewMember": "View member",
-    "all": "All"
+    "all": "All",
+    "levelPrivate": "Level not shown"
   }
 }
