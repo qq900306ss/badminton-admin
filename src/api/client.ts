@@ -371,7 +371,7 @@ export interface AdminPlayer {
   join_name?: string // 現在使用的名稱
   avatar_url?: string // 現在使用的頭像(emoji 或照片網址)
   photo_url?: string // 登入提供的大頭貼
-  default_level?: number
+  default_level?: number // -1 = 球友選了「不透露」
   email?: string
   banned?: boolean // 超管停權中
   created_at: string
