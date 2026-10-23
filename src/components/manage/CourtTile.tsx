@@ -128,7 +128,7 @@ export function CourtTile({
             {court.queue.length ? court.queue.map((q) => q.display_name).join('、') : t('Manage.nobodyQueued')}
           </span>
           {court.queue.length < 4 && (
-            <button onClick={onAddQueue} className="shrink-0 text-xs font-bold text-brand-pink bg-brand-pink/10 rounded-full px-2.5 py-1 active:scale-95">
+            <button onClick={onAddQueue} className="shrink-0 text-xs font-bold text-pink-600 bg-pink-50 rounded-full px-2.5 py-1 active:scale-95">
               ＋ {t('Manage.queueShort')}
             </button>
           )}

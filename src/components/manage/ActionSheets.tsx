@@ -4,40 +4,34 @@ import type { CourtView, SessionPlayer } from '../../api/client'
 import { getTiers } from '../../lib/levels'
 import { Avatar, Sheet, SheetAction } from './Sheet'
 
-// 點一個人 → 這個人能做的事(到了/收錢/程度/改名/對應報名/下場/移除)
+// 點一個人 → 這個人能做的事(收錢/程度/改名/核准/下場/移除)
 export function PlayerSheet({
   player,
   onCourt,
-  joined,
   ownerName,
   onClose,
-  onArrived,
   onPaid,
   onLevel,
   onRename,
   onApprove,
-  onLink,
   onOffCourt,
   onRemove,
 }: {
   player: SessionPlayer | null
   onCourt?: { courtTitle: string; playing: boolean } // 他現在在哪個場地(場上或排隊)
-  joined: SessionPlayer[] // 用 App 加入、還沒對應到報名名單的人(報名名字要對應時的候選)
   ownerName?: string
   onClose: () => void
-  onArrived: (arrived: boolean) => void
   onPaid: (paid: boolean) => void
   onLevel: (lv: number) => void
   onRename: (name: string) => void
   onApprove: () => void
-  onLink: (fromPlayerId: string) => void
   onOffCourt: () => void
   onRemove: () => void
 }) {
   const { t } = useTranslation()
   // 換人時由父層用 key 重新掛載,狀態自然重置
   const [name, setName] = useState(player?.display_name ?? '')
-  const [mode, setMode] = useState<'main' | 'level' | 'rename' | 'link'>('main')
+  const [mode, setMode] = useState<'main' | 'level' | 'rename'>('main')
   const p = player
   return (
     <Sheet open={!!p} onClose={onClose}>
@@ -51,7 +45,6 @@ export function PlayerSheet({
                 {p.level > 0 ? `Lv${p.level}` : t('Manage.noLevel')}
                 {' · '}
                 {t('Manage.gamesMins', { n: p.games, m: p.total_minutes })}
-                {p.reserved && ` · ${t('Manage.badgeReserved')}`}
                 {ownerName && ` · 👪 ${t('Manage.familyOf', { name: ownerName })}`}
               </p>
               {onCourt && (
@@ -64,24 +57,13 @@ export function PlayerSheet({
 
           {mode === 'main' && (
             <>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => onArrived(!p.claimed)}
-                  className={`py-3 rounded-2xl font-extrabold text-sm ${p.claimed ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-500'}`}
-                >
-                  {p.claimed ? `✓ ${t('Manage.here')}` : t('Manage.markHere')}
-                </button>
-                <button
-                  onClick={() => onPaid(!p.paid)}
-                  className={`py-3 rounded-2xl font-extrabold text-sm ${p.paid ? 'bg-amber-400 text-white' : 'bg-gray-100 text-gray-500'}`}
-                >
-                  {p.paid ? `$ ${t('Manage.paid')}` : t('Manage.markPaid')}
-                </button>
-              </div>
+              <button
+                onClick={() => onPaid(!p.paid)}
+                className={`w-full py-3 rounded-2xl font-extrabold text-sm ${p.paid ? 'bg-amber-400 text-white' : 'bg-gray-100 text-gray-500'}`}
+              >
+                {p.paid ? `$ ${t('Manage.paid')}` : `$ ${t('Manage.markPaid')}`}
+              </button>
               {p.pending && <SheetAction icon="✅" label={t('Manage.approve')} onClick={onApprove} />}
-              {p.reserved && !p.claimed && joined.length > 0 && (
-                <SheetAction icon="🔗" label={t('Manage.linkJoined')} hint={t('Manage.linkJoinedHint')} onClick={() => setMode('link')} />
-              )}
               {onCourt && <SheetAction icon="🪑" label={t('Manage.offCourt')} hint={onCourt.courtTitle} onClick={onOffCourt} />}
               <SheetAction icon="🏷️" label={t('Manage.setLevel')} hint={p.level > 0 ? `Lv${p.level}` : t('Manage.noLevel')} onClick={() => setMode('level')} />
               <SheetAction icon="✏️" label={t('Manage.renameHere')} onClick={() => setMode('rename')} />
@@ -138,25 +120,6 @@ export function PlayerSheet({
             </div>
           )}
 
-          {mode === 'link' && (
-            <div className="space-y-1">
-              <p className="text-xs text-gray-400 pb-1">{t('Manage.linkPick', { name: p.display_name })}</p>
-              {joined.map((j) => (
-                <button
-                  key={j.player_id}
-                  onClick={() => {
-                    onLink(j.player_id)
-                    onClose()
-                  }}
-                  className="w-full flex items-center gap-2.5 px-2 py-2 rounded-2xl active:bg-gray-100 text-left"
-                >
-                  <Avatar p={j} size="sm" />
-                  <span className="font-bold text-gray-700 text-sm">{j.display_name}</span>
-                  <span className="text-[11px] text-gray-400">{t('Manage.joinedViaApp')}</span>
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       )}
     </Sheet>

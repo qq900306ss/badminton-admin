@@ -117,7 +117,6 @@ export interface SessionPlayer {
   is_signup?: boolean // 從前台報名進來(pending 期間顯示在報名審核區)
   signup_msg?: string // 報名留言
   account_ref?: string // 封鎖用的穩定匿名識別碼(臨時加的人沒有)
-  reserved?: boolean // 團主從 FB/LINE 收到報名、貼進來的名單(到場前 claimed=false = 還沒到)
 }
 
 export interface SessionSummary {
@@ -218,15 +217,6 @@ export const sessionApi = {
     api.post<{ data: SessionPlayer }>(
       `/api/sessions/${sessionId}/players/${playerId}/approve`
     ),
-  // 點名:一次貼上報名名單(一行一個名字)→ 都列為「已報名・未到」
-  addReserved: (sessionId: string, names: string[]) =>
-    api.post<{ data: SessionPlayer[] }>(`/api/sessions/${sessionId}/players/bulk`, { names }),
-  // 點名:到了 / 還沒到
-  setArrived: (sessionId: string, playerId: string, arrived: boolean) =>
-    api.post<{ data: SessionPlayer }>(`/api/sessions/${sessionId}/players/${playerId}/arrived`, { arrived }),
-  // 報名名單上的名字 ← 對應到用 App 加入的那個人(合併成一位,算已到)
-  linkReserved: (sessionId: string, reservedId: string, fromPlayerId: string) =>
-    api.post<{ data: SessionPlayer }>(`/api/sessions/${sessionId}/players/${reservedId}/link`, { from_player_id: fromPlayerId }),
   removePlayer: (sessionId: string, playerId: string) =>
     api.delete(`/api/sessions/${sessionId}/players/${playerId}`),
   close: (sessionId: string) => api.post(`/api/sessions/${sessionId}/close`),
