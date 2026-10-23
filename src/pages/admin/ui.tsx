@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isPhotoUrl } from '../../lib/avatar'
 
@@ -7,9 +7,14 @@ import { isPhotoUrl } from '../../lib/avatar'
 // 頭像:照片網址 → <img>,emoji → 字,其他 → 第一個字
 export function Swatch({ url, fallback, size = 'md' }: { url?: string; fallback: string; size?: 'sm' | 'md' | 'lg' }) {
   const cls = size === 'lg' ? 'w-14 h-14 text-2xl' : size === 'sm' ? 'w-7 h-7 text-sm' : 'w-10 h-10 text-lg'
-  if (isPhotoUrl(url)) return <img src={url} alt="" className={`${cls} rounded-full object-cover shrink-0`} />
+  // LINE 等登入給的照片網址會過期 → 載入失敗就改顯示名字首字,不留破圖
+  const [broken, setBroken] = useState<string | null>(null)
+  const photo = isPhotoUrl(url) && broken !== url
+  if (photo) return <img src={url} alt="" onError={() => setBroken(url ?? null)} className={`${cls} rounded-full object-cover shrink-0`} />
   return (
-    <span className={`${cls} rounded-full bg-gray-100 flex items-center justify-center shrink-0`}>{url || fallback}</span>
+    <span className={`${cls} rounded-full bg-gray-100 flex items-center justify-center shrink-0`}>
+      {isPhotoUrl(url) ? fallback : url || fallback}
+    </span>
   )
 }
 
