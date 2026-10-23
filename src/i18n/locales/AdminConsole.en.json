@@ -51,7 +51,7 @@
     "noHosts": "No matching hosts",
     "ongoingN": "{{n}} live",
     "sessionsN": "{{n}} sessions",
-    "lastOpened": "Last {{when}}",
+    "lastOpened": "Last session {{when}}",
     "neverOpened": "No sessions yet",
     "statSessions": "Sessions",
     "statAttendance": "Attendance",
@@ -124,6 +124,7 @@
     "withPeople": "With: {{names}}",
     "partnersHint": "Based on games from the last {{n}} sessions played. People with accounts are merged across renames.",
     "retentionHint": "Rosters are kept ~90 days after a session ends; older sessions aren't shown.",
-    "viewMember": "View member"
+    "viewMember": "View member",
+    "all": "All"
   }
 }

@@ -41,7 +41,7 @@
     "noHosts": "該当する主催者はいません",
     "ongoingN": "開催中 {{n}}",
     "sessionsN": "{{n}} 回",
-    "lastOpened": "最終 {{when}}",
+    "lastOpened": "最終開催 {{when}}",
     "neverOpened": "未開催",
     "statSessions": "開催数",
     "statAttendance": "延べ人数",
@@ -114,6 +114,7 @@
     "withPeople": "同じコート:{{names}}",
     "partnersHint": "直近 {{n}} 回の試合記録から集計。アカウントのある人は名前を変えても同一人物として集計。",
     "retentionHint": "会の終了後、名簿は約 90 日保存されます。それより前の会は表示されません。",
-    "viewMember": "メンバーを見る"
+    "viewMember": "メンバーを見る",
+    "all": "すべて"
   }
 }

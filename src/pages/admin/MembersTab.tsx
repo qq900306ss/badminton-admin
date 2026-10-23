@@ -215,7 +215,7 @@ export function MembersTab({
         <FilterRow label={t('AdminConsole.filterLogin')}>
           {(['all', 'google', 'line', 'apple'] as Provider[]).map((k) => (
             <Pill key={k} active={provider === k} onClick={() => setProvider(k)} count={providerCounts[k]}>
-              {k === 'all' ? t('ClientSource.filterAll') : PROVIDER_LABEL[k]}
+              {k === 'all' ? t('AdminConsole.all') : PROVIDER_LABEL[k]}
             </Pill>
           ))}
           <Pill active={bannedOnly} onClick={() => setBannedOnly((v) => !v)} count={bannedCount}>
