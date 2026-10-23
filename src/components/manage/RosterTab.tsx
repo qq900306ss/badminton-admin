@@ -69,7 +69,7 @@ export function RosterTab({
           placeholder={t('Manage.addOnSitePlaceholder')}
           className="flex-1 min-w-0 border-2 border-gray-100 bg-white rounded-2xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-pink"
         />
-        <button onClick={add} disabled={!newName.trim()} className="px-4 rounded-2xl bg-gray-900 text-white text-sm font-bold disabled:opacity-40">
+        <button onClick={add} disabled={!newName.trim()} className="px-4 rounded-2xl bg-pink-400 text-white text-sm font-bold disabled:opacity-40">
           {t('Manage.add')}
         </button>
       </div>
@@ -80,7 +80,7 @@ export function RosterTab({
           <button
             key={k}
             onClick={() => setFilter(k)}
-            className={`text-xs font-bold px-3 py-1.5 rounded-full ${filter === k ? 'bg-gray-900 text-white' : 'bg-white text-gray-500 shadow-sm'}`}
+            className={`text-xs font-bold px-3 py-1.5 rounded-full ${filter === k ? 'bg-pink-400 text-white' : 'bg-white text-gray-500 shadow-sm'}`}
           >
             {t(`Manage.filter_${k}`)} <span className="opacity-60">{counts[k]}</span>
           </button>

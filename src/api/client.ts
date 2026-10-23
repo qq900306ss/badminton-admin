@@ -132,6 +132,7 @@ export interface SessionSummary {
   queue_open_at?: string
   playing_courts?: number // 目前正在開打的球場數(僅超級後台列表會帶)
   opened_at: string
+  contact_url?: string
   // 前台報名(counts 對進行中場次計算)
   description?: string
   signup_open?: boolean

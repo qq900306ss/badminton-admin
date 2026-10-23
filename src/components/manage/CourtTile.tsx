@@ -145,7 +145,7 @@ export function CourtTile({
         <button
           onClick={onEnd}
           disabled={filled === 0 && court.queue.length === 0}
-          className="flex-1 py-3.5 rounded-2xl bg-gray-900 text-white font-extrabold text-[15px] active:scale-[0.98] transition-transform disabled:bg-gray-200 disabled:text-gray-400"
+          className="flex-1 py-3.5 rounded-2xl bg-pink-400 text-white font-extrabold text-[15px] active:scale-[0.98] transition-transform disabled:bg-gray-200 disabled:text-gray-400"
         >
           {court.queue.length > 0 ? t('Manage.endAndNext', { n: court.queue.length }) : t('Manage.endOnly')}
         </button>

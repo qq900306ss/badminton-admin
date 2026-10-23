@@ -1,0 +1,30 @@
+{
+  "Home": {
+    "cardLine": "{{courts}} courts · {{people}} people · {{played}} played",
+    "collapse": "Hide",
+    "emptyHint": "Tap “New session” below, or repeat your last one",
+    "emptyTitle": "No open sessions",
+    "enter": "Manage",
+    "expand": "Show",
+    "greetAfternoon": "Good afternoon",
+    "greetEvening": "Good evening — playing tonight?",
+    "greetMorning": "Good morning",
+    "history": "Past sessions {{n}}",
+    "liveNow": "Live",
+    "moreOptions": "More (queue time, intro, sign-ups)",
+    "newSession": "New session",
+    "newTitle": "New session",
+    "ongoing": "Live now",
+    "openNow": "Open ({{date}} {{time}})",
+    "pendingSignups": "{{n}} sign-ups",
+    "randomCode": "Random",
+    "repeat": "Repeat",
+    "repeatLast": "Repeat last session",
+    "repeatTitle": "Repeat “{{name}}”",
+    "rowLine": "{{courts}} courts · {{people}} signed up",
+    "rowLinePast": "{{people}} people · {{played}} played",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "upcoming": "Upcoming"
+  }
+}
