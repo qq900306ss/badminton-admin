@@ -296,6 +296,11 @@ export const adminApi = {
   listSessions: () => api.get<{ data: SessionSummary[] }>('/api/admin/sessions'),
   listFeedback: () => api.get<{ data: Feedback[] }>('/api/admin/feedback'),
   listPlayers: () => api.get<{ data: AdminPlayer[] }>('/api/admin/players'),
+  // 每個帳號的打球統計(名單保留 ~90 天,只算這段期間)
+  playerStats: () => api.get<{ data: Record<string, PlayerStats> }>('/api/admin/players/stats'),
+  // 成員詳情:加入過的團、最近幾團的比賽與球伴
+  playerActivity: (playerId: string) =>
+    api.get<{ data: PlayerActivity }>(`/api/admin/players/${encodeURIComponent(playerId)}/activity`),
   // 停權/解除停權:立即生效(後端 middleware 擋掉該帳號的玩家 API 與登入)
   setPlayerBanned: (playerId: string, banned: boolean) =>
     api.post<{ data: { banned: boolean } }>(`/api/admin/players/${encodeURIComponent(playerId)}/ban`, { banned }),
@@ -307,6 +312,54 @@ export const adminApi = {
     api.get<{ data: Report[] }>('/api/admin/reports', { params: { status } }),
   resolveReport: (id: string, note: string) =>
     api.post<{ data: { resolved: boolean } }>('/api/admin/reports/resolve', { id, note }),
+}
+
+export interface PlayerStats {
+  sessions: number // 加入過幾團
+  played_in: number // 其中真的上場過的團數
+  games: number
+  minutes: number
+  last_session_id?: string
+  last_session_at?: string // 最近一團的開打時間
+  org_ids?: string[] // 加入過哪些團主的團
+}
+
+export interface ActivitySession {
+  session_id: string
+  title: string
+  org_id: string
+  status: string
+  at: string
+  name: string // 他在這團用的名字
+  level: number
+  games: number
+  minutes: number
+  paid: boolean
+  pending?: boolean
+  missing?: boolean // 場次已被刪,只剩名單
+}
+
+export interface Partner {
+  account_id?: string // 有帳號才有(可以點過去看他)
+  name: string
+  games: number
+  last_at: string
+}
+
+export interface ActivityGame {
+  session_id: string
+  court_num: number
+  started_at: string
+  ended_at: string
+  minutes: number
+  with: string[]
+}
+
+export interface PlayerActivity {
+  sessions: ActivitySession[]
+  partners: Partner[]
+  games: ActivityGame[]
+  games_from_count: number // 球伴/比賽是從最近幾團算的
 }
 
 export interface AdminPlayer {
