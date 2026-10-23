@@ -42,10 +42,10 @@ export default function App() {
       <ConfirmProvider>
       {/* 舊 cloudfront 網址:瀏覽器直接跳新網域、已安裝 PWA 顯示重新安裝提醒 */}
       <MovedNotice />
-      <LanguageSwitcher />
       <ConnectionBanner />
       <UpdateBanner />
       <BrowserRouter>
+        <LanguageSwitcher />
         <Suspense fallback={<div className="min-h-screen bg-brand-bg" />}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />

@@ -188,5 +188,21 @@ export function useManageActions(sessionId: string) {
       sessionApi.lockCourt(sessionId, v.courtId, v.locked),
     onSuccess: invalidate,
   })
-  return { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, approveFamily, renameCourt, removeCourt, addQueue, swapQueue, lockCourt, removePlayer }
+  // 點名:貼報名名單 / 到了沒 / 報名名字對應到 App 加入的人
+  const addReserved = useMutation({
+    mutationFn: (names: string[]) => sessionApi.addReserved(sessionId, names),
+    onSuccess: invalidatePlayers,
+  })
+  const setArrived = useMutation({
+    mutationFn: (v: { playerId: string; arrived: boolean }) => sessionApi.setArrived(sessionId, v.playerId, v.arrived),
+    onSuccess: invalidatePlayers,
+  })
+  const linkReserved = useMutation({
+    mutationFn: (v: { reservedId: string; fromPlayerId: string }) => sessionApi.linkReserved(sessionId, v.reservedId, v.fromPlayerId),
+    onSuccess: () => {
+      invalidatePlayers()
+      invalidate()
+    },
+  })
+  return { endCourt, undoEnd, kick, addPlaying, addCourt, addPlayer, setLevel, setPlayerName, setPaid, approveFamily, renameCourt, removeCourt, addQueue, swapQueue, lockCourt, removePlayer, addReserved, setArrived, linkReserved }
 }
