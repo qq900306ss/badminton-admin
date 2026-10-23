@@ -54,7 +54,8 @@ export function AdminPage() {
   const { data: allSessions } = useQuery({
     queryKey: ['admin-sessions'],
     queryFn: () => adminApi.listSessions().then((r) => r.data.data),
-    refetchInterval: 15000, // 超管這頁沒有 WS,15 秒對帳一次
+    // 這支每次都會把所有團的名單各讀一遍(團越多越貴);1 分鐘對帳一次就夠,切到別的分頁時不輪詢
+    refetchInterval: 60_000,
   })
   const { data: players } = useQuery({
     queryKey: ['admin-players'],
