@@ -54,6 +54,17 @@
       "i0": "Seating board upgrade: each court now has an \"End game\" button and the header a \"💰 Settle up\" popup — seating, rotating and collecting fees all on one screen",
       "i1": "New \"📢 Announcement\": write a message for everyone in the session (e.g. dinner afterwards) — players see it instantly",
       "i2": "Courts can now be 🔒 locked/unlocked right on the seating board (locked = players can't self-serve join/queue; board seating still works)"
+    },
+    "r11": {
+      "i0": "New home screen: live sessions as big cards with a sign-up reminder; “Repeat last session” fills in everything from last time — just pick the date",
+      "i1": "The new-session form now slides up from the bottom: Today / Tomorrow shortcuts, ＋/− for courts, and 🎲 for a random password",
+      "i2": "Session management is now mobile-first with bottom tabs: Courts / Members / Invite / More — it opens on Courts",
+      "i3": "Each court card looks like a court: the net shows minutes played and turns yellow after 20 min; “End · next group” sits right under your thumb, other actions are under ⋯",
+      "i4": "Members: one $ per person — tap when they pay; unpaid people are listed first",
+      "i5": "“End session” moved to the bottom of More so it can’t be tapped by accident; the tutorial was updated for the new layout"
+    },
+    "r10": {
+      "i0": "Minutes played now count from the session start time: warming up before the start and time after the end no longer count"
     }
   }
 }
