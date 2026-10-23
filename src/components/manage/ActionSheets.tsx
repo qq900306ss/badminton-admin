@@ -84,7 +84,7 @@ export function PlayerSheet({
                           onLevel(lv)
                           setMode('main')
                         }}
-                        className={`w-11 h-11 rounded-xl text-base font-extrabold ${tier.chip} ${p.level === lv ? 'ring-2 ring-gray-900' : ''}`}
+                        className={`w-11 h-11 rounded-xl text-base font-extrabold ${tier.chip} ${p.level === lv ? 'ring-2 ring-pink-400' : ''}`}
                       >
                         {lv}
                       </button>
@@ -113,7 +113,7 @@ export function PlayerSheet({
                   onRename(name.trim())
                   setMode('main')
                 }}
-                className="w-full py-3.5 rounded-2xl bg-gray-900 text-white font-extrabold disabled:bg-gray-200 disabled:text-gray-400"
+                className="w-full py-3.5 rounded-2xl bg-pink-400 text-white font-extrabold disabled:bg-gray-200 disabled:text-gray-400"
               >
                 {t('Manage.save')}
               </button>
@@ -227,7 +227,7 @@ export function CourtMenuSheet({
                 onRename(name.trim())
                 onClose()
               }}
-              className="w-full py-3.5 rounded-2xl bg-gray-900 text-white font-extrabold"
+              className="w-full py-3.5 rounded-2xl bg-pink-400 text-white font-extrabold"
             >
               {t('Manage.save')}
             </button>

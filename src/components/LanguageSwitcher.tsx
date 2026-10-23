@@ -5,10 +5,10 @@ import { SUPPORTED_LANGS, LANG_LABELS, type Lang } from '../i18n'
 
 // Floating language picker. Fixed so it's reachable from every page/screen
 // without threading a header prop through each route.
-// 場內管理頁有底部分頁列,浮動鈕會壓到 → 那頁不顯示,改在「更多」分頁放一列語言選擇(LanguageRow)。
+// 首頁、場內管理頁底部有固定按鈕列,浮動鈕會壓到 → 這兩頁不顯示,改在設定 /「更多」放一列語言選擇(LanguageRow)。
 export function LanguageSwitcher() {
   const { pathname } = useLocation()
-  if (pathname.startsWith('/session/')) return null
+  if (pathname === '/' || pathname.startsWith('/session/')) return null
   return <FloatingLanguageSwitcher />
 }
 
@@ -74,7 +74,7 @@ export function LanguageRow() {
         <button
           key={lng}
           onClick={() => i18n.changeLanguage(lng)}
-          className={`text-xs font-bold px-3 py-1.5 rounded-full ${lng === current ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500'}`}
+          className={`text-xs font-bold px-3 py-1.5 rounded-full ${lng === current ? 'bg-pink-400 text-white' : 'bg-gray-100 text-gray-500'}`}
         >
           {LANG_LABELS[lng]}
         </button>

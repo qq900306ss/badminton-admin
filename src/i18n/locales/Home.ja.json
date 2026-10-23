@@ -1,0 +1,30 @@
+{
+  "Home": {
+    "cardLine": "{{courts}} 面 · {{people}} 人 · {{played}} 人プレー",
+    "collapse": "閉じる",
+    "emptyHint": "下の「新しく開催」か、前回と同じ内容で開催",
+    "emptyTitle": "開催中の会はありません",
+    "enter": "管理する",
+    "expand": "開く",
+    "greetAfternoon": "こんにちは",
+    "greetEvening": "こんばんは、今日はプレーしますか?",
+    "greetMorning": "おはようございます",
+    "history": "過去の会 {{n}}",
+    "liveNow": "開催中",
+    "moreOptions": "その他(順番開始時刻・紹介・申込)",
+    "newSession": "新しく開催",
+    "newTitle": "新しく開催",
+    "ongoing": "開催中",
+    "openNow": "開催する({{date}} {{time}})",
+    "pendingSignups": "申込 {{n}} 件",
+    "randomCode": "ランダム",
+    "repeat": "再開催",
+    "repeatLast": "前回と同じで開催",
+    "repeatTitle": "「{{name}}」と同じ内容で開催",
+    "rowLine": "{{courts}} 面 · 申込 {{people}} 人",
+    "rowLinePast": "{{people}} 人 · {{played}} 人プレー",
+    "today": "今日",
+    "tomorrow": "明日",
+    "upcoming": "これから"
+  }
+}

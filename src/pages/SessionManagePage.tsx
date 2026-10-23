@@ -253,7 +253,7 @@ export function SessionManagePage() {
         <button
           onClick={toggleAnnounce}
           aria-label={announceOn ? t('Announce.toggleTitleOn') : t('Announce.toggleTitleOff')}
-          className={`h-9 px-3 rounded-full text-sm font-bold ${announceOn ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-400'}`}
+          className={`h-9 px-3 rounded-full text-sm font-bold ${announceOn ? 'bg-pink-400 text-white' : 'bg-gray-100 text-gray-400'}`}
         >
           🔊 {announceOn ? t('Manage.on') : t('Manage.off')}
         </button>
@@ -496,7 +496,7 @@ export function SessionManagePage() {
           className="w-full border-2 border-gray-100 bg-gray-50 rounded-2xl px-3 py-3 text-base focus:outline-none focus:border-brand-pink focus:bg-white"
         />
         {titleErr && <p className="text-red-400 text-sm mt-1">{titleErr}</p>}
-        <button onClick={saveTitle} disabled={!titleInput.trim()} className="mt-3 w-full py-3.5 rounded-2xl bg-gray-900 text-white font-extrabold disabled:bg-gray-200">
+        <button onClick={saveTitle} disabled={!titleInput.trim()} className="mt-3 w-full py-3.5 rounded-2xl bg-pink-400 text-white font-extrabold disabled:bg-gray-200">
           {t('Manage.save')}
         </button>
       </Sheet>

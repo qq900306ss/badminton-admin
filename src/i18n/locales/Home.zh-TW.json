@@ -1,0 +1,30 @@
+{
+  "Home": {
+    "cardLine": "{{courts}} 面場 · {{people}} 人 · {{played}} 人打過",
+    "collapse": "收起",
+    "emptyHint": "按下面的「開新團」,或照上一團再開一次",
+    "emptyTitle": "現在沒有開著的團",
+    "enter": "進場管理",
+    "expand": "展開",
+    "greetAfternoon": "午安",
+    "greetEvening": "晚安,今天打球嗎?",
+    "greetMorning": "早安",
+    "history": "開過的團 {{n}}",
+    "liveNow": "進行中",
+    "moreOptions": "更多設定(開放排隊時間、簡介、報名)",
+    "newSession": "開新團",
+    "newTitle": "開新團",
+    "ongoing": "進行中",
+    "openNow": "開團({{date}} {{time}})",
+    "pendingSignups": "{{n}} 筆報名",
+    "randomCode": "隨機產生",
+    "repeat": "再開",
+    "repeatLast": "照上一團再開",
+    "repeatTitle": "照「{{name}}」再開一團",
+    "rowLine": "{{courts}} 面場 · {{people}} 人報名",
+    "rowLinePast": "{{people}} 人 · {{played}} 人打過",
+    "today": "今天",
+    "tomorrow": "明天",
+    "upcoming": "即將開始"
+  }
+}
