@@ -177,8 +177,7 @@ export function MemberDetail({
                     <div className="text-right shrink-0">
                       <p className={`text-xs font-bold ${s.games ? 'text-gray-700' : 'text-gray-300'}`}>{t('AdminConsole.gamesN', { n: s.games })}</p>
                       <p className="text-[10px] text-gray-400">
-                        {s.minutes ? fmtMinutes(s.minutes, t) : ''}
-                        {s.paid && ` · ${t('AdminConsole.paid')}`}
+                        {[s.minutes ? fmtMinutes(s.minutes, t) : '', s.paid ? t('AdminConsole.paid') : ''].filter(Boolean).join(' · ')}
                       </p>
                     </div>
                   </button>
