@@ -1,5 +1,10 @@
 {
   "changelog": {
+    "r12": {
+      "i0": "After a session closes, players can no longer join a court, queue or vote to end, and you can no longer seat people; “End game” and “Undo” still work (handy for recording games the next day)",
+      "i1": "Auto-close: a session closes automatically 2 hours after its end time. It closes right away when someone opens it; otherwise within 3 hours of the end time",
+      "i2": "Data retention: each player’s totals (sessions, games, minutes) are kept permanently; each session’s roster details (signup messages, paid flags), courts and per-game records are deleted automatically 90 days after it ends"
+    },
     "r9": {
       "i0": "🛡 Confirmation guards: \"End game\", \"Undo\", and seating people on court / into the queue (seating board & manual add) now show a confirm dialog first — no more accidental taps",
       "i1": "The home session list now splits \"Ongoing\" vs \"Not started yet\": sessions whose start time hasn't arrived are no longer shown as ongoing, and move over automatically when it's time",

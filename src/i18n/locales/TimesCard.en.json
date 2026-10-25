@@ -8,7 +8,7 @@
     "queueLabel": "Queue opens: ",
     "edit": "Edit",
     "fieldStart": "Play starts",
-    "fieldEnd": "End time (auto-closes 2 hours after)",
+    "fieldEnd": "End time (auto-closes 2 hours after; within 3 hours if nobody has it open)",
     "fieldQueue": "Queue opens at (view-only before this)",
     "saving": "Saving…",
     "save": "Save",

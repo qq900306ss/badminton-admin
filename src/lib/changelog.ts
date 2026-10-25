@@ -13,6 +13,7 @@ export interface ChangelogEntry {
 // (not the array index) so adding a newer release on top is a pure append to the
 // locale files — no renumbering of every existing key.
 const RELEASES: { date: string; count: number; key: string }[] = [
+  { date: '2026/10/26', count: 3, key: 'r12' },
   { date: '2026/10/23', count: 6, key: 'r11' },
   { date: '2026/10/22', count: 1, key: 'r10' },
   { date: '2026/09/03', count: 5, key: 'r9' },
