@@ -117,16 +117,24 @@ export function CourtTile({
       <div className="px-4 pt-3">
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-bold text-gray-400 shrink-0">{t('Manage.next', { n: court.queue.length })}</span>
-          <div className="flex -space-x-1.5 overflow-x-auto py-1 min-w-0">
-            {court.queue.map((q) => (
-              <button key={q.player_id} onClick={() => onSlot(q)} title={q.display_name}>
-                <Avatar p={q} size="sm" />
-              </button>
-            ))}
-          </div>
-          <span className="text-xs text-gray-500 truncate min-w-0 flex-1">
-            {court.queue.length ? court.queue.map((q) => q.display_name).join('、') : t('Manage.nobodyQueued')}
-          </span>
+          {/* 跟前台一樣一人一顆大頭像+名字,好點 */}
+          {court.queue.length ? (
+            <div className="flex gap-2 overflow-x-auto py-1 min-w-0 flex-1">
+              {court.queue.map((q) => (
+                <button
+                  key={q.player_id}
+                  onClick={() => onSlot(q)}
+                  title={q.display_name}
+                  className="flex flex-col items-center gap-0.5 shrink-0 active:scale-95"
+                >
+                  <Avatar p={q} size="lg" />
+                  <span className="text-[11px] font-semibold text-gray-600 max-w-[3.5rem] truncate">{q.display_name}</span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <span className="text-xs text-gray-500 truncate min-w-0 flex-1">{t('Manage.nobodyQueued')}</span>
+          )}
           {court.queue.length < 4 && (
             <button onClick={onAddQueue} className="shrink-0 text-xs font-bold text-pink-600 bg-pink-50 rounded-full px-2.5 py-1 active:scale-95">
               ＋ {t('Manage.queueShort')}
