@@ -2,7 +2,9 @@
 // CHANGED DATA in the message (view / players) so clients apply it directly
 // instead of re-calling the API; a bare nudge (no payload) still means
 // "refetch yourself" as fallback. Auto-reconnects; onStatus reports socket
-// health so pollers can slow down while live.
+// health so pollers can slow down while live. Sends the leader token as
+// ?token= (browsers can't set headers on WebSocket) so the server knows we may
+// see the full roster.
 import type { SessionView, SessionPlayer } from '../api/client'
 
 export type RTMessage =
@@ -30,7 +32,10 @@ export function connectSessionWS(
   function open() {
     if (closed) return
     try {
-      ws = new WebSocket(`${base}/api/sessions/${sessionId}/ws`)
+      // no token → server sends bare nudges only (we refetch via the authed API)
+      const token = localStorage.getItem('token')
+      const q = token ? `?token=${encodeURIComponent(token)}` : ''
+      ws = new WebSocket(`${base}/api/sessions/${sessionId}/ws${q}`)
     } catch {
       schedule()
       return
