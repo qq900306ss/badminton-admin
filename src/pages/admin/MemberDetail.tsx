@@ -125,7 +125,7 @@ export function MemberDetail({
 
           {/* 統計 */}
           <div className="grid grid-cols-2 gap-2">
-            <Stat label={t('AdminConsole.statLastActive')} value={ago(lastActiveOf(p, stats), now, t)} />
+            <Stat label={t('AdminConsole.statLastActive')} value={ago(lastActiveOf(p, stats, now), now, t)} />
             <Stat
               label={t('AdminConsole.statLastPlayed')}
               value={stats?.last_session_at ? ago(stats.last_session_at, now, t) : '—'}

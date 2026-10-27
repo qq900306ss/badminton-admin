@@ -66,9 +66,9 @@ export function MembersTab({
     () =>
       (players ?? []).map((p) => {
         const st = stats?.[p.player_id]
-        return { p, st, lastActive: lastActiveOf(p, st) }
+        return { p, st, lastActive: lastActiveOf(p, st, now) }
       }),
-    [players, stats]
+    [players, stats, now]
   )
 
   const idleDays = (r: MemberRow) => (now - new Date(r.lastActive).getTime()) / DAY

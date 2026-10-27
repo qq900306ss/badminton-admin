@@ -58,9 +58,12 @@ export function sessionState(s: SessionSummary, now: number): SessionState {
 
 export const PROVIDER_LABEL: Record<'google' | 'line' | 'apple', string> = { google: 'Google', line: 'LINE', apple: 'Apple' }
 
-// 最近活動 = 「最近使用 App」與「最近加入的團」較晚者;舊帳號兩者都沒有就用註冊時間
-export function lastActiveOf(p: AdminPlayer, st?: PlayerStats): string {
-  const xs = [p.last_seen_at, st?.last_session_at].filter(Boolean) as string[]
+// 最近活動 = 「最近使用 App」與「最近加入的團」較晚者;舊帳號兩者都沒有就用註冊時間。
+// last_session_at 是團的開打時間,報名了還沒開打的團會在未來 → 不算(否則排序置頂、多久沒來的區間也放不進去);
+// 報名當下有打 API,last_seen_at 已經記到了
+export function lastActiveOf(p: AdminPlayer, st: PlayerStats | undefined, now: number): string {
+  const played = st?.last_session_at && new Date(st.last_session_at).getTime() <= now ? st.last_session_at : undefined
+  const xs = [p.last_seen_at, played].filter(Boolean) as string[]
   return xs.sort().pop() ?? p.created_at
 }
 
