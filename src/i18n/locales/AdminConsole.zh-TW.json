@@ -12,7 +12,7 @@
     "in_day": "{{count}} 天後",
     "in_month": "{{count}} 個月後",
     "in_year": "{{count}} 年後",
-    "hoursMinutes": "{{h}} 小時 {{m}} 分",
+    "hoursMinutes": "{{h}} 小時 {{m}} 分鐘",
     "minutesOnly": "{{m}} 分鐘",
     "showMore": "顯示更多({{shown}}/{{total}})",
     "cancel": "取消",

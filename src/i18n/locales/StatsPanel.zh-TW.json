@@ -4,7 +4,7 @@
     "games": "場數",
     "minutes": "時數",
     "gamesCount": "{{n}} 場",
-    "minutesCount": "{{n}} 分",
+    "minutesCount": "{{n}} 分鐘",
     "empty": "還沒有人",
     "history": "每場歷史 ({{count}})",
     "court": "場地 {{n}}",
