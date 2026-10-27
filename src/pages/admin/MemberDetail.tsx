@@ -44,7 +44,17 @@ export function MemberDetail({
 
   const { data: act, isError, isLoading } = useQuery({
     queryKey: ['admin-player-activity', p.player_id],
-    queryFn: () => adminApi.playerActivity(p.player_id).then((r) => r.data.data),
+    // 後端沒資料的陣列回 null(沒打過比賽 → partners/games 是 null、只有自己的場 → with 是 null),這裡統一補成 []
+    queryFn: () =>
+      adminApi.playerActivity(p.player_id).then((r) => {
+        const d = r.data.data
+        return {
+          ...d,
+          sessions: d.sessions ?? [],
+          partners: d.partners ?? [],
+          games: (d.games ?? []).map((g) => ({ ...g, with: g.with ?? [] })),
+        }
+      }),
     staleTime: 30_000,
   })
   const orgName = (id: string) => (orgs ?? []).find((o) => o.org_id === id)?.org_name ?? t('AdminPage.unknown')

@@ -354,13 +354,14 @@ export interface ActivityGame {
   started_at: string
   ended_at: string
   minutes: number
-  with: string[]
+  with: string[] | null
 }
 
+// 線上格式:空陣列會回 null;MemberDetail 的 queryFn 會補成 []
 export interface PlayerActivity {
-  sessions: ActivitySession[]
-  partners: Partner[]
-  games: ActivityGame[]
+  sessions: ActivitySession[] | null
+  partners: Partner[] | null
+  games: ActivityGame[] | null
   games_from_count: number // 球伴/比賽是從最近幾團算的
 }
 
