@@ -36,7 +36,9 @@ export function ago(iso: string | undefined, now: number, t: TFunction): string 
   const abs = Math.abs(diff)
   const future = diff < 0
   const unit = (key: string, n: number) => t(future ? `AdminConsole.in_${key}` : `AdminConsole.ago_${key}`, { count: n })
-  if (abs < 3_600_000) return future ? unit('min', Math.max(1, Math.round(abs / 60_000))) : t('AdminConsole.justNow')
+  // 一分鐘內才叫「剛剛」;一小時內寫分鐘數(之前整小時都叫剛剛,26 分鐘前看起來像此刻)
+  if (!future && abs < 60_000) return t('AdminConsole.justNow')
+  if (abs < 3_600_000) return unit('min', Math.max(1, Math.round(abs / 60_000)))
   if (abs < DAY) return unit('hour', Math.round(abs / 3_600_000))
   if (abs < 30 * DAY) return unit('day', Math.round(abs / DAY))
   if (abs < 365 * DAY) return unit('month', Math.round(abs / (30 * DAY)))
